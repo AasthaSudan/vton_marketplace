@@ -1,0 +1,42 @@
+name: Clothsy Shop CI
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  validate:
+    name: Code Quality & Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Check code formatting
+        run: dart format --output=none --set-exit-if-changed .
+
+      - name: Static code analysis
+        run: flutter analyze --fatal-infos --fatal-warnings
+
+      - name: Run unit & widget tests
+        run: flutter test --coverage
+
+      - name: Build Android APK (Debug Dev Flavor)
+        run: flutter build apk --debug -t lib/main_dev.dart
