@@ -14,14 +14,11 @@ class AuthState {
     this.errorMessage,
   });
 
-  bool get isAuthenticated => status == AuthStatus.authenticated && user != null;
+  bool get isAuthenticated =>
+      status == AuthStatus.authenticated && user != null;
   bool get isGuest => status == AuthStatus.guest;
 
-  AuthState copyWith({
-    User? user,
-    AuthStatus? status,
-    String? errorMessage,
-  }) {
+  AuthState copyWith({User? user, AuthStatus? status, String? errorMessage}) {
     return AuthState(
       user: user ?? this.user,
       status: status ?? this.status,
@@ -53,66 +50,96 @@ class AuthNotifier extends Notifier<AuthState> {
   }
 
   Future<bool> sendPhoneOtp(String phone) async {
-    state = state.copyWith(status: AuthStatus.authenticating, errorMessage: null);
+    state = state.copyWith(
+      status: AuthStatus.authenticating,
+      errorMessage: null,
+    );
     try {
       final repo = ref.read(authRepositoryProvider);
       final ok = await repo.sendPhoneOtp(phone);
       state = state.copyWith(status: AuthStatus.unauthenticated);
       return ok;
     } catch (e) {
-      state = state.copyWith(status: AuthStatus.unauthenticated, errorMessage: e.toString());
+      state = state.copyWith(
+        status: AuthStatus.unauthenticated,
+        errorMessage: e.toString(),
+      );
       return false;
     }
   }
 
   Future<bool> verifyOtp(String phone, String otp) async {
-    state = state.copyWith(status: AuthStatus.authenticating, errorMessage: null);
+    state = state.copyWith(
+      status: AuthStatus.authenticating,
+      errorMessage: null,
+    );
     try {
       final repo = ref.read(authRepositoryProvider);
       final user = await repo.verifyPhoneOtp(phone, otp);
       state = AuthState(user: user, status: AuthStatus.authenticated);
       return true;
     } catch (e) {
-      state = state.copyWith(status: AuthStatus.unauthenticated, errorMessage: e.toString());
+      state = state.copyWith(
+        status: AuthStatus.unauthenticated,
+        errorMessage: e.toString(),
+      );
       return false;
     }
   }
 
   Future<bool> signInWithEmail(String email, String password) async {
-    state = state.copyWith(status: AuthStatus.authenticating, errorMessage: null);
+    state = state.copyWith(
+      status: AuthStatus.authenticating,
+      errorMessage: null,
+    );
     try {
       final repo = ref.read(authRepositoryProvider);
       final user = await repo.signInWithEmail(email, password);
       state = AuthState(user: user, status: AuthStatus.authenticated);
       return true;
     } catch (e) {
-      state = state.copyWith(status: AuthStatus.unauthenticated, errorMessage: e.toString());
+      state = state.copyWith(
+        status: AuthStatus.unauthenticated,
+        errorMessage: e.toString(),
+      );
       return false;
     }
   }
 
   Future<bool> signInWithGoogle() async {
-    state = state.copyWith(status: AuthStatus.authenticating, errorMessage: null);
+    state = state.copyWith(
+      status: AuthStatus.authenticating,
+      errorMessage: null,
+    );
     try {
       final repo = ref.read(authRepositoryProvider);
       final user = await repo.signInWithGoogle();
       state = AuthState(user: user, status: AuthStatus.authenticated);
       return true;
     } catch (e) {
-      state = state.copyWith(status: AuthStatus.unauthenticated, errorMessage: e.toString());
+      state = state.copyWith(
+        status: AuthStatus.unauthenticated,
+        errorMessage: e.toString(),
+      );
       return false;
     }
   }
 
   Future<bool> signInWithApple() async {
-    state = state.copyWith(status: AuthStatus.authenticating, errorMessage: null);
+    state = state.copyWith(
+      status: AuthStatus.authenticating,
+      errorMessage: null,
+    );
     try {
       final repo = ref.read(authRepositoryProvider);
       final user = await repo.signInWithApple();
       state = AuthState(user: user, status: AuthStatus.authenticated);
       return true;
     } catch (e) {
-      state = state.copyWith(status: AuthStatus.unauthenticated, errorMessage: e.toString());
+      state = state.copyWith(
+        status: AuthStatus.unauthenticated,
+        errorMessage: e.toString(),
+      );
       return false;
     }
   }
@@ -121,9 +148,17 @@ class AuthNotifier extends Notifier<AuthState> {
     state = const AuthState(user: User.guest, status: AuthStatus.guest);
   }
 
-  Future<void> updateProfile({String? name, String? email, String? phone}) async {
+  Future<void> updateProfile({
+    String? name,
+    String? email,
+    String? phone,
+  }) async {
     final repo = ref.read(authRepositoryProvider);
-    final updated = await repo.updateProfile(name: name, email: email, phone: phone);
+    final updated = await repo.updateProfile(
+      name: name,
+      email: email,
+      phone: phone,
+    );
     state = state.copyWith(user: updated);
   }
 
@@ -140,7 +175,9 @@ class AuthNotifier extends Notifier<AuthState> {
   }
 }
 
-final authProvider = NotifierProvider<AuthNotifier, AuthState>(AuthNotifier.new);
+final authProvider = NotifierProvider<AuthNotifier, AuthState>(
+  AuthNotifier.new,
+);
 
 final currentUserProvider = Provider<User?>((ref) {
   return ref.watch(authProvider).user;

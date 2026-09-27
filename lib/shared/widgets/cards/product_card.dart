@@ -86,7 +86,9 @@ class ProductCard extends StatelessWidget {
                               child: Center(
                                 child: CircularProgressIndicator(
                                   strokeWidth: 2,
-                                  valueColor: AlwaysStoppedAnimation<Color>(colors.accent),
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                    colors.accent,
+                                  ),
                                 ),
                               ),
                             ),
@@ -107,7 +109,9 @@ class ProductCard extends StatelessWidget {
                             child: Center(
                               child: CircularProgressIndicator(
                                 strokeWidth: 2,
-                                valueColor: AlwaysStoppedAnimation<Color>(colors.accent),
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  colors.accent,
+                                ),
                               ),
                             ),
                           ),
@@ -154,7 +158,9 @@ class ProductCard extends StatelessWidget {
                       backgroundColor: colors.surface.withOpacity(0.9),
                       borderColor: Colors.transparent,
                       icon: Icon(
-                        isWishlisted ? Icons.favorite_rounded : Icons.favorite_outline_rounded,
+                        isWishlisted
+                            ? Icons.favorite_rounded
+                            : Icons.favorite_outline_rounded,
                         color: isWishlisted ? colors.error : colors.primary,
                         size: 18,
                       ),
@@ -167,7 +173,10 @@ class ProductCard extends StatelessWidget {
                       bottom: 8,
                       left: 8,
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
                         decoration: BoxDecoration(
                           color: colors.primary.withOpacity(0.85),
                           borderRadius: BorderRadius.circular(100),
@@ -175,14 +184,17 @@ class ProductCard extends StatelessWidget {
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(Icons.auto_awesome, size: 10, color: colors.accent),
+                            Icon(
+                              Icons.auto_awesome,
+                              size: 10,
+                              color: colors.accent,
+                            ),
                             const SizedBox(width: 4),
                             Text(
                               'TRIED ON',
-                              style: AppTypography.label(color: colors.onPrimary).copyWith(
-                                fontSize: 9,
-                                letterSpacing: 0.5,
-                              ),
+                              style: AppTypography.label(
+                                color: colors.onPrimary,
+                              ).copyWith(fontSize: 9, letterSpacing: 0.5),
                             ),
                           ],
                         ),

@@ -81,7 +81,8 @@ class TryOnRepositoryImpl implements TryOnRepository {
       photo: preset,
       product: demoProduct,
       variant: demoVariant,
-      resultImageUrl: 'https://images.unsplash.com/photo-1539533018447-63fcce2678e3',
+      resultImageUrl:
+          'https://images.unsplash.com/photo-1539533018447-63fcce2678e3',
       createdAt: DateTime.now().subtract(const Duration(hours: 3)),
       rating: 5,
     );
@@ -182,7 +183,8 @@ class TryOnRepositoryImpl implements TryOnRepository {
     await Future.delayed(const Duration(milliseconds: 500));
 
     // Select the best image representing the on-body garment result
-    final resultImageUrl = variant.imageUrl ??
+    final resultImageUrl =
+        variant.imageUrl ??
         (product.images.length > 1 ? product.images[1] : product.images.first);
 
     final result = TryOnResult(

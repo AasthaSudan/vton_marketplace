@@ -468,8 +468,15 @@ class CatalogRepositoryImpl implements CatalogRepository {
       results = results.where((p) {
         final pCat = p.category.toLowerCase();
         if (pCat == cat) return true;
-        if (cat == 'men' && (pCat == 'men' || p.tags.any((t) => t.toLowerCase() == 'men'))) return true;
-        if (cat == 'women' && (pCat == 'women' || pCat == 'dresses' || pCat == 'outerwear' || p.tags.any((t) => t.toLowerCase() == 'women'))) return true;
+        if (cat == 'men' &&
+            (pCat == 'men' || p.tags.any((t) => t.toLowerCase() == 'men')))
+          return true;
+        if (cat == 'women' &&
+            (pCat == 'women' ||
+                pCat == 'dresses' ||
+                pCat == 'outerwear' ||
+                p.tags.any((t) => t.toLowerCase() == 'women')))
+          return true;
         if (cat == 'shoes' && pCat == 'shoes') return true;
         if (cat == 'bags' && pCat == 'bags') return true;
         return p.tags.any((t) => t.toLowerCase() == cat);

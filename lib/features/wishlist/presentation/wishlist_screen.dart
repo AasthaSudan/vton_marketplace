@@ -39,7 +39,8 @@ class WishlistScreen extends ConsumerWidget {
           ? EmptyStateView(
               icon: Icons.favorite_outline_rounded,
               title: 'Your Wishlist is Empty',
-              message: 'Save pieces you love to preview outfits, compare styles, and get price drop alerts.',
+              message:
+                  'Save pieces you love to preview outfits, compare styles, and get price drop alerts.',
               actionText: 'Explore Collection',
               onActionPressed: () => context.go('/explore'),
             )

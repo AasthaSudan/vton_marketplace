@@ -67,27 +67,38 @@ class _ClothsyTextFieldState extends State<ClothsyTextField> {
           cursorColor: colors.primary,
           decoration: InputDecoration(
             hintText: widget.hint,
-            hintStyle: AppTypography.body(color: colors.textSecondary.withOpacity(0.6)),
+            hintStyle: AppTypography.body(
+              color: colors.textSecondary.withOpacity(0.6),
+            ),
             prefixIcon: widget.prefixIcon != null
                 ? Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 14),
                     child: widget.prefixIcon,
                   )
                 : null,
-            prefixIconConstraints: const BoxConstraints(minWidth: 44, minHeight: 44),
+            prefixIconConstraints: const BoxConstraints(
+              minWidth: 44,
+              minHeight: 44,
+            ),
             suffixIcon: widget.isPassword
                 ? IconButton(
                     icon: Icon(
-                      _obscureText ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+                      _obscureText
+                          ? Icons.visibility_off_outlined
+                          : Icons.visibility_outlined,
                       color: colors.textSecondary,
                       size: 20,
                     ),
-                    onPressed: () => setState(() => _obscureText = !_obscureText),
+                    onPressed: () =>
+                        setState(() => _obscureText = !_obscureText),
                   )
                 : widget.suffixIcon,
             filled: true,
             fillColor: widget.enabled ? colors.surface : colors.surfaceMuted,
-            contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 18,
+              vertical: 16,
+            ),
             border: OutlineInputBorder(
               borderRadius: AppRadius.cardRadius,
               borderSide: BorderSide(color: colors.border, width: 1.0),
@@ -109,7 +120,9 @@ class _ClothsyTextFieldState extends State<ClothsyTextField> {
               borderSide: BorderSide(color: colors.error, width: 1.8),
             ),
             errorText: widget.errorText,
-            errorStyle: AppTypography.caption(color: colors.error).copyWith(fontSize: 12),
+            errorStyle: AppTypography.caption(
+              color: colors.error,
+            ).copyWith(fontSize: 12),
           ),
         ),
       ],

@@ -24,8 +24,9 @@ class WishlistNotifier extends Notifier<List<Product>> {
   }
 }
 
-final wishlistProvider =
-    NotifierProvider<WishlistNotifier, List<Product>>(WishlistNotifier.new);
+final wishlistProvider = NotifierProvider<WishlistNotifier, List<Product>>(
+  WishlistNotifier.new,
+);
 
 final isProductWishlistedProvider = Provider.family<bool, String>((ref, id) {
   final items = ref.watch(wishlistProvider);

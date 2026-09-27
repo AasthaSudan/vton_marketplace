@@ -21,7 +21,10 @@ class AddressesNotifier extends Notifier<List<Address>> {
     state = list;
     // Auto-select default if none selected yet
     if (list.isNotEmpty) {
-      final defaultAddr = list.firstWhere((a) => a.isDefault, orElse: () => list.first);
+      final defaultAddr = list.firstWhere(
+        (a) => a.isDefault,
+        orElse: () => list.first,
+      );
       ref.read(selectedAddressProvider.notifier).select(defaultAddr);
     }
   }
@@ -59,13 +62,17 @@ class AddressesNotifier extends Notifier<List<Address>> {
     await repo.setDefaultAddress(id);
     final updatedList = await repo.getAddresses();
     state = updatedList;
-    final match = updatedList.firstWhere((a) => a.id == id, orElse: () => updatedList.first);
+    final match = updatedList.firstWhere(
+      (a) => a.id == id,
+      orElse: () => updatedList.first,
+    );
     ref.read(selectedAddressProvider.notifier).select(match);
   }
 }
 
-final addressesProvider =
-    NotifierProvider<AddressesNotifier, List<Address>>(AddressesNotifier.new);
+final addressesProvider = NotifierProvider<AddressesNotifier, List<Address>>(
+  AddressesNotifier.new,
+);
 
 class SelectedAddressNotifier extends Notifier<Address?> {
   @override
@@ -75,4 +82,6 @@ class SelectedAddressNotifier extends Notifier<Address?> {
 }
 
 final selectedAddressProvider =
-    NotifierProvider<SelectedAddressNotifier, Address?>(SelectedAddressNotifier.new);
+    NotifierProvider<SelectedAddressNotifier, Address?>(
+      SelectedAddressNotifier.new,
+    );

@@ -75,9 +75,8 @@ class _BeforeAfterSliderState extends State<BeforeAfterSlider> {
                 child: CachedNetworkImage(
                   imageUrl: widget.beforeImageUrl,
                   fit: BoxFit.cover,
-                  placeholder: (context, url) => Container(
-                    color: colors.surfaceMuted,
-                  ),
+                  placeholder: (context, url) =>
+                      Container(color: colors.surfaceMuted),
                   errorWidget: (context, url, error) => Container(
                     color: colors.surfaceMuted,
                     child: const Icon(Icons.broken_image_outlined, size: 40),
@@ -93,17 +92,19 @@ class _BeforeAfterSliderState extends State<BeforeAfterSlider> {
                   duration: const Duration(milliseconds: 200),
                   opacity: _splitPercent > 0.15 ? 1.0 : 0.0,
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 5,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.black.withOpacity(0.55),
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
                       widget.beforeLabel,
-                      style: AppTypography.caption(color: Colors.white).copyWith(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
-                      ),
+                      style: AppTypography.caption(
+                        color: Colors.white,
+                      ).copyWith(fontSize: 11, fontWeight: FontWeight.w600),
                     ),
                   ),
                 ),
@@ -117,7 +118,10 @@ class _BeforeAfterSliderState extends State<BeforeAfterSlider> {
                   duration: const Duration(milliseconds: 200),
                   opacity: _splitPercent < 0.85 ? 1.0 : 0.0,
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 5,
+                    ),
                     decoration: BoxDecoration(
                       color: colors.primary.withOpacity(0.85),
                       borderRadius: BorderRadius.circular(20),
@@ -125,14 +129,17 @@ class _BeforeAfterSliderState extends State<BeforeAfterSlider> {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(Icons.auto_awesome, color: Colors.amber, size: 12),
+                        const Icon(
+                          Icons.auto_awesome,
+                          color: Colors.amber,
+                          size: 12,
+                        ),
                         const SizedBox(width: 4),
                         Text(
                           widget.afterLabel,
-                          style: AppTypography.caption(color: Colors.white).copyWith(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
-                          ),
+                          style: AppTypography.caption(
+                            color: Colors.white,
+                          ).copyWith(fontSize: 11, fontWeight: FontWeight.w600),
                         ),
                       ],
                     ),

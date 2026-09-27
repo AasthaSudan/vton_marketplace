@@ -69,17 +69,13 @@ class PrimaryButton extends StatelessWidget {
             : FittedBox(
                 fit: BoxFit.scaleDown,
                 child: Row(
-                  mainAxisSize: isFullWidth ? MainAxisSize.max : MainAxisSize.min,
+                  mainAxisSize: isFullWidth
+                      ? MainAxisSize.max
+                      : MainAxisSize.min,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    if (icon != null) ...[
-                      icon!,
-                      const SizedBox(width: 8),
-                    ],
-                    Text(
-                      text,
-                      style: AppTypography.button(color: fgColor),
-                    ),
+                    if (icon != null) ...[icon!, const SizedBox(width: 8)],
+                    Text(text, style: AppTypography.button(color: fgColor)),
                     if (trailingIcon != null) ...[
                       const SizedBox(width: 8),
                       trailingIcon!,
@@ -91,10 +87,14 @@ class PrimaryButton extends StatelessWidget {
     );
 
     return isDisabled
-        ? (isFullWidth ? SizedBox(width: double.infinity, child: content) : content)
+        ? (isFullWidth
+              ? SizedBox(width: double.infinity, child: content)
+              : content)
         : PressableScale(
             onTap: onPressed,
-            child: isFullWidth ? SizedBox(width: double.infinity, child: content) : content,
+            child: isFullWidth
+                ? SizedBox(width: double.infinity, child: content)
+                : content,
           );
   }
 }

@@ -70,7 +70,9 @@ class ColorSwatchSelector extends StatelessWidget {
               ),
               child: isSelected && item.color.computeLuminance() > 0.8
                   ? Icon(Icons.check, size: 14, color: colors.primary)
-                  : (isSelected ? const Icon(Icons.check, size: 14, color: Colors.white) : null),
+                  : (isSelected
+                        ? const Icon(Icons.check, size: 14, color: Colors.white)
+                        : null),
             ),
           ),
         );

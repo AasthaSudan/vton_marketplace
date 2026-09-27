@@ -40,7 +40,9 @@ class TryOnHistoryScreen extends ConsumerWidget {
               },
               child: Text(
                 'Clear All',
-                style: AppTypography.caption(color: colors.error).copyWith(fontWeight: FontWeight.w600),
+                style: AppTypography.caption(
+                  color: colors.error,
+                ).copyWith(fontWeight: FontWeight.w600),
               ),
             ),
         ],
@@ -49,7 +51,8 @@ class TryOnHistoryScreen extends ConsumerWidget {
           ? Center(
               child: EmptyStateView(
                 title: 'No Try-On Looks Yet',
-                message: 'Try on luxury pieces from Clothsy Atelier to see yourself styled in seconds.',
+                message:
+                    'Try on luxury pieces from Clothsy Atelier to see yourself styled in seconds.',
                 icon: Icons.auto_awesome,
                 actionText: 'Open Try-On Studio',
                 onActionPressed: () => Navigator.pop(context),
@@ -103,12 +106,24 @@ class TryOnHistoryScreen extends ConsumerWidget {
                                   shape: BoxShape.circle,
                                 ),
                                 child: IconButton(
-                                  constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                                  constraints: const BoxConstraints(
+                                    minWidth: 32,
+                                    minHeight: 32,
+                                  ),
                                   padding: EdgeInsets.zero,
-                                  icon: const Icon(Icons.close, color: Colors.white, size: 16),
+                                  icon: const Icon(
+                                    Icons.close,
+                                    color: Colors.white,
+                                    size: 16,
+                                  ),
                                   onPressed: () {
-                                    ref.read(tryOnHistoryProvider.notifier).deleteItem(item.id);
-                                    ClothsySnackbar.show(context, message: 'Look removed from history');
+                                    ref
+                                        .read(tryOnHistoryProvider.notifier)
+                                        .deleteItem(item.id);
+                                    ClothsySnackbar.show(
+                                      context,
+                                      message: 'Look removed from history',
+                                    );
                                   },
                                 ),
                               ),
@@ -122,7 +137,10 @@ class TryOnHistoryScreen extends ConsumerWidget {
                                 height: 28,
                                 decoration: BoxDecoration(
                                   shape: BoxShape.circle,
-                                  border: Border.all(color: Colors.white, width: 2),
+                                  border: Border.all(
+                                    color: Colors.white,
+                                    width: 2,
+                                  ),
                                 ),
                                 clipBehavior: Clip.antiAlias,
                                 child: CachedNetworkImage(
@@ -145,18 +163,25 @@ class TryOnHistoryScreen extends ConsumerWidget {
                               item.product.title,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
-                              style: AppTypography.bodyMedium(weight: FontWeight.w600, color: colors.textPrimary),
+                              style: AppTypography.bodyMedium(
+                                weight: FontWeight.w600,
+                                color: colors.textPrimary,
+                              ),
                             ),
                             const SizedBox(height: 2),
                             Text(
                               CurrencyFormatter.format(item.variant.price),
-                              style: AppTypography.price(color: colors.textPrimary).copyWith(fontSize: 14),
+                              style: AppTypography.price(
+                                color: colors.textPrimary,
+                              ).copyWith(fontSize: 14),
                             ),
                             const SizedBox(height: 10),
                             // Direct Add To Bag Button
                             PressableScale(
                               onTap: () {
-                                ref.read(cartProvider.notifier).addToCart(item.product, item.variant);
+                                ref
+                                    .read(cartProvider.notifier)
+                                    .addToCart(item.product, item.variant);
                                 ClothsySnackbar.show(
                                   context,
                                   message: 'Added ${item.product.title} to bag',
@@ -165,7 +190,9 @@ class TryOnHistoryScreen extends ConsumerWidget {
                               },
                               child: Container(
                                 width: double.infinity,
-                                padding: const EdgeInsets.symmetric(vertical: 8),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 8,
+                                ),
                                 decoration: BoxDecoration(
                                   color: colors.primary,
                                   borderRadius: AppRadius.buttonRadius,
@@ -174,14 +201,21 @@ class TryOnHistoryScreen extends ConsumerWidget {
                                   child: Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      const Icon(Icons.shopping_bag_outlined, color: Colors.white, size: 14),
+                                      const Icon(
+                                        Icons.shopping_bag_outlined,
+                                        color: Colors.white,
+                                        size: 14,
+                                      ),
                                       const SizedBox(width: 4),
                                       Text(
                                         'Add to Bag',
-                                        style: AppTypography.caption(color: Colors.white).copyWith(
-                                          fontWeight: FontWeight.w600,
-                                          fontSize: 11,
-                                        ),
+                                        style:
+                                            AppTypography.caption(
+                                              color: Colors.white,
+                                            ).copyWith(
+                                              fontWeight: FontWeight.w600,
+                                              fontSize: 11,
+                                            ),
                                       ),
                                     ],
                                   ),
@@ -206,7 +240,10 @@ class TryOnHistoryScreen extends ConsumerWidget {
       builder: (ctx) => AlertDialog(
         backgroundColor: colors.surface,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text('Clear Look History?', style: AppTypography.h3(color: colors.textPrimary)),
+        title: Text(
+          'Clear Look History?',
+          style: AppTypography.h3(color: colors.textPrimary),
+        ),
         content: Text(
           'This will permanently remove all your saved AI virtual try-on looks.',
           style: AppTypography.body(color: colors.textSecondary),
@@ -214,7 +251,10 @@ class TryOnHistoryScreen extends ConsumerWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: Text('Cancel', style: TextStyle(color: colors.textSecondary)),
+            child: Text(
+              'Cancel',
+              style: TextStyle(color: colors.textSecondary),
+            ),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(backgroundColor: colors.error),
@@ -223,7 +263,10 @@ class TryOnHistoryScreen extends ConsumerWidget {
               ref.read(tryOnHistoryProvider.notifier).clearAll();
               ClothsySnackbar.show(context, message: 'Try-on history cleared');
             },
-            child: const Text('Clear All', style: TextStyle(color: Colors.white)),
+            child: const Text(
+              'Clear All',
+              style: TextStyle(color: Colors.white),
+            ),
           ),
         ],
       ),

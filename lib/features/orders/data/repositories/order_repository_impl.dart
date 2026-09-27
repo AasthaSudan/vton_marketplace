@@ -67,13 +67,15 @@ class OrderRepositoryImpl implements OrderRepository {
         ),
         TrackingStep(
           title: 'Packed at Atelier',
-          description: 'Hand-inspected, steam-pressed, and packaged in signature luxury box.',
+          description:
+              'Hand-inspected, steam-pressed, and packaged in signature luxury box.',
           date: DateTime.now().subtract(const Duration(days: 1, hours: 8)),
           isCompleted: true,
         ),
         TrackingStep(
           title: 'Shipped with BlueDart Apex',
-          description: 'Package handed over to express transit (AWB #84920412).',
+          description:
+              'Package handed over to express transit (AWB #84920412).',
           date: DateTime.now().subtract(const Duration(hours: 12)),
           isCompleted: true,
           isCurrent: true,
@@ -198,7 +200,8 @@ class OrderRepositoryImpl implements OrderRepository {
       trackingSteps: [
         TrackingStep(
           title: 'Order Placed',
-          description: 'Payment authorized & order logged with Clothsy Atelier.',
+          description:
+              'Payment authorized & order logged with Clothsy Atelier.',
           date: DateTime.now(),
           isCompleted: true,
           isCurrent: true,
@@ -233,7 +236,9 @@ class OrderRepositoryImpl implements OrderRepository {
   @override
   Future<Order> cancelOrder(String orderId, String reason) async {
     await Future.delayed(const Duration(milliseconds: 250));
-    final index = _orders.indexWhere((o) => o.id == orderId || o.orderNumber == orderId);
+    final index = _orders.indexWhere(
+      (o) => o.id == orderId || o.orderNumber == orderId,
+    );
     if (index >= 0) {
       final current = _orders[index];
       final cancelled = current.copyWith(
@@ -242,7 +247,8 @@ class OrderRepositoryImpl implements OrderRepository {
           ...current.trackingSteps,
           TrackingStep(
             title: 'Order Cancelled',
-            description: 'Reason: $reason. Any prepaid amount will be refunded within 24-48 hours.',
+            description:
+                'Reason: $reason. Any prepaid amount will be refunded within 24-48 hours.',
             date: DateTime.now(),
             isCompleted: true,
             isCurrent: true,

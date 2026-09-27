@@ -65,20 +65,31 @@ class CatalogScreen extends ConsumerWidget {
               return SizedBox(
                 height: 48,
                 child: ListView.separated(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 6,
+                  ),
                   scrollDirection: Axis.horizontal,
                   itemCount: categories.length,
-                  separatorBuilder: (context, index) => const SizedBox(width: 8),
+                  separatorBuilder: (context, index) =>
+                      const SizedBox(width: 8),
                   itemBuilder: (context, index) {
                     final cat = categories[index];
-                    final isSelected = selectedCategory.toLowerCase() == cat.title.toLowerCase();
+                    final isSelected =
+                        selectedCategory.toLowerCase() ==
+                        cat.title.toLowerCase();
 
                     return PressableScale(
                       onTap: () {
-                        ref.read(selectedCategoryProvider.notifier).select(cat.title);
+                        ref
+                            .read(selectedCategoryProvider.notifier)
+                            .select(cat.title);
                       },
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 8,
+                        ),
                         decoration: BoxDecoration(
                           color: isSelected ? colors.primary : colors.surface,
                           borderRadius: BorderRadius.circular(100),
@@ -90,8 +101,12 @@ class CatalogScreen extends ConsumerWidget {
                         child: Text(
                           cat.title,
                           style: AppTypography.caption(
-                            color: isSelected ? colors.onPrimary : colors.textPrimary,
-                            weight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                            color: isSelected
+                                ? colors.onPrimary
+                                : colors.textPrimary,
+                            weight: isSelected
+                                ? FontWeight.w700
+                                : FontWeight.w500,
                           ),
                         ),
                       ),
@@ -110,11 +125,17 @@ class CatalogScreen extends ConsumerWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 productsAsync.when(
-                  loading: () => Text('Loading...', style: AppTypography.caption(color: colors.textSecondary)),
+                  loading: () => Text(
+                    'Loading...',
+                    style: AppTypography.caption(color: colors.textSecondary),
+                  ),
                   error: (context, index) => const SizedBox.shrink(),
                   data: (items) => Text(
                     '${items.length} Pieces Available',
-                    style: AppTypography.caption(color: colors.textSecondary, weight: FontWeight.w600),
+                    style: AppTypography.caption(
+                      color: colors.textSecondary,
+                      weight: FontWeight.w600,
+                    ),
                   ),
                 ),
                 PressableScale(
@@ -125,7 +146,10 @@ class CatalogScreen extends ConsumerWidget {
                       const SizedBox(width: 4),
                       Text(
                         _sortLabel(currentSort),
-                        style: AppTypography.caption(color: colors.primary, weight: FontWeight.w600),
+                        style: AppTypography.caption(
+                          color: colors.primary,
+                          weight: FontWeight.w600,
+                        ),
                       ),
                     ],
                   ),
@@ -139,7 +163,10 @@ class CatalogScreen extends ConsumerWidget {
           Expanded(
             child: productsAsync.when(
               loading: () => GridView.builder(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 12,
+                ),
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 2,
                   childAspectRatio: 0.55,
@@ -149,13 +176,15 @@ class CatalogScreen extends ConsumerWidget {
                 itemCount: 4,
                 itemBuilder: (context, index) => const ProductCardSkeleton(),
               ),
-              error: (err, _) => Center(child: Text('Error loading products: $err')),
+              error: (err, _) =>
+                  Center(child: Text('Error loading products: $err')),
               data: (products) {
                 if (products.isEmpty) {
                   return EmptyStateView(
                     icon: Icons.checkroom_outlined,
                     title: 'No Items in $selectedCategory',
-                    message: 'We are continually updating our atelier. Explore another category.',
+                    message:
+                        'We are continually updating our atelier. Explore another category.',
                     actionText: 'View All',
                     onActionPressed: () {
                       ref.read(selectedCategoryProvider.notifier).select('All');
@@ -164,7 +193,10 @@ class CatalogScreen extends ConsumerWidget {
                 }
 
                 return GridView.builder(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 12,
+                  ),
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 2,
                     childAspectRatio: 0.55,
@@ -174,7 +206,9 @@ class CatalogScreen extends ConsumerWidget {
                   itemCount: products.length,
                   itemBuilder: (context, index) {
                     final product = products[index];
-                    final isWishlisted = ref.watch(isProductWishlistedProvider(product.id));
+                    final isWishlisted = ref.watch(
+                      isProductWishlistedProvider(product.id),
+                    );
 
                     return ProductCard(
                       id: product.id,
@@ -184,10 +218,14 @@ class CatalogScreen extends ConsumerWidget {
                       originalPrice: product.originalPrice,
                       imageUrl: product.primaryImage,
                       isWishlisted: isWishlisted,
-                      isTriedOn: ref.watch(triedOnProductIdsProvider).contains(product.id),
+                      isTriedOn: ref
+                          .watch(triedOnProductIdsProvider)
+                          .contains(product.id),
                       onTap: () => context.push('/product/${product.id}'),
                       onWishlistToggle: () {
-                        ref.read(wishlistProvider.notifier).toggleWishlist(product);
+                        ref
+                            .read(wishlistProvider.notifier)
+                            .toggleWishlist(product);
                       },
                     );
                   },
@@ -224,11 +262,32 @@ class CatalogScreen extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Sort Order', style: AppTypography.bodyMedium(weight: FontWeight.w700)),
+            Text(
+              'Sort Order',
+              style: AppTypography.bodyMedium(weight: FontWeight.w700),
+            ),
             const SizedBox(height: 12),
-            _buildSortOption(context, ref, 'popular', 'Most Popular', currentSort),
-            _buildSortOption(context, ref, 'price_low_high', 'Price: Low to High', currentSort),
-            _buildSortOption(context, ref, 'price_high_low', 'Price: High to Low', currentSort),
+            _buildSortOption(
+              context,
+              ref,
+              'popular',
+              'Most Popular',
+              currentSort,
+            ),
+            _buildSortOption(
+              context,
+              ref,
+              'price_low_high',
+              'Price: Low to High',
+              currentSort,
+            ),
+            _buildSortOption(
+              context,
+              ref,
+              'price_high_low',
+              'Price: High to Low',
+              currentSort,
+            ),
             const SizedBox(height: 24),
             PrimaryButton(
               text: 'Apply',

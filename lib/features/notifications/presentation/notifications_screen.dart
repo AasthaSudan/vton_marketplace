@@ -31,17 +31,25 @@ class NotificationsScreen extends ConsumerWidget {
           padding: const EdgeInsets.only(left: 12),
           child: ClothsyIconButton(
             size: 38,
-            icon: Icon(Icons.arrow_back_ios_new_rounded, size: 16, color: colors.primary),
+            icon: Icon(
+              Icons.arrow_back_ios_new_rounded,
+              size: 16,
+              color: colors.primary,
+            ),
             onPressed: () => context.pop(),
           ),
         ),
         actions: [
           if (unreadCount > 0)
             TextButton(
-              onPressed: () => ref.read(notificationsProvider.notifier).markAllAsRead(),
+              onPressed: () =>
+                  ref.read(notificationsProvider.notifier).markAllAsRead(),
               child: Text(
                 'Mark All Read',
-                style: AppTypography.caption(color: colors.primary, weight: FontWeight.w600),
+                style: AppTypography.caption(
+                  color: colors.primary,
+                  weight: FontWeight.w600,
+                ),
               ),
             ),
         ],
@@ -50,7 +58,8 @@ class NotificationsScreen extends ConsumerWidget {
           ? EmptyStateView(
               icon: Icons.notifications_none_rounded,
               title: 'No Notifications',
-              message: 'We will notify you here with tracking milestones, price drop alerts, and try-on updates.',
+              message:
+                  'We will notify you here with tracking milestones, price drop alerts, and try-on updates.',
               actionText: 'Back to Home',
               onActionPressed: () => context.go('/'),
             )
@@ -106,10 +115,14 @@ class NotificationsScreen extends ConsumerWidget {
         child: Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: notif.isRead ? colors.surface : colors.surfaceMuted.withOpacity(0.5),
+            color: notif.isRead
+                ? colors.surface
+                : colors.surfaceMuted.withOpacity(0.5),
             borderRadius: AppRadius.cardRadius,
             border: Border.all(
-              color: notif.isRead ? colors.border.withOpacity(0.5) : colors.accent.withOpacity(0.6),
+              color: notif.isRead
+                  ? colors.border.withOpacity(0.5)
+                  : colors.accent.withOpacity(0.6),
               width: notif.isRead ? 0.8 : 1.2,
             ),
           ),
@@ -137,7 +150,9 @@ class NotificationsScreen extends ConsumerWidget {
                           child: Text(
                             notif.title,
                             style: AppTypography.bodyMedium(
-                              weight: notif.isRead ? FontWeight.w600 : FontWeight.w700,
+                              weight: notif.isRead
+                                  ? FontWeight.w600
+                                  : FontWeight.w700,
                               color: colors.textPrimary,
                             ).copyWith(fontSize: 14),
                           ),
@@ -156,12 +171,16 @@ class NotificationsScreen extends ConsumerWidget {
                     const SizedBox(height: 4),
                     Text(
                       notif.message,
-                      style: AppTypography.body(color: colors.textSecondary).copyWith(fontSize: 13),
+                      style: AppTypography.body(
+                        color: colors.textSecondary,
+                      ).copyWith(fontSize: 13),
                     ),
                     const SizedBox(height: 8),
                     Text(
                       timeStr,
-                      style: AppTypography.caption(color: colors.textSecondary).copyWith(fontSize: 11),
+                      style: AppTypography.caption(
+                        color: colors.textSecondary,
+                      ).copyWith(fontSize: 11),
                     ),
                   ],
                 ),

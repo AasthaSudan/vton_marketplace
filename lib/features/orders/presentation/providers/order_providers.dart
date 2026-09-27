@@ -54,11 +54,14 @@ class OrdersNotifier extends Notifier<List<Order>> {
   }
 }
 
-final ordersProvider =
-    NotifierProvider<OrdersNotifier, List<Order>>(OrdersNotifier.new);
+final ordersProvider = NotifierProvider<OrdersNotifier, List<Order>>(
+  OrdersNotifier.new,
+);
 
-final orderDetailProvider =
-    FutureProvider.family<Order?, String>((ref, id) async {
+final orderDetailProvider = FutureProvider.family<Order?, String>((
+  ref,
+  id,
+) async {
   final repo = ref.read(orderRepositoryProvider);
   return repo.getOrderById(id);
 });

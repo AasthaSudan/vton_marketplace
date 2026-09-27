@@ -19,16 +19,19 @@ void main() {
   });
 
   group('Phase 3 - Auth Flow', () {
-    test('AuthNotifier initial state starts as unauthenticated when no stored session', () async {
-      final container = ProviderContainer();
-      addTearDown(container.dispose);
+    test(
+      'AuthNotifier initial state starts as unauthenticated when no stored session',
+      () async {
+        final container = ProviderContainer();
+        addTearDown(container.dispose);
 
-      // wait for async auth check
-      await Future<void>.delayed(const Duration(milliseconds: 100));
-      final authState = container.read(authProvider);
-      expect(authState.isAuthenticated, isFalse);
-      expect(authState.user, isNull);
-    });
+        // wait for async auth check
+        await Future<void>.delayed(const Duration(milliseconds: 100));
+        final authState = container.read(authProvider);
+        expect(authState.isAuthenticated, isFalse);
+        expect(authState.user, isNull);
+      },
+    );
 
     test('AuthNotifier sends OTP and verifies login successfully', () async {
       final container = ProviderContainer();
@@ -52,7 +55,10 @@ void main() {
 
       final notifier = container.read(authProvider.notifier);
       await notifier.verifyOtp('+91 98765 00000', '1234');
-      await notifier.updateProfile(name: 'Lady Aastha', email: 'lady.aastha@clothsy.studio');
+      await notifier.updateProfile(
+        name: 'Lady Aastha',
+        email: 'lady.aastha@clothsy.studio',
+      );
 
       final user = container.read(authProvider).user;
       expect(user?.name, equals('Lady Aastha'));
@@ -99,29 +105,32 @@ void main() {
       expect(isServiceable, isTrue);
     });
 
-    test('Addresses notifier loads addresses and allows adding new address', () async {
-      final container = ProviderContainer();
-      addTearDown(container.dispose);
+    test(
+      'Addresses notifier loads addresses and allows adding new address',
+      () async {
+        final container = ProviderContainer();
+        addTearDown(container.dispose);
 
-      // Trigger load and wait for repo response
-      container.read(addressesProvider);
-      await Future<void>.delayed(const Duration(milliseconds: 300));
+        // Trigger load and wait for repo response
+        container.read(addressesProvider);
+        await Future<void>.delayed(const Duration(milliseconds: 300));
 
-      const newAddr = Address(
-        id: 'addr_kolkata_1',
-        name: 'Anita Roy',
-        phone: '+91 99999 88888',
-        street: 'Park Street 24',
-        city: 'Kolkata',
-        state: 'West Bengal',
-        pinCode: '700016',
-        isDefault: false,
-      );
+        const newAddr = Address(
+          id: 'addr_kolkata_1',
+          name: 'Anita Roy',
+          phone: '+91 99999 88888',
+          street: 'Park Street 24',
+          city: 'Kolkata',
+          state: 'West Bengal',
+          pinCode: '700016',
+          isDefault: false,
+        );
 
-      await container.read(addressesProvider.notifier).addAddress(newAddr);
-      final updated = container.read(addressesProvider);
-      expect(updated.any((a) => a.pinCode == '700016'), isTrue);
-    });
+        await container.read(addressesProvider.notifier).addAddress(newAddr);
+        final updated = container.read(addressesProvider);
+        expect(updated.any((a) => a.pinCode == '700016'), isTrue);
+      },
+    );
   });
 
   group('Phase 3 - Orders and Checkout', () {
@@ -146,7 +155,9 @@ void main() {
         description: 'Luxury pure mulberry silk slip dress.',
         originalPrice: 7999,
         price: 4999,
-        images: ['https://images.unsplash.com/photo-1595777457583-95e059d581b8'],
+        images: [
+          'https://images.unsplash.com/photo-1595777457583-95e059d581b8',
+        ],
         availableSizes: ['XS', 'S', 'M', 'L'],
         variants: [sampleVariant],
       );
@@ -180,7 +191,10 @@ void main() {
       expect(newOrder.status, equals(OrderStatus.placed));
       expect(newOrder.total, equals(4499));
 
-      final cancelled = await repo.cancelOrder(newOrder.id, 'Ordered by mistake');
+      final cancelled = await repo.cancelOrder(
+        newOrder.id,
+        'Ordered by mistake',
+      );
       expect(cancelled.status, equals(OrderStatus.cancelled));
     });
   });
@@ -193,7 +207,9 @@ void main() {
       final initial = container.read(notificationsProvider);
       expect(initial.isNotEmpty, isTrue);
 
-      final unreadCountInitial = container.read(unreadNotificationsCountProvider);
+      final unreadCountInitial = container.read(
+        unreadNotificationsCountProvider,
+      );
       expect(unreadCountInitial, greaterThan(0));
 
       final unreadItem = initial.firstWhere((n) => !n.isRead);

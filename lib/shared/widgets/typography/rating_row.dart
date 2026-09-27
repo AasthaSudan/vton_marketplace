@@ -22,11 +22,7 @@ class RatingRow extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Icon(
-          Icons.star_rounded,
-          size: starSize,
-          color: colors.rating,
-        ),
+        Icon(Icons.star_rounded, size: starSize, color: colors.rating),
         const SizedBox(width: 4),
         Text(
           rating.toStringAsFixed(1),
@@ -39,9 +35,7 @@ class RatingRow extends StatelessWidget {
           const SizedBox(width: 4),
           Text(
             '($reviewCount)',
-            style: AppTypography.caption(
-              color: colors.textSecondary,
-            ),
+            style: AppTypography.caption(color: colors.textSecondary),
           ),
         ],
       ],

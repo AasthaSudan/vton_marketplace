@@ -30,11 +30,7 @@ void main() {
             size: size,
             padding: const EdgeInsets.only(top: 44, bottom: 34),
           ),
-          child: SizedBox(
-            width: size.width,
-            height: size.height,
-            child: child,
-          ),
+          child: SizedBox(width: size.width, height: size.height, child: child),
         ),
       ),
     );
@@ -42,60 +38,73 @@ void main() {
 
   group('Universal Mobile Screen Size Responsiveness Tests', () {
     for (final size in mobileScreenSizes) {
-      testWidgets('OnboardingScreen renders cleanly on ${size.width}x${size.height} with zero overflow',
-          (tester) async {
-        await tester.binding.setSurfaceSize(size);
-        await tester.pumpWidget(wrapWithScope(const OnboardingScreen(), size));
-        await tester.pump();
-        await tester.pump(const Duration(milliseconds: 400));
+      testWidgets(
+        'OnboardingScreen renders cleanly on ${size.width}x${size.height} with zero overflow',
+        (tester) async {
+          await tester.binding.setSurfaceSize(size);
+          await tester.pumpWidget(
+            wrapWithScope(const OnboardingScreen(), size),
+          );
+          await tester.pump();
+          await tester.pump(const Duration(milliseconds: 400));
 
-        expect(tester.takeException(), isNull);
-        // Kicker of first slide
-        expect(find.text('DISCOVER'), findsOneWidget);
-        // First slide has "Next" button; "Get Started" appears only on final slide
-        expect(find.text('Next'), findsOneWidget);
-        // Skip link always visible
-        expect(find.text('Skip'), findsOneWidget);
-      });
+          expect(tester.takeException(), isNull);
+          // Kicker of first slide
+          expect(find.text('DISCOVER'), findsOneWidget);
+          // First slide has "Next" button; "Get Started" appears only on final slide
+          expect(find.text('Next'), findsOneWidget);
+          // Skip link always visible
+          expect(find.text('Skip'), findsOneWidget);
+        },
+      );
 
-      testWidgets('HomeScreen renders cleanly on ${size.width}x${size.height} with zero overflow',
-          (tester) async {
-        await tester.binding.setSurfaceSize(size);
-        await tester.pumpWidget(wrapWithScope(const HomeScreen(), size));
-        await tester.pump();
-        await tester.pump(const Duration(milliseconds: 400));
+      testWidgets(
+        'HomeScreen renders cleanly on ${size.width}x${size.height} with zero overflow',
+        (tester) async {
+          await tester.binding.setSurfaceSize(size);
+          await tester.pumpWidget(wrapWithScope(const HomeScreen(), size));
+          await tester.pump();
+          await tester.pump(const Duration(milliseconds: 400));
 
-        expect(tester.takeException(), isNull);
-        expect(find.text('Clothsy'), findsOneWidget);
-        expect(find.text('Best Picks'), findsOneWidget);
-      });
+          expect(tester.takeException(), isNull);
+          expect(find.text('Clothsy'), findsOneWidget);
+          expect(find.text('Best Picks'), findsOneWidget);
+        },
+      );
 
-      testWidgets('ProductDetailScreen renders cleanly on ${size.width}x${size.height} with zero overflow',
-          (tester) async {
-        await tester.binding.setSurfaceSize(size);
-        await tester.pumpWidget(
-          wrapWithScope(const ProductDetailScreen(productId: 'p_lavender_blazer'), size),
-        );
-        await tester.pump();
-        await tester.pump(const Duration(milliseconds: 500));
-        await tester.pump(const Duration(milliseconds: 500));
+      testWidgets(
+        'ProductDetailScreen renders cleanly on ${size.width}x${size.height} with zero overflow',
+        (tester) async {
+          await tester.binding.setSurfaceSize(size);
+          await tester.pumpWidget(
+            wrapWithScope(
+              const ProductDetailScreen(productId: 'p_lavender_blazer'),
+              size,
+            ),
+          );
+          await tester.pump();
+          await tester.pump(const Duration(milliseconds: 500));
+          await tester.pump(const Duration(milliseconds: 500));
 
-        expect(tester.takeException(), isNull);
-        expect(find.text('Add to Cart'), findsOneWidget);
-        expect(find.text('Buy Now'), findsOneWidget);
-      });
+          expect(tester.takeException(), isNull);
+          expect(find.text('Add to Cart'), findsOneWidget);
+          expect(find.text('Buy Now'), findsOneWidget);
+        },
+      );
 
-      testWidgets('TryonScreen renders cleanly on ${size.width}x${size.height} with zero overflow',
-          (tester) async {
-        await tester.binding.setSurfaceSize(size);
-        await tester.pumpWidget(wrapWithScope(const TryonScreen(), size));
-        await tester.pump();
-        await tester.pump(const Duration(milliseconds: 500));
-        await tester.pump(const Duration(milliseconds: 500));
+      testWidgets(
+        'TryonScreen renders cleanly on ${size.width}x${size.height} with zero overflow',
+        (tester) async {
+          await tester.binding.setSurfaceSize(size);
+          await tester.pumpWidget(wrapWithScope(const TryonScreen(), size));
+          await tester.pump();
+          await tester.pump(const Duration(milliseconds: 500));
+          await tester.pump(const Duration(milliseconds: 500));
 
-        expect(tester.takeException(), isNull);
-        expect(find.text('Virtual Try-On'), findsOneWidget);
-      });
+          expect(tester.takeException(), isNull);
+          expect(find.text('Virtual Try-On'), findsOneWidget);
+        },
+      );
     }
   });
 }

@@ -20,7 +20,8 @@ class SkeletonBox extends StatefulWidget {
   State<SkeletonBox> createState() => _SkeletonBoxState();
 }
 
-class _SkeletonBoxState extends State<SkeletonBox> with SingleTickerProviderStateMixin {
+class _SkeletonBoxState extends State<SkeletonBox>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _animation;
 
@@ -31,9 +32,10 @@ class _SkeletonBoxState extends State<SkeletonBox> with SingleTickerProviderStat
       vsync: this,
       duration: const Duration(milliseconds: 1400),
     )..repeat(reverse: true);
-    _animation = Tween<double>(begin: 0.35, end: 0.75).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
-    );
+    _animation = Tween<double>(
+      begin: 0.35,
+      end: 0.75,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
   }
 
   @override
@@ -55,7 +57,10 @@ class _SkeletonBoxState extends State<SkeletonBox> with SingleTickerProviderStat
           decoration: BoxDecoration(
             color: colors.surfaceMuted.withOpacity(_animation.value),
             borderRadius: widget.borderRadius ?? AppRadius.chipRadius,
-            border: Border.all(color: colors.border.withOpacity(0.3), width: 0.5),
+            border: Border.all(
+              color: colors.border.withOpacity(0.3),
+              width: 0.5,
+            ),
           ),
         );
       },
@@ -72,19 +77,21 @@ class ProductCardSkeleton extends StatelessWidget {
       decoration: BoxDecoration(
         color: context.colors.surface,
         borderRadius: AppRadius.cardRadius,
-        border: Border.all(color: context.colors.border.withOpacity(0.6), width: 0.8),
+        border: Border.all(
+          color: context.colors.border.withOpacity(0.6),
+          width: 0.8,
+        ),
       ),
       clipBehavior: Clip.antiAlias,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Expanded(
-            child: SkeletonBox(
-              borderRadius: BorderRadius.zero,
-            ),
-          ),
+          const Expanded(child: SkeletonBox(borderRadius: BorderRadius.zero)),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 8.0),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 10.0,
+              vertical: 8.0,
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,

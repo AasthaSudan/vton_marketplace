@@ -55,50 +55,56 @@ void main() {
       expect(presets.first.imageUrl, isNotEmpty);
     });
 
-    test('runTryOn runs full styling pipeline and returns TryOnResult', () async {
-      final presets = await repo.getPresetPhotos();
-      final photo = presets.first;
+    test(
+      'runTryOn runs full styling pipeline and returns TryOnResult',
+      () async {
+        final presets = await repo.getPresetPhotos();
+        final photo = presets.first;
 
-      final progressSteps = <ProcessingStep>[];
-      final result = await repo.runTryOn(
-        photo: photo,
-        product: sampleProduct,
-        variant: sampleVariant,
-        onProgress: (step) => progressSteps.add(step),
-      );
+        final progressSteps = <ProcessingStep>[];
+        final result = await repo.runTryOn(
+          photo: photo,
+          product: sampleProduct,
+          variant: sampleVariant,
+          onProgress: (step) => progressSteps.add(step),
+        );
 
-      expect(result.id, startsWith('try_'));
-      expect(result.product.id, equals(sampleProduct.id));
-      expect(result.variant.id, equals(sampleVariant.id));
-      expect(result.resultImageUrl, isNotEmpty);
-      expect(progressSteps.isNotEmpty, isTrue);
-      expect(progressSteps.last.progress, equals(1.0));
-    });
+        expect(result.id, startsWith('try_'));
+        expect(result.product.id, equals(sampleProduct.id));
+        expect(result.variant.id, equals(sampleVariant.id));
+        expect(result.resultImageUrl, isNotEmpty);
+        expect(progressSteps.isNotEmpty, isTrue);
+        expect(progressSteps.last.progress, equals(1.0));
+      },
+    );
 
-    test('runTryOn caches result by (photo + product + variant) for instant repeat access', () async {
-      final presets = await repo.getPresetPhotos();
-      final photo = presets.first;
+    test(
+      'runTryOn caches result by (photo + product + variant) for instant repeat access',
+      () async {
+        final presets = await repo.getPresetPhotos();
+        final photo = presets.first;
 
-      // First run takes several pipeline steps
-      final first = await repo.runTryOn(
-        photo: photo,
-        product: sampleProduct,
-        variant: sampleVariant,
-      );
+        // First run takes several pipeline steps
+        final first = await repo.runTryOn(
+          photo: photo,
+          product: sampleProduct,
+          variant: sampleVariant,
+        );
 
-      final steps = <ProcessingStep>[];
-      final second = await repo.runTryOn(
-        photo: photo,
-        product: sampleProduct,
-        variant: sampleVariant,
-        onProgress: (step) => steps.add(step),
-      );
+        final steps = <ProcessingStep>[];
+        final second = await repo.runTryOn(
+          photo: photo,
+          product: sampleProduct,
+          variant: sampleVariant,
+          onProgress: (step) => steps.add(step),
+        );
 
-      // Instant cache hit
-      expect(second.cacheKey, equals(first.cacheKey));
-      expect(steps.length, equals(1));
-      expect(steps.first.title, contains('Cache'));
-    });
+        // Instant cache hit
+        expect(second.cacheKey, equals(first.cacheKey));
+        expect(steps.length, equals(1));
+        expect(steps.first.title, contains('Cache'));
+      },
+    );
 
     test('saveUserPhoto and deleteUserPhoto manage custom photos', () async {
       final newPhoto = await repo.saveUserPhoto(
@@ -168,58 +174,67 @@ void main() {
       expect(state.canGenerate, isTrue);
     });
 
-    test('TryOnNotifier generateTryOn completes and updates triedOnProductIdsProvider', () async {
-      final container = ProviderContainer();
-      addTearDown(container.dispose);
+    test(
+      'TryOnNotifier generateTryOn completes and updates triedOnProductIdsProvider',
+      () async {
+        final container = ProviderContainer();
+        addTearDown(container.dispose);
 
-      await Future<void>.delayed(const Duration(milliseconds: 100));
-      final notifier = container.read(tryOnNotifierProvider.notifier);
+        await Future<void>.delayed(const Duration(milliseconds: 100));
+        final notifier = container.read(tryOnNotifierProvider.notifier);
 
-      final presets = await container.read(tryOnPresetsProvider.future);
-      notifier.selectPhoto(presets.first);
-      notifier.selectGarment(sampleProduct, sampleVariant);
+        final presets = await container.read(tryOnPresetsProvider.future);
+        notifier.selectPhoto(presets.first);
+        notifier.selectGarment(sampleProduct, sampleVariant);
 
-      final result = await notifier.generateTryOn();
-      expect(result, isNotNull);
+        final result = await notifier.generateTryOn();
+        expect(result, isNotNull);
 
-      final state = container.read(tryOnNotifierProvider);
-      expect(state.status, equals(TryOnJobStatus.completed));
-      expect(state.currentResult, isNotNull);
+        final state = container.read(tryOnNotifierProvider);
+        expect(state.status, equals(TryOnJobStatus.completed));
+        expect(state.currentResult, isNotNull);
 
-      // Check tried-on badge provider
-      final triedIds = container.read(triedOnProductIdsProvider);
-      expect(triedIds.contains(sampleProduct.id), isTrue);
+        // Check tried-on badge provider
+        final triedIds = container.read(triedOnProductIdsProvider);
+        expect(triedIds.contains(sampleProduct.id), isTrue);
 
-      // Rate result
-      notifier.rateResult(5, 'Stunning drape');
-      final ratedState = container.read(tryOnNotifierProvider);
-      expect(ratedState.currentResult?.rating, equals(5));
-      expect(ratedState.currentResult?.feedbackNote, equals('Stunning drape'));
-    });
+        // Rate result
+        notifier.rateResult(5, 'Stunning drape');
+        final ratedState = container.read(tryOnNotifierProvider);
+        expect(ratedState.currentResult?.rating, equals(5));
+        expect(
+          ratedState.currentResult?.feedbackNote,
+          equals('Stunning drape'),
+        );
+      },
+    );
   });
 
   group('Phase 4 - BeforeAfterSlider Widget', () {
-    testWidgets('BeforeAfterSlider renders before/after labels and slider handle', (tester) async {
-      await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
-            body: SizedBox(
-              width: 360,
-              height: 500,
-              child: BeforeAfterSlider(
-                beforeImageUrl: 'https://images.unsplash.com/photo-before',
-                afterImageUrl: 'https://images.unsplash.com/photo-after',
-                beforeLabel: 'Original',
-                afterLabel: 'Clothsy AI Drape',
+    testWidgets(
+      'BeforeAfterSlider renders before/after labels and slider handle',
+      (tester) async {
+        await tester.pumpWidget(
+          const MaterialApp(
+            home: Scaffold(
+              body: SizedBox(
+                width: 360,
+                height: 500,
+                child: BeforeAfterSlider(
+                  beforeImageUrl: 'https://images.unsplash.com/photo-before',
+                  afterImageUrl: 'https://images.unsplash.com/photo-after',
+                  beforeLabel: 'Original',
+                  afterLabel: 'Clothsy AI Drape',
+                ),
               ),
             ),
           ),
-        ),
-      );
+        );
 
-      expect(find.text('Original'), findsOneWidget);
-      expect(find.text('Clothsy AI Drape'), findsOneWidget);
-      expect(find.byIcon(Icons.compare_arrows_rounded), findsOneWidget);
-    });
+        expect(find.text('Original'), findsOneWidget);
+        expect(find.text('Clothsy AI Drape'), findsOneWidget);
+        expect(find.byIcon(Icons.compare_arrows_rounded), findsOneWidget);
+      },
+    );
   });
 }

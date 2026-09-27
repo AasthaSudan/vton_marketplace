@@ -5,10 +5,7 @@ import '../../shared/widgets/navigation/clothsy_bottom_nav.dart';
 class ScaffoldWithNavBar extends StatelessWidget {
   final StatefulNavigationShell navigationShell;
 
-  const ScaffoldWithNavBar({
-    super.key,
-    required this.navigationShell,
-  });
+  const ScaffoldWithNavBar({super.key, required this.navigationShell});
 
   void _onTap(BuildContext context, int index) {
     navigationShell.goBranch(

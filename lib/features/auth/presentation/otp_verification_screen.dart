@@ -22,7 +22,8 @@ class OtpVerificationScreen extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<OtpVerificationScreen> createState() => _OtpVerificationScreenState();
+  ConsumerState<OtpVerificationScreen> createState() =>
+      _OtpVerificationScreenState();
 }
 
 class _OtpVerificationScreenState extends ConsumerState<OtpVerificationScreen> {
@@ -57,16 +58,26 @@ class _OtpVerificationScreenState extends ConsumerState<OtpVerificationScreen> {
 
   Future<void> _verifyOtp() async {
     if (_enteredOtp.length < 4) {
-      ClothsySnackbar.show(context, message: 'Please enter the 4-digit code', type: SnackbarType.error);
+      ClothsySnackbar.show(
+        context,
+        message: 'Please enter the 4-digit code',
+        type: SnackbarType.error,
+      );
       return;
     }
 
     setState(() => _isLoading = true);
-    final ok = await ref.read(authProvider.notifier).verifyOtp(widget.phoneNumber, _enteredOtp);
+    final ok = await ref
+        .read(authProvider.notifier)
+        .verifyOtp(widget.phoneNumber, _enteredOtp);
     setState(() => _isLoading = false);
 
     if (ok && mounted) {
-      ClothsySnackbar.show(context, message: 'Welcome to Clothsy!', type: SnackbarType.success);
+      ClothsySnackbar.show(
+        context,
+        message: 'Welcome to Clothsy!',
+        type: SnackbarType.success,
+      );
       if (widget.redirectPath != null && widget.redirectPath!.isNotEmpty) {
         context.go(widget.redirectPath!);
       } else {
@@ -86,7 +97,11 @@ class _OtpVerificationScreenState extends ConsumerState<OtpVerificationScreen> {
           padding: const EdgeInsets.only(left: 12),
           child: ClothsyIconButton(
             size: 38,
-            icon: Icon(Icons.arrow_back_ios_new_rounded, size: 16, color: colors.primary),
+            icon: Icon(
+              Icons.arrow_back_ios_new_rounded,
+              size: 16,
+              color: colors.primary,
+            ),
             onPressed: () => context.pop(),
           ),
         ),
@@ -105,7 +120,11 @@ class _OtpVerificationScreenState extends ConsumerState<OtpVerificationScreen> {
                   color: colors.accentSoft,
                   shape: BoxShape.circle,
                 ),
-                child: Icon(Icons.mark_email_read_outlined, size: 32, color: colors.primary),
+                child: Icon(
+                  Icons.mark_email_read_outlined,
+                  size: 32,
+                  color: colors.primary,
+                ),
               ),
               const SizedBox(height: 24),
               Text(
@@ -171,7 +190,8 @@ class _OtpVerificationScreenState extends ConsumerState<OtpVerificationScreen> {
                     _startTimer();
                     ClothsySnackbar.show(
                       context,
-                      message: 'New verification code sent to ${widget.phoneNumber}',
+                      message:
+                          'New verification code sent to ${widget.phoneNumber}',
                       type: SnackbarType.info,
                     );
                   },

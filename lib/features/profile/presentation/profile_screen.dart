@@ -18,9 +18,15 @@ class ProfileScreen extends ConsumerWidget {
 
   void _openEditProfileSheet(BuildContext context, WidgetRef ref) {
     final user = ref.read(currentUserProvider);
-    final nameController = TextEditingController(text: user?.name ?? 'Aastha Sudan');
-    final emailController = TextEditingController(text: user?.email ?? 'aastha@example.com');
-    final phoneController = TextEditingController(text: user?.phone ?? '+91 98765 43210');
+    final nameController = TextEditingController(
+      text: user?.name ?? 'Aastha Sudan',
+    );
+    final emailController = TextEditingController(
+      text: user?.email ?? 'aastha@example.com',
+    );
+    final phoneController = TextEditingController(
+      text: user?.phone ?? '+91 98765 43210',
+    );
 
     ClothsyBottomSheet.show(
       context: context,
@@ -32,14 +38,22 @@ class ProfileScreen extends ConsumerWidget {
           children: [
             ClothsyTextField(label: 'Full Name', controller: nameController),
             const SizedBox(height: 14),
-            ClothsyTextField(label: 'Email Address', controller: emailController),
+            ClothsyTextField(
+              label: 'Email Address',
+              controller: emailController,
+            ),
             const SizedBox(height: 14),
-            ClothsyTextField(label: 'Mobile Phone', controller: phoneController),
+            ClothsyTextField(
+              label: 'Mobile Phone',
+              controller: phoneController,
+            ),
             const SizedBox(height: 24),
             PrimaryButton(
               text: 'Save Profile Changes',
               onPressed: () {
-                ref.read(authProvider.notifier).updateProfile(
+                ref
+                    .read(authProvider.notifier)
+                    .updateProfile(
                       name: nameController.text.trim(),
                       email: emailController.text.trim(),
                       phone: phoneController.text.trim(),
@@ -62,7 +76,10 @@ class ProfileScreen extends ConsumerWidget {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text('Delete Account', style: AppTypography.h3(color: ctx.colors.error)),
+        title: Text(
+          'Delete Account',
+          style: AppTypography.h3(color: ctx.colors.error),
+        ),
         content: Text(
           'Are you sure you wish to permanently delete your Clothsy account? All orders, saved models, and rewards will be erased.',
           style: AppTypography.body(color: ctx.colors.textPrimary),
@@ -70,15 +87,28 @@ class ProfileScreen extends ConsumerWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: Text('Cancel', style: AppTypography.caption(color: ctx.colors.textSecondary)),
+            child: Text(
+              'Cancel',
+              style: AppTypography.caption(color: ctx.colors.textSecondary),
+            ),
           ),
           TextButton(
             onPressed: () {
               Navigator.pop(ctx);
               ref.read(authProvider.notifier).deleteAccount();
-              ClothsySnackbar.show(ctx, message: 'Account permanently erased', type: SnackbarType.info);
+              ClothsySnackbar.show(
+                ctx,
+                message: 'Account permanently erased',
+                type: SnackbarType.info,
+              );
             },
-            child: Text('Delete Account', style: AppTypography.caption(color: ctx.colors.error, weight: FontWeight.w700)),
+            child: Text(
+              'Delete Account',
+              style: AppTypography.caption(
+                color: ctx.colors.error,
+                weight: FontWeight.w700,
+              ),
+            ),
           ),
         ],
       ),
@@ -124,7 +154,9 @@ class ProfileScreen extends ConsumerWidget {
                   radius: 34,
                   backgroundColor: colors.accentSoft,
                   child: Text(
-                    (user?.name.isNotEmpty == true) ? user!.name[0].toUpperCase() : 'C',
+                    (user?.name.isNotEmpty == true)
+                        ? user!.name[0].toUpperCase()
+                        : 'C',
                     style: AppTypography.h2(color: colors.primary),
                   ),
                 ),
@@ -134,17 +166,28 @@ class ProfileScreen extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        user?.name.isNotEmpty == true ? user!.name : 'Clothsy Shopper',
+                        user?.name.isNotEmpty == true
+                            ? user!.name
+                            : 'Clothsy Shopper',
                         style: AppTypography.h3(color: colors.textPrimary),
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        user?.phone.isNotEmpty == true ? user!.phone : (user?.email.isNotEmpty == true ? user!.email : 'Sign in for member perks'),
-                        style: AppTypography.caption(color: colors.textSecondary),
+                        user?.phone.isNotEmpty == true
+                            ? user!.phone
+                            : (user?.email.isNotEmpty == true
+                                  ? user!.email
+                                  : 'Sign in for member perks'),
+                        style: AppTypography.caption(
+                          color: colors.textSecondary,
+                        ),
                       ),
                       const SizedBox(height: 6),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 3,
+                        ),
                         decoration: BoxDecoration(
                           color: colors.primary.withOpacity(0.08),
                           borderRadius: BorderRadius.circular(100),
@@ -162,13 +205,23 @@ class ProfileScreen extends ConsumerWidget {
                 ),
                 if (auth.isAuthenticated)
                   IconButton(
-                    icon: Icon(Icons.edit_outlined, size: 20, color: colors.primary),
+                    icon: Icon(
+                      Icons.edit_outlined,
+                      size: 20,
+                      color: colors.primary,
+                    ),
                     onPressed: () => _openEditProfileSheet(context, ref),
                   )
                 else
                   TextButton(
                     onPressed: () => context.push('/login'),
-                    child: Text('Sign In', style: AppTypography.caption(color: colors.primary, weight: FontWeight.w700)),
+                    child: Text(
+                      'Sign In',
+                      style: AppTypography.caption(
+                        color: colors.primary,
+                        weight: FontWeight.w700,
+                      ),
+                    ),
                   ),
               ],
             ),
@@ -254,7 +307,11 @@ class ProfileScreen extends ConsumerWidget {
               text: 'Sign Out',
               onPressed: () {
                 ref.read(authProvider.notifier).signOut();
-                ClothsySnackbar.show(context, message: 'You have been signed out', type: SnackbarType.info);
+                ClothsySnackbar.show(
+                  context,
+                  message: 'You have been signed out',
+                  type: SnackbarType.info,
+                );
               },
             ),
             const SizedBox(height: 12),
@@ -263,7 +320,10 @@ class ProfileScreen extends ConsumerWidget {
                 onPressed: () => _confirmDeleteAccount(context, ref),
                 child: Text(
                   'Delete Account',
-                  style: AppTypography.caption(color: colors.error, weight: FontWeight.w600),
+                  style: AppTypography.caption(
+                    color: colors.error,
+                    weight: FontWeight.w600,
+                  ),
                 ),
               ),
             ),
@@ -328,14 +388,19 @@ class ProfileScreen extends ConsumerWidget {
               ),
               if (badgeCount > 0) ...[
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 3,
+                  ),
                   decoration: BoxDecoration(
                     color: colors.primary,
                     borderRadius: BorderRadius.circular(100),
                   ),
                   child: Text(
                     '$badgeCount',
-                    style: AppTypography.label(color: colors.onPrimary).copyWith(fontSize: 10),
+                    style: AppTypography.label(
+                      color: colors.onPrimary,
+                    ).copyWith(fontSize: 10),
                   ),
                 ),
                 const SizedBox(width: 8),

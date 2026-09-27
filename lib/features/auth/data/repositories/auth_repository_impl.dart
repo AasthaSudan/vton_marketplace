@@ -103,7 +103,11 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<User> updateProfile({String? name, String? email, String? phone}) async {
+  Future<User> updateProfile({
+    String? name,
+    String? email,
+    String? phone,
+  }) async {
     final current = await getCurrentUser() ?? User.guest;
     final updated = current.copyWith(
       name: name ?? current.name,

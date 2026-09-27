@@ -25,9 +25,5 @@ Future<void> bootstrap({required AppFlavor flavor}) async {
     DeviceOrientation.portraitDown,
   ]);
 
-  runApp(
-    const ProviderScope(
-      child: ClothsyShopApp(),
-    ),
-  );
+  runApp(const ProviderScope(child: ClothsyShopApp()));
 }

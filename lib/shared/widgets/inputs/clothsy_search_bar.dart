@@ -47,11 +47,7 @@ class ClothsySearchBar extends StatelessWidget {
       child: Row(
         children: [
           const SizedBox(width: 16),
-          Icon(
-            Icons.search_rounded,
-            color: colors.textSecondary,
-            size: 22,
-          ),
+          Icon(Icons.search_rounded, color: colors.textSecondary, size: 22),
           const SizedBox(width: 10),
           Expanded(
             child: TextField(
@@ -64,7 +60,9 @@ class ClothsySearchBar extends StatelessWidget {
               cursorColor: colors.primary,
               decoration: InputDecoration(
                 hintText: hintText,
-                hintStyle: AppTypography.body(color: colors.textSecondary.withOpacity(0.7)),
+                hintStyle: AppTypography.body(
+                  color: colors.textSecondary.withOpacity(0.7),
+                ),
                 border: InputBorder.none,
                 isDense: true,
                 contentPadding: EdgeInsets.zero,
@@ -72,11 +70,7 @@ class ClothsySearchBar extends StatelessWidget {
             ),
           ),
           if (showFilterButton) ...[
-            Container(
-              height: 24,
-              width: 1,
-              color: colors.border,
-            ),
+            Container(height: 24, width: 1, color: colors.border),
             PressableScale(
               onTap: onFilterTap,
               child: Padding(

@@ -9,11 +9,7 @@ class TryOnShimmerLoading extends StatefulWidget {
   final ProcessingStep? currentStep;
   final VoidCallback? onCancel;
 
-  const TryOnShimmerLoading({
-    super.key,
-    this.currentStep,
-    this.onCancel,
-  });
+  const TryOnShimmerLoading({super.key, this.currentStep, this.onCancel});
 
   @override
   State<TryOnShimmerLoading> createState() => _TryOnShimmerLoadingState();
@@ -125,8 +121,9 @@ class _TryOnShimmerLoadingState extends State<TryOnShimmerLoading>
                         step?.description ??
                             'Harmonizing fabric drape, shadows & pose...',
                         textAlign: TextAlign.center,
-                        style: AppTypography.caption(color: colors.textSecondary)
-                            .copyWith(fontSize: 13),
+                        style: AppTypography.caption(
+                          color: colors.textSecondary,
+                        ).copyWith(fontSize: 13),
                       ),
                       const SizedBox(height: 20),
 
@@ -138,7 +135,9 @@ class _TryOnShimmerLoadingState extends State<TryOnShimmerLoading>
                           child: LinearProgressIndicator(
                             value: progress,
                             backgroundColor: colors.border.withOpacity(0.4),
-                            valueColor: AlwaysStoppedAnimation<Color>(colors.primary),
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              colors.primary,
+                            ),
                           ),
                         ),
                       ),
@@ -147,8 +146,9 @@ class _TryOnShimmerLoadingState extends State<TryOnShimmerLoading>
                       // Estimated time
                       Text(
                         'Estimated time: ~${((1.0 - progress) * 4).ceil()}s',
-                        style: AppTypography.caption(color: colors.textSecondary)
-                            .copyWith(fontSize: 11),
+                        style: AppTypography.caption(
+                          color: colors.textSecondary,
+                        ).copyWith(fontSize: 11),
                       ),
 
                       if (widget.onCancel != null) ...[
@@ -157,7 +157,9 @@ class _TryOnShimmerLoadingState extends State<TryOnShimmerLoading>
                           onPressed: widget.onCancel,
                           style: TextButton.styleFrom(
                             foregroundColor: colors.textSecondary,
-                            shape: RoundedRectangleBorder(borderRadius: AppRadius.buttonRadius),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: AppRadius.buttonRadius,
+                            ),
                           ),
                           child: const Text('Cancel Request'),
                         ),

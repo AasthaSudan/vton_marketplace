@@ -88,15 +88,17 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
       paymentLabel = 'UPI ($_selectedUpiApp)';
     }
 
-    final order = await ref.read(ordersProvider.notifier).createOrder(
-      items: cart.items,
-      address: address,
-      paymentMethod: paymentLabel,
-      subtotal: cart.subtotal,
-      discount: cart.discountAmount,
-      shippingFee: cart.shippingFee,
-      total: cart.total,
-    );
+    final order = await ref
+        .read(ordersProvider.notifier)
+        .createOrder(
+          items: cart.items,
+          address: address,
+          paymentMethod: paymentLabel,
+          subtotal: cart.subtotal,
+          discount: cart.discountAmount,
+          shippingFee: cart.shippingFee,
+          total: cart.total,
+        );
 
     // Clear cart upon successful order placement
     ref.read(cartProvider.notifier).clearCart();
@@ -125,7 +127,11 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
           padding: const EdgeInsets.only(left: 12),
           child: ClothsyIconButton(
             size: 38,
-            icon: Icon(Icons.arrow_back_ios_new_rounded, size: 16, color: colors.primary),
+            icon: Icon(
+              Icons.arrow_back_ios_new_rounded,
+              size: 16,
+              color: colors.primary,
+            ),
             onPressed: () => context.pop(),
           ),
         ),
@@ -135,7 +141,10 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
           children: [
             Expanded(
               child: ListView(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 12,
+                ),
                 children: [
                   // Step 1: Delivery Address
                   _buildSectionTitle('1. Delivery Address'),
@@ -153,17 +162,26 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                             children: [
                               Text(
                                 'No address selected',
-                                style: AppTypography.body(color: colors.textSecondary),
+                                style: AppTypography.body(
+                                  color: colors.textSecondary,
+                                ),
                               ),
                               TextButton(
                                 onPressed: () {
                                   Navigator.of(context).push(
                                     MaterialPageRoute(
-                                      builder: (_) => const AddressListScreen(isSelectingForCheckout: true),
+                                      builder: (_) => const AddressListScreen(
+                                        isSelectingForCheckout: true,
+                                      ),
                                     ),
                                   );
                                 },
-                                child: Text('Add Address', style: AppTypography.label(color: colors.primary)),
+                                child: Text(
+                                  'Add Address',
+                                  style: AppTypography.label(
+                                    color: colors.primary,
+                                  ),
+                                ),
                               ),
                             ],
                           )
@@ -171,15 +189,22 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   Row(
                                     children: [
-                                      Icon(Icons.location_on_outlined, size: 18, color: colors.primary),
+                                      Icon(
+                                        Icons.location_on_outlined,
+                                        size: 18,
+                                        color: colors.primary,
+                                      ),
                                       const SizedBox(width: 6),
                                       Text(
                                         selectedAddress.name,
-                                        style: AppTypography.bodyMedium(weight: FontWeight.w700),
+                                        style: AppTypography.bodyMedium(
+                                          weight: FontWeight.w700,
+                                        ),
                                       ),
                                     ],
                                   ),
@@ -187,16 +212,23 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                                     onTap: () {
                                       Navigator.of(context).push(
                                         MaterialPageRoute(
-                                          builder: (_) => const AddressListScreen(isSelectingForCheckout: true),
+                                          builder: (_) =>
+                                              const AddressListScreen(
+                                                isSelectingForCheckout: true,
+                                              ),
                                         ),
                                       );
                                     },
                                     child: Text(
                                       'Change',
-                                      style: AppTypography.caption(
-                                        color: colors.primary,
-                                        weight: FontWeight.w700,
-                                      ).copyWith(decoration: TextDecoration.underline),
+                                      style:
+                                          AppTypography.caption(
+                                            color: colors.primary,
+                                            weight: FontWeight.w700,
+                                          ).copyWith(
+                                            decoration:
+                                                TextDecoration.underline,
+                                          ),
                                     ),
                                   ),
                                 ],
@@ -204,12 +236,16 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                               const SizedBox(height: 6),
                               Text(
                                 selectedAddress.formattedAddress,
-                                style: AppTypography.body(color: colors.textSecondary).copyWith(fontSize: 13),
+                                style: AppTypography.body(
+                                  color: colors.textSecondary,
+                                ).copyWith(fontSize: 13),
                               ),
                               const SizedBox(height: 4),
                               Text(
                                 selectedAddress.phone,
-                                style: AppTypography.caption(color: colors.textSecondary),
+                                style: AppTypography.caption(
+                                  color: colors.textSecondary,
+                                ),
                               ),
                             ],
                           ),
@@ -235,7 +271,11 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                             color: colors.accentSoft,
                             shape: BoxShape.circle,
                           ),
-                          child: Icon(Icons.rocket_launch_outlined, color: colors.primary, size: 20),
+                          child: Icon(
+                            Icons.rocket_launch_outlined,
+                            color: colors.primary,
+                            size: 20,
+                          ),
                         ),
                         const SizedBox(width: 14),
                         Expanded(
@@ -244,12 +284,16 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                             children: [
                               Text(
                                 'Complimentary Express Delivery',
-                                style: AppTypography.bodyMedium(weight: FontWeight.w600).copyWith(fontSize: 14),
+                                style: AppTypography.bodyMedium(
+                                  weight: FontWeight.w600,
+                                ).copyWith(fontSize: 14),
                               ),
                               const SizedBox(height: 2),
                               Text(
                                 'Guaranteed delivery in 2–4 business days via BlueDart Apex',
-                                style: AppTypography.caption(color: colors.textSecondary),
+                                style: AppTypography.caption(
+                                  color: colors.textSecondary,
+                                ),
                               ),
                             ],
                           ),
@@ -275,14 +319,18 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                     return Padding(
                       padding: const EdgeInsets.only(bottom: 10),
                       child: PressableScale(
-                        onTap: () => setState(() => _selectedPaymentMethod = opt['id'] as String),
+                        onTap: () => setState(
+                          () => _selectedPaymentMethod = opt['id'] as String,
+                        ),
                         child: Container(
                           padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
                             color: colors.surface,
                             borderRadius: AppRadius.cardRadius,
                             border: Border.all(
-                              color: isSelected ? colors.primary : colors.border.withOpacity(0.6),
+                              color: isSelected
+                                  ? colors.primary
+                                  : colors.border.withOpacity(0.6),
                               width: isSelected ? 1.8 : 1.0,
                             ),
                           ),
@@ -290,26 +338,39 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                             children: [
                               Row(
                                 children: [
-                                  Icon(opt['icon'] as IconData, color: colors.primary, size: 22),
+                                  Icon(
+                                    opt['icon'] as IconData,
+                                    color: colors.primary,
+                                    size: 22,
+                                  ),
                                   const SizedBox(width: 12),
                                   Expanded(
                                     child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
                                         Text(
                                           opt['title'] as String,
-                                          style: AppTypography.bodyMedium(weight: FontWeight.w600),
+                                          style: AppTypography.bodyMedium(
+                                            weight: FontWeight.w600,
+                                          ),
                                         ),
                                         Text(
                                           opt['subtitle'] as String,
-                                          style: AppTypography.caption(color: colors.textSecondary).copyWith(fontSize: 11),
+                                          style: AppTypography.caption(
+                                            color: colors.textSecondary,
+                                          ).copyWith(fontSize: 11),
                                         ),
                                       ],
                                     ),
                                   ),
                                   Icon(
-                                    isSelected ? Icons.check_circle_rounded : Icons.radio_button_off,
-                                    color: isSelected ? colors.primary : colors.textSecondary.withOpacity(0.4),
+                                    isSelected
+                                        ? Icons.check_circle_rounded
+                                        : Icons.radio_button_off,
+                                    color: isSelected
+                                        ? colors.primary
+                                        : colors.textSecondary.withOpacity(0.4),
                                     size: 20,
                                   ),
                                 ],
@@ -319,27 +380,41 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                                 Divider(color: colors.border.withOpacity(0.5)),
                                 const SizedBox(height: 8),
                                 Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                                  children: ['Google Pay', 'PhonePe', 'Paytm'].map((app) {
-                                    final isAppSelected = _selectedUpiApp == app;
-                                    return PressableScale(
-                                      onTap: () => setState(() => _selectedUpiApp = app),
-                                      child: Container(
-                                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-                                        decoration: BoxDecoration(
-                                          color: isAppSelected ? colors.primary : colors.surfaceMuted,
-                                          borderRadius: BorderRadius.circular(100),
-                                        ),
-                                        child: Text(
-                                          app,
-                                          style: AppTypography.caption(
-                                            color: isAppSelected ? colors.onPrimary : colors.textPrimary,
-                                            weight: FontWeight.w600,
-                                          ).copyWith(fontSize: 11),
-                                        ),
-                                      ),
-                                    );
-                                  }).toList(),
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceAround,
+                                  children: ['Google Pay', 'PhonePe', 'Paytm']
+                                      .map((app) {
+                                        final isAppSelected =
+                                            _selectedUpiApp == app;
+                                        return PressableScale(
+                                          onTap: () => setState(
+                                            () => _selectedUpiApp = app,
+                                          ),
+                                          child: Container(
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 14,
+                                              vertical: 6,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              color: isAppSelected
+                                                  ? colors.primary
+                                                  : colors.surfaceMuted,
+                                              borderRadius:
+                                                  BorderRadius.circular(100),
+                                            ),
+                                            child: Text(
+                                              app,
+                                              style: AppTypography.caption(
+                                                color: isAppSelected
+                                                    ? colors.onPrimary
+                                                    : colors.textPrimary,
+                                                weight: FontWeight.w600,
+                                              ).copyWith(fontSize: 11),
+                                            ),
+                                          ),
+                                        );
+                                      })
+                                      .toList(),
                                 ),
                               ],
                             ],
@@ -362,7 +437,10 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                     ),
                     child: Column(
                       children: [
-                        _buildPriceRow('Items Subtotal (${cart.totalCount})', CurrencyFormatter.format(cart.subtotal)),
+                        _buildPriceRow(
+                          'Items Subtotal (${cart.totalCount})',
+                          CurrencyFormatter.format(cart.subtotal),
+                        ),
                         if (cart.discountAmount > 0) ...[
                           const SizedBox(height: 8),
                           _buildPriceRow(
@@ -372,7 +450,12 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                           ),
                         ],
                         const SizedBox(height: 8),
-                        _buildPriceRow('Express Delivery', cart.shippingFee == 0 ? 'FREE' : CurrencyFormatter.format(cart.shippingFee)),
+                        _buildPriceRow(
+                          'Express Delivery',
+                          cart.shippingFee == 0
+                              ? 'FREE'
+                              : CurrencyFormatter.format(cart.shippingFee),
+                        ),
                         const Padding(
                           padding: EdgeInsets.symmetric(vertical: 12),
                           child: Divider(),
@@ -380,10 +463,18 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text('Grand Total', style: AppTypography.h3(color: colors.textPrimary)),
+                            Text(
+                              'Grand Total',
+                              style: AppTypography.h3(
+                                color: colors.textPrimary,
+                              ),
+                            ),
                             Text(
                               CurrencyFormatter.format(cart.total),
-                              style: AppTypography.h2(color: colors.primary, weight: FontWeight.w700),
+                              style: AppTypography.h2(
+                                color: colors.primary,
+                                weight: FontWeight.w700,
+                              ),
                             ),
                           ],
                         ),
@@ -400,12 +491,19 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
               padding: const EdgeInsets.fromLTRB(20, 14, 20, 20),
               decoration: BoxDecoration(
                 color: colors.surface,
-                border: Border(top: BorderSide(color: colors.border.withOpacity(0.6))),
+                border: Border(
+                  top: BorderSide(color: colors.border.withOpacity(0.6)),
+                ),
               ),
               child: PrimaryButton(
-                text: 'Pay ${CurrencyFormatter.format(cart.total)} & Place Order',
+                text:
+                    'Pay ${CurrencyFormatter.format(cart.total)} & Place Order',
                 isLoading: _isPlacingOrder,
-                trailingIcon: const Icon(Icons.lock_outline, size: 18, color: Colors.white),
+                trailingIcon: const Icon(
+                  Icons.lock_outline,
+                  size: 18,
+                  color: Colors.white,
+                ),
                 onPressed: _handlePlaceOrder,
               ),
             ),
@@ -418,16 +516,27 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   Widget _buildSectionTitle(String title) {
     return Text(
       title,
-      style: AppTypography.bodyMedium(weight: FontWeight.w700).copyWith(fontSize: 15),
+      style: AppTypography.bodyMedium(
+        weight: FontWeight.w700,
+      ).copyWith(fontSize: 15),
     );
   }
 
-  Widget _buildPriceRow(String label, String value, {bool isHighlight = false}) {
+  Widget _buildPriceRow(
+    String label,
+    String value, {
+    bool isHighlight = false,
+  }) {
     final colors = context.colors;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(label, style: AppTypography.caption(color: isHighlight ? colors.success : colors.textSecondary)),
+        Text(
+          label,
+          style: AppTypography.caption(
+            color: isHighlight ? colors.success : colors.textSecondary,
+          ),
+        ),
         Text(
           value,
           style: AppTypography.bodyMedium(

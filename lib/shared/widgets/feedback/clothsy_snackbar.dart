@@ -63,10 +63,7 @@ class ClothsySnackbar {
               Icon(icon, color: fg, size: 20),
               const SizedBox(width: 12),
               Expanded(
-                child: Text(
-                  message,
-                  style: AppTypography.body(color: fg),
-                ),
+                child: Text(message, style: AppTypography.body(color: fg)),
               ),
             ],
           ),

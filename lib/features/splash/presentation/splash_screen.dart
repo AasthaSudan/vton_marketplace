@@ -32,9 +32,10 @@ class _SplashScreenState extends State<SplashScreen>
       curve: Curves.easeOutCubic,
     );
 
-    _scaleAnimation = Tween<double>(begin: 0.92, end: 1.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic),
-    );
+    _scaleAnimation = Tween<double>(
+      begin: 0.92,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic));
 
     _controller.forward();
 
@@ -112,10 +113,7 @@ class _SplashScreenState extends State<SplashScreen>
                         style: AppTypography.display(
                           color: colors.primary,
                           weight: FontWeight.w800,
-                        ).copyWith(
-                          fontSize: 34,
-                          letterSpacing: 8.0,
-                        ),
+                        ).copyWith(fontSize: 34, letterSpacing: 8.0),
                       ),
                       const SizedBox(height: 8),
 
@@ -125,10 +123,7 @@ class _SplashScreenState extends State<SplashScreen>
                         style: AppTypography.label(
                           color: colors.textSecondary,
                           weight: FontWeight.w600,
-                        ).copyWith(
-                          letterSpacing: 3.5,
-                          fontSize: 11,
-                        ),
+                        ).copyWith(letterSpacing: 3.5, fontSize: 11),
                       ),
                       const SizedBox(height: 36),
 
@@ -141,7 +136,9 @@ class _SplashScreenState extends State<SplashScreen>
                             value: _controller.value,
                             minHeight: 2.5,
                             backgroundColor: colors.primary.withOpacity(0.08),
-                            valueColor: AlwaysStoppedAnimation<Color>(colors.primary),
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              colors.primary,
+                            ),
                           ),
                         ),
                       ),

@@ -68,16 +68,26 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     final password = _passwordController.text;
 
     if (email.isEmpty || !email.contains('@')) {
-      ClothsySnackbar.show(context, message: 'Please enter a valid email address', type: SnackbarType.error);
+      ClothsySnackbar.show(
+        context,
+        message: 'Please enter a valid email address',
+        type: SnackbarType.error,
+      );
       return;
     }
     if (password.length < 6) {
-      ClothsySnackbar.show(context, message: 'Password must be at least 6 characters', type: SnackbarType.error);
+      ClothsySnackbar.show(
+        context,
+        message: 'Password must be at least 6 characters',
+        type: SnackbarType.error,
+      );
       return;
     }
 
     setState(() => _isLoading = true);
-    final ok = await ref.read(authProvider.notifier).signInWithEmail(email, password);
+    final ok = await ref
+        .read(authProvider.notifier)
+        .signInWithEmail(email, password);
     setState(() => _isLoading = false);
 
     if (ok && mounted) {
@@ -129,7 +139,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   shape: BoxShape.circle,
                   border: Border.all(color: colors.accentSoft, width: 1.5),
                 ),
-                child: Icon(Icons.auto_awesome, color: colors.primary, size: 28),
+                child: Icon(
+                  Icons.auto_awesome,
+                  color: colors.primary,
+                  size: 28,
+                ),
               ),
             ),
             const SizedBox(height: 20),
@@ -161,7 +175,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       onTap: () => setState(() => _isPhoneMode = true),
                       child: Container(
                         decoration: BoxDecoration(
-                          color: _isPhoneMode ? colors.surface : Colors.transparent,
+                          color: _isPhoneMode
+                              ? colors.surface
+                              : Colors.transparent,
                           borderRadius: BorderRadius.circular(100),
                           boxShadow: _isPhoneMode
                               ? [
@@ -177,8 +193,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         child: Text(
                           'Phone OTP',
                           style: AppTypography.bodyMedium(
-                            color: _isPhoneMode ? colors.primary : colors.textSecondary,
-                            weight: _isPhoneMode ? FontWeight.w700 : FontWeight.w500,
+                            color: _isPhoneMode
+                                ? colors.primary
+                                : colors.textSecondary,
+                            weight: _isPhoneMode
+                                ? FontWeight.w700
+                                : FontWeight.w500,
                           ).copyWith(fontSize: 13),
                         ),
                       ),
@@ -189,7 +209,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       onTap: () => setState(() => _isPhoneMode = false),
                       child: Container(
                         decoration: BoxDecoration(
-                          color: !_isPhoneMode ? colors.surface : Colors.transparent,
+                          color: !_isPhoneMode
+                              ? colors.surface
+                              : Colors.transparent,
                           borderRadius: BorderRadius.circular(100),
                           boxShadow: !_isPhoneMode
                               ? [
@@ -205,8 +227,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         child: Text(
                           'Email & Password',
                           style: AppTypography.bodyMedium(
-                            color: !_isPhoneMode ? colors.primary : colors.textSecondary,
-                            weight: !_isPhoneMode ? FontWeight.w700 : FontWeight.w500,
+                            color: !_isPhoneMode
+                                ? colors.primary
+                                : colors.textSecondary,
+                            weight: !_isPhoneMode
+                                ? FontWeight.w700
+                                : FontWeight.w500,
                           ).copyWith(fontSize: 13),
                         ),
                       ),
@@ -273,7 +299,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 Expanded(child: Divider(color: colors.border)),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Text('OR', style: AppTypography.caption(color: colors.textSecondary)),
+                  child: Text(
+                    'OR',
+                    style: AppTypography.caption(color: colors.textSecondary),
+                  ),
                 ),
                 Expanded(child: Divider(color: colors.border)),
               ],
@@ -283,7 +312,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             // Social Buttons (Google and Apple)
             SecondaryButton(
               text: 'Continue with Google',
-              icon: Icon(Icons.g_mobiledata_rounded, size: 26, color: colors.primary),
+              icon: Icon(
+                Icons.g_mobiledata_rounded,
+                size: 26,
+                color: colors.primary,
+              ),
               onPressed: _handleGoogleSignIn,
             ),
             const SizedBox(height: 12),

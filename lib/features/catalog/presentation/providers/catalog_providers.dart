@@ -9,7 +9,9 @@ final catalogRepositoryProvider = Provider<CatalogRepository>((ref) {
   return CatalogRepositoryImpl();
 });
 
-final featuredBannersProvider = FutureProvider<List<PromoBannerItem>>((ref) async {
+final featuredBannersProvider = FutureProvider<List<PromoBannerItem>>((
+  ref,
+) async {
   final repo = ref.watch(catalogRepositoryProvider);
   return repo.getFeaturedBanners();
 });
@@ -27,7 +29,9 @@ class SelectedCategoryNotifier extends Notifier<String> {
 }
 
 final selectedCategoryProvider =
-    NotifierProvider<SelectedCategoryNotifier, String>(SelectedCategoryNotifier.new);
+    NotifierProvider<SelectedCategoryNotifier, String>(
+      SelectedCategoryNotifier.new,
+    );
 
 class SortOptionNotifier extends Notifier<String> {
   @override
@@ -36,8 +40,9 @@ class SortOptionNotifier extends Notifier<String> {
   void setSort(String sort) => state = sort;
 }
 
-final sortOptionProvider =
-    NotifierProvider<SortOptionNotifier, String>(SortOptionNotifier.new);
+final sortOptionProvider = NotifierProvider<SortOptionNotifier, String>(
+  SortOptionNotifier.new,
+);
 
 final productsProvider = FutureProvider<List<Product>>((ref) async {
   final repo = ref.watch(catalogRepositoryProvider);
@@ -51,14 +56,18 @@ final bestPicksProvider = FutureProvider<List<Product>>((ref) async {
   return repo.getBestPicks();
 });
 
-final productDetailProvider =
-    FutureProvider.family<Product?, String>((ref, id) async {
+final productDetailProvider = FutureProvider.family<Product?, String>((
+  ref,
+  id,
+) async {
   final repo = ref.watch(catalogRepositoryProvider);
   return repo.getProductById(id);
 });
 
-final recommendationsProvider =
-    FutureProvider.family<List<Product>, String>((ref, productId) async {
+final recommendationsProvider = FutureProvider.family<List<Product>, String>((
+  ref,
+  productId,
+) async {
   final repo = ref.watch(catalogRepositoryProvider);
   return repo.getRecommendations(productId);
 });
@@ -71,8 +80,9 @@ class SearchQueryNotifier extends Notifier<String> {
   void clear() => state = '';
 }
 
-final searchQueryProvider =
-    NotifierProvider<SearchQueryNotifier, String>(SearchQueryNotifier.new);
+final searchQueryProvider = NotifierProvider<SearchQueryNotifier, String>(
+  SearchQueryNotifier.new,
+);
 
 final searchResultsProvider = FutureProvider<List<Product>>((ref) async {
   final query = ref.watch(searchQueryProvider);

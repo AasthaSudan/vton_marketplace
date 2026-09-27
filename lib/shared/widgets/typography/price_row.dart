@@ -27,7 +27,8 @@ class PriceRow extends StatelessWidget {
 
     String? calculatedDiscount = discountText;
     if (calculatedDiscount == null && hasDiscount) {
-      final percentage = (((originalPrice! - price) / originalPrice!) * 100).round();
+      final percentage = (((originalPrice! - price) / originalPrice!) * 100)
+          .round();
       if (percentage > 0) {
         calculatedDiscount = '$percentage% OFF';
       }
@@ -40,9 +41,9 @@ class PriceRow extends StatelessWidget {
       children: [
         Text(
           CurrencyFormatter.format(price),
-          style: AppTypography.price(color: colors.textPrimary).copyWith(
-            fontSize: currentPriceFontSize,
-          ),
+          style: AppTypography.price(
+            color: colors.textPrimary,
+          ).copyWith(fontSize: currentPriceFontSize),
         ),
         if (hasDiscount)
           Text(

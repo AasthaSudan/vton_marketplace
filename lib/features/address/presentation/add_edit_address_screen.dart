@@ -18,7 +18,8 @@ class AddEditAddressScreen extends ConsumerStatefulWidget {
   const AddEditAddressScreen({super.key, this.initialAddress});
 
   @override
-  ConsumerState<AddEditAddressScreen> createState() => _AddEditAddressScreenState();
+  ConsumerState<AddEditAddressScreen> createState() =>
+      _AddEditAddressScreenState();
 }
 
 class _AddEditAddressScreenState extends ConsumerState<AddEditAddressScreen> {
@@ -40,7 +41,9 @@ class _AddEditAddressScreenState extends ConsumerState<AddEditAddressScreen> {
     super.initState();
     final addr = widget.initialAddress;
     _nameController = TextEditingController(text: addr?.name ?? 'Aastha Sudan');
-    _phoneController = TextEditingController(text: addr?.phone ?? '+91 98765 43210');
+    _phoneController = TextEditingController(
+      text: addr?.phone ?? '+91 98765 43210',
+    );
     _pinController = TextEditingController(text: addr?.pinCode ?? '');
     _streetController = TextEditingController(text: addr?.street ?? '');
     _aptController = TextEditingController(text: addr?.apartment ?? '');
@@ -88,13 +91,19 @@ class _AddEditAddressScreenState extends ConsumerState<AddEditAddressScreen> {
     }
 
     final newAddress = Address(
-      id: widget.initialAddress?.id ?? 'addr_${DateTime.now().millisecondsSinceEpoch}',
+      id:
+          widget.initialAddress?.id ??
+          'addr_${DateTime.now().millisecondsSinceEpoch}',
       name: _nameController.text.trim(),
       phone: _phoneController.text.trim(),
       street: _streetController.text.trim(),
       apartment: _aptController.text.trim(),
-      city: _cityController.text.trim().isEmpty ? 'City' : _cityController.text.trim(),
-      state: _stateController.text.trim().isEmpty ? 'State' : _stateController.text.trim(),
+      city: _cityController.text.trim().isEmpty
+          ? 'City'
+          : _cityController.text.trim(),
+      state: _stateController.text.trim().isEmpty
+          ? 'State'
+          : _stateController.text.trim(),
       pinCode: _pinController.text.trim(),
       isDefault: _isDefault,
       label: _label,
@@ -103,13 +112,21 @@ class _AddEditAddressScreenState extends ConsumerState<AddEditAddressScreen> {
     if (widget.initialAddress != null) {
       await ref.read(addressesProvider.notifier).updateAddress(newAddress);
       if (mounted) {
-        ClothsySnackbar.show(context, message: 'Address updated successfully', type: SnackbarType.success);
+        ClothsySnackbar.show(
+          context,
+          message: 'Address updated successfully',
+          type: SnackbarType.success,
+        );
         context.pop();
       }
     } else {
       await ref.read(addressesProvider.notifier).addAddress(newAddress);
       if (mounted) {
-        ClothsySnackbar.show(context, message: 'Address saved to your address book', type: SnackbarType.success);
+        ClothsySnackbar.show(
+          context,
+          message: 'Address saved to your address book',
+          type: SnackbarType.success,
+        );
         context.pop();
       }
     }
@@ -131,7 +148,11 @@ class _AddEditAddressScreenState extends ConsumerState<AddEditAddressScreen> {
           padding: const EdgeInsets.only(left: 12),
           child: ClothsyIconButton(
             size: 38,
-            icon: Icon(Icons.arrow_back_ios_new_rounded, size: 16, color: colors.primary),
+            icon: Icon(
+              Icons.arrow_back_ios_new_rounded,
+              size: 16,
+              color: colors.primary,
+            ),
             onPressed: () => context.pop(),
           ),
         ),
@@ -143,7 +164,10 @@ class _AddEditAddressScreenState extends ConsumerState<AddEditAddressScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
             children: [
               // Contact details
-              Text('Contact Person', style: AppTypography.bodyMedium(weight: FontWeight.w700)),
+              Text(
+                'Contact Person',
+                style: AppTypography.bodyMedium(weight: FontWeight.w700),
+              ),
               const SizedBox(height: 12),
               ClothsyTextField(
                 label: 'Full Name *',
@@ -160,7 +184,10 @@ class _AddEditAddressScreenState extends ConsumerState<AddEditAddressScreen> {
               const SizedBox(height: 24),
 
               // Address details
-              Text('Address Information', style: AppTypography.bodyMedium(weight: FontWeight.w700)),
+              Text(
+                'Address Information',
+                style: AppTypography.bodyMedium(weight: FontWeight.w700),
+              ),
               const SizedBox(height: 12),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -207,7 +234,10 @@ class _AddEditAddressScreenState extends ConsumerState<AddEditAddressScreen> {
               const SizedBox(height: 24),
 
               // Address Label Selector (Home, Work, Other)
-              Text('Address Type', style: AppTypography.bodyMedium(weight: FontWeight.w700)),
+              Text(
+                'Address Type',
+                style: AppTypography.bodyMedium(weight: FontWeight.w700),
+              ),
               const SizedBox(height: 10),
               Row(
                 children: ['Home', 'Work', 'Other'].map((l) {
@@ -217,7 +247,10 @@ class _AddEditAddressScreenState extends ConsumerState<AddEditAddressScreen> {
                     child: PressableScale(
                       onTap: () => setState(() => _label = l),
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 18,
+                          vertical: 10,
+                        ),
                         decoration: BoxDecoration(
                           color: isSelected ? colors.primary : colors.surface,
                           borderRadius: BorderRadius.circular(100),
@@ -229,8 +262,12 @@ class _AddEditAddressScreenState extends ConsumerState<AddEditAddressScreen> {
                         child: Text(
                           l,
                           style: AppTypography.caption(
-                            color: isSelected ? colors.onPrimary : colors.textPrimary,
-                            weight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                            color: isSelected
+                                ? colors.onPrimary
+                                : colors.textPrimary,
+                            weight: isSelected
+                                ? FontWeight.w700
+                                : FontWeight.w500,
                           ),
                         ),
                       ),
@@ -254,8 +291,18 @@ class _AddEditAddressScreenState extends ConsumerState<AddEditAddressScreen> {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Set as Default Address', style: AppTypography.bodyMedium(weight: FontWeight.w600)),
-                        Text('Use this address for all future checkouts', style: AppTypography.caption(color: colors.textSecondary)),
+                        Text(
+                          'Set as Default Address',
+                          style: AppTypography.bodyMedium(
+                            weight: FontWeight.w600,
+                          ),
+                        ),
+                        Text(
+                          'Use this address for all future checkouts',
+                          style: AppTypography.caption(
+                            color: colors.textSecondary,
+                          ),
+                        ),
                       ],
                     ),
                     Switch.adaptive(

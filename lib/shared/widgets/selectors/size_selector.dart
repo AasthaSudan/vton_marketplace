@@ -34,10 +34,7 @@ class SizeSelector extends StatelessWidget {
           onTap: isUnavailable ? null : () => onSizeSelected?.call(size),
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 200),
-            constraints: const BoxConstraints(
-              minWidth: 44,
-              minHeight: 44,
-            ),
+            constraints: const BoxConstraints(minWidth: 44, minHeight: 44),
             padding: EdgeInsets.symmetric(
               horizontal: isPill ? 14 : 0,
               vertical: 8,
@@ -46,11 +43,15 @@ class SizeSelector extends StatelessWidget {
               borderRadius: BorderRadius.circular(100),
               color: isSelected
                   ? colors.primary
-                  : (isUnavailable ? colors.surfaceMuted.withOpacity(0.5) : colors.surface),
+                  : (isUnavailable
+                        ? colors.surfaceMuted.withOpacity(0.5)
+                        : colors.surface),
               border: Border.all(
                 color: isSelected
                     ? colors.primary
-                    : (isUnavailable ? colors.border.withOpacity(0.4) : colors.border),
+                    : (isUnavailable
+                          ? colors.border.withOpacity(0.4)
+                          : colors.border),
                 width: isSelected ? 2.0 : 1.0,
               ),
               boxShadow: isSelected
@@ -72,7 +73,9 @@ class SizeSelector extends StatelessWidget {
                   style: AppTypography.button(
                     color: isSelected
                         ? colors.onPrimary
-                        : (isUnavailable ? colors.textSecondary.withOpacity(0.4) : colors.textPrimary),
+                        : (isUnavailable
+                              ? colors.textSecondary.withOpacity(0.4)
+                              : colors.textPrimary),
                     weight: isSelected ? FontWeight.w700 : FontWeight.w600,
                   ).copyWith(fontSize: isPill ? 12 : 14),
                 ),

@@ -40,10 +40,7 @@ class CartBadgeIcon extends StatelessWidget {
               top: 2,
               child: Container(
                 padding: const EdgeInsets.all(4),
-                constraints: const BoxConstraints(
-                  minWidth: 18,
-                  minHeight: 18,
-                ),
+                constraints: const BoxConstraints(minWidth: 18, minHeight: 18),
                 decoration: BoxDecoration(
                   color: colors.primary,
                   shape: BoxShape.circle,

@@ -24,11 +24,21 @@ import '../../features/wishlist/presentation/wishlist_screen.dart';
 import 'scaffold_with_nav_bar.dart';
 
 final rootNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'root');
-final _sectionHomeNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'sectionHome');
-final _sectionExploreNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'sectionExplore');
-final _sectionTryonNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'sectionTryon');
-final _sectionWishlistNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'sectionWishlist');
-final _sectionProfileNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'sectionProfile');
+final _sectionHomeNavigatorKey = GlobalKey<NavigatorState>(
+  debugLabel: 'sectionHome',
+);
+final _sectionExploreNavigatorKey = GlobalKey<NavigatorState>(
+  debugLabel: 'sectionExplore',
+);
+final _sectionTryonNavigatorKey = GlobalKey<NavigatorState>(
+  debugLabel: 'sectionTryon',
+);
+final _sectionWishlistNavigatorKey = GlobalKey<NavigatorState>(
+  debugLabel: 'sectionWishlist',
+);
+final _sectionProfileNavigatorKey = GlobalKey<NavigatorState>(
+  debugLabel: 'sectionProfile',
+);
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   return GoRouter(
@@ -45,9 +55,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(
                 path: '/',
-                pageBuilder: (context, state) => const NoTransitionPage(
-                  child: HomeScreen(),
-                ),
+                pageBuilder: (context, state) =>
+                    const NoTransitionPage(child: HomeScreen()),
               ),
             ],
           ),
@@ -56,9 +65,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(
                 path: '/explore',
-                pageBuilder: (context, state) => const NoTransitionPage(
-                  child: CatalogScreen(),
-                ),
+                pageBuilder: (context, state) =>
+                    const NoTransitionPage(child: CatalogScreen()),
               ),
             ],
           ),
@@ -80,9 +88,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(
                 path: '/wishlist',
-                pageBuilder: (context, state) => const NoTransitionPage(
-                  child: WishlistScreen(),
-                ),
+                pageBuilder: (context, state) =>
+                    const NoTransitionPage(child: WishlistScreen()),
               ),
             ],
           ),
@@ -91,9 +98,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(
                 path: '/profile',
-                pageBuilder: (context, state) => const NoTransitionPage(
-                  child: ProfileScreen(),
-                ),
+                pageBuilder: (context, state) =>
+                    const NoTransitionPage(child: ProfileScreen()),
               ),
             ],
           ),
@@ -123,7 +129,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) {
           final phone = state.uri.queryParameters['phone'] ?? '';
           final redirect = state.uri.queryParameters['redirect'];
-          return OtpVerificationScreen(phoneNumber: phone, redirectPath: redirect);
+          return OtpVerificationScreen(
+            phoneNumber: phone,
+            redirectPath: redirect,
+          );
         },
       ),
       GoRoute(

@@ -24,10 +24,7 @@ void main() {
 
       await tester.pumpWidget(
         _wrap(
-          PrimaryButton(
-            text: 'Add to Bag',
-            onPressed: () => tapped = true,
-          ),
+          PrimaryButton(text: 'Add to Bag', onPressed: () => tapped = true),
         ),
       );
 
@@ -38,12 +35,7 @@ void main() {
 
     testWidgets('shows loading spinner when isLoading is true', (tester) async {
       await tester.pumpWidget(
-        _wrap(
-          const PrimaryButton(
-            text: 'Add to Bag',
-            isLoading: true,
-          ),
-        ),
+        _wrap(const PrimaryButton(text: 'Add to Bag', isLoading: true)),
       );
 
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
@@ -52,15 +44,14 @@ void main() {
   });
 
   group('SecondaryButton', () {
-    testWidgets('renders secondary outlined button and handles tap', (tester) async {
+    testWidgets('renders secondary outlined button and handles tap', (
+      tester,
+    ) async {
       bool tapped = false;
 
       await tester.pumpWidget(
         _wrap(
-          SecondaryButton(
-            text: 'Size Guide',
-            onPressed: () => tapped = true,
-          ),
+          SecondaryButton(text: 'Size Guide', onPressed: () => tapped = true),
         ),
       );
 
@@ -72,25 +63,18 @@ void main() {
 
   group('DiscountBadge', () {
     testWidgets('displays uppercase discount text', (tester) async {
-      await tester.pumpWidget(
-        _wrap(
-          const DiscountBadge(text: '30% off'),
-        ),
-      );
+      await tester.pumpWidget(_wrap(const DiscountBadge(text: '30% off')));
 
       expect(find.text('30% OFF'), findsOneWidget);
     });
   });
 
   group('PriceRow', () {
-    testWidgets('renders current price and strikethrough price', (tester) async {
+    testWidgets('renders current price and strikethrough price', (
+      tester,
+    ) async {
       await tester.pumpWidget(
-        _wrap(
-          const PriceRow(
-            price: 2999,
-            originalPrice: 4999,
-          ),
-        ),
+        _wrap(const PriceRow(price: 2999, originalPrice: 4999)),
       );
 
       expect(find.text('\$2,999'), findsOneWidget);
@@ -102,12 +86,7 @@ void main() {
   group('RatingRow', () {
     testWidgets('renders rating score and reviews count', (tester) async {
       await tester.pumpWidget(
-        _wrap(
-          const RatingRow(
-            rating: 4.8,
-            reviewCount: 142,
-          ),
-        ),
+        _wrap(const RatingRow(rating: 4.8, reviewCount: 142)),
       );
 
       expect(find.text('4.8'), findsOneWidget);

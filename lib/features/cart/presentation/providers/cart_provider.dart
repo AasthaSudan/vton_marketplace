@@ -50,7 +50,9 @@ class CartNotifier extends Notifier<CartSummary> {
   }
 
   void removeFromCart(String cartItemId) {
-    final currentItems = state.items.where((item) => item.id != cartItemId).toList();
+    final currentItems = state.items
+        .where((item) => item.id != cartItemId)
+        .toList();
     _updateState(items: currentItems);
   }
 
@@ -109,8 +111,9 @@ class CartNotifier extends Notifier<CartSummary> {
   }
 }
 
-final cartProvider =
-    NotifierProvider<CartNotifier, CartSummary>(CartNotifier.new);
+final cartProvider = NotifierProvider<CartNotifier, CartSummary>(
+  CartNotifier.new,
+);
 
 final cartCountProvider = Provider<int>((ref) {
   return ref.watch(cartProvider).totalCount;

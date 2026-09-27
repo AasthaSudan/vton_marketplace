@@ -100,7 +100,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   height: 195,
                   child: PageView.builder(
                     itemCount: banners.length,
-                    onPageChanged: (idx) => setState(() => _activeBannerIndex = idx),
+                    onPageChanged: (idx) =>
+                        setState(() => _activeBannerIndex = idx),
                     itemBuilder: (context, index) {
                       final banner = banners[index];
                       return Padding(
@@ -169,7 +170,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: categories.map((cat) {
                           final isSelected =
-                              selectedCategory.toLowerCase() == cat.title.toLowerCase();
+                              selectedCategory.toLowerCase() ==
+                              cat.title.toLowerCase();
                           return Expanded(
                             child: Center(
                               child: CategoryChip(
@@ -221,7 +223,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   ],
                 ),
               ),
-              error: (err, _) => Center(child: Text('Error loading best picks: $err')),
+              error: (err, _) =>
+                  Center(child: Text('Error loading best picks: $err')),
               data: (products) {
                 return SizedBox(
                   height: 320,
@@ -229,10 +232,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     padding: const EdgeInsets.symmetric(horizontal: 20),
                     scrollDirection: Axis.horizontal,
                     itemCount: products.length,
-                    separatorBuilder: (context, index) => const SizedBox(width: 16),
+                    separatorBuilder: (context, index) =>
+                        const SizedBox(width: 16),
                     itemBuilder: (context, index) {
                       final product = products[index];
-                      final isWishlisted = ref.watch(isProductWishlistedProvider(product.id));
+                      final isWishlisted = ref.watch(
+                        isProductWishlistedProvider(product.id),
+                      );
 
                       return SizedBox(
                         width: 185,
@@ -245,10 +251,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           originalPrice: product.originalPrice,
                           imageUrl: product.primaryImage,
                           isWishlisted: isWishlisted,
-                          isTriedOn: ref.watch(triedOnProductIdsProvider).contains(product.id),
+                          isTriedOn: ref
+                              .watch(triedOnProductIdsProvider)
+                              .contains(product.id),
                           onTap: () => context.push('/product/${product.id}'),
                           onWishlistToggle: () {
-                            ref.read(wishlistProvider.notifier).toggleWishlist(product);
+                            ref
+                                .read(wishlistProvider.notifier)
+                                .toggleWishlist(product);
                           },
                         ),
                       );
@@ -304,11 +314,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       const SizedBox(width: 8),
                       Text(
                         'CLOTHSY',
-                        style: AppTypography.display(color: colors.primary).copyWith(
-                          fontSize: 22,
-                          letterSpacing: 2.0,
-                          fontWeight: FontWeight.w700,
-                        ),
+                        style: AppTypography.display(color: colors.primary)
+                            .copyWith(
+                              fontSize: 22,
+                              letterSpacing: 2.0,
+                              fontWeight: FontWeight.w700,
+                            ),
                       ),
                     ],
                   ),
@@ -325,7 +336,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             // Drawer Nav Items
             Expanded(
               child: ListView(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 8,
+                ),
                 children: [
                   _buildDrawerTile(
                     context,
@@ -432,7 +446,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 2),
       decoration: BoxDecoration(
-        color: isHighlighted ? colors.accentSoft.withOpacity(0.4) : Colors.transparent,
+        color: isHighlighted
+            ? colors.accentSoft.withOpacity(0.4)
+            : Colors.transparent,
         borderRadius: BorderRadius.circular(14),
       ),
       child: ListTile(

@@ -5,15 +5,13 @@ import 'package:clothsy_shop/app.dart';
 import 'package:clothsy_shop/core/constants/app_constants.dart';
 
 void main() {
-  testWidgets('ClothsyShopApp smoke test renders navigation and home', (WidgetTester tester) async {
+  testWidgets('ClothsyShopApp smoke test renders navigation and home', (
+    WidgetTester tester,
+  ) async {
     AppConstants.currentFlavor = AppFlavor.dev;
     SharedPreferences.setMockInitialValues({'has_completed_onboarding': true});
 
-    await tester.pumpWidget(
-      const ProviderScope(
-        child: ClothsyShopApp(),
-      ),
-    );
+    await tester.pumpWidget(const ProviderScope(child: ClothsyShopApp()));
 
     // Pump past the initial splash screen timer (1400ms) to land on Home
     await tester.pump();

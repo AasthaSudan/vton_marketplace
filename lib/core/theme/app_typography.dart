@@ -6,7 +6,10 @@ class AppTypography {
   AppTypography._();
 
   // High-Fashion Editorial Display Serif (Mockup kicker & headlines)
-  static TextStyle display({Color? color, FontWeight weight = FontWeight.w600}) {
+  static TextStyle display({
+    Color? color,
+    FontWeight weight = FontWeight.w600,
+  }) {
     return GoogleFonts.playfairDisplay(
       fontSize: 40,
       fontWeight: weight,
@@ -16,7 +19,11 @@ class AppTypography {
     );
   }
 
-  static TextStyle serif({Color? color, double fontSize = 28, FontWeight weight = FontWeight.w600}) {
+  static TextStyle serif({
+    Color? color,
+    double fontSize = 28,
+    FontWeight weight = FontWeight.w600,
+  }) {
     return GoogleFonts.playfairDisplay(
       fontSize: fontSize,
       fontWeight: weight,
@@ -58,7 +65,10 @@ class AppTypography {
   }
 
   // Sans body & UI (Inter)
-  static TextStyle bodyLarge({Color? color, FontWeight weight = FontWeight.w400}) {
+  static TextStyle bodyLarge({
+    Color? color,
+    FontWeight weight = FontWeight.w400,
+  }) {
     return GoogleFonts.inter(
       fontSize: 16,
       fontWeight: weight,
@@ -76,7 +86,10 @@ class AppTypography {
     );
   }
 
-  static TextStyle bodyMedium({Color? color, FontWeight weight = FontWeight.w500}) {
+  static TextStyle bodyMedium({
+    Color? color,
+    FontWeight weight = FontWeight.w500,
+  }) {
     return GoogleFonts.inter(
       fontSize: 15,
       fontWeight: weight,
@@ -85,7 +98,10 @@ class AppTypography {
     );
   }
 
-  static TextStyle caption({Color? color, FontWeight weight = FontWeight.w400}) {
+  static TextStyle caption({
+    Color? color,
+    FontWeight weight = FontWeight.w400,
+  }) {
     return GoogleFonts.inter(
       fontSize: 13,
       fontWeight: weight,

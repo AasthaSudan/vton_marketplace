@@ -48,7 +48,9 @@ class TryOnHistoryNotifier extends Notifier<List<TryOnResult>> {
 }
 
 final tryOnHistoryProvider =
-    NotifierProvider<TryOnHistoryNotifier, List<TryOnResult>>(TryOnHistoryNotifier.new);
+    NotifierProvider<TryOnHistoryNotifier, List<TryOnResult>>(
+      TryOnHistoryNotifier.new,
+    );
 
 /// Set of all product IDs that the shopper has already tried on with Clothsy AI.
 final triedOnProductIdsProvider = Provider<Set<String>>((ref) {

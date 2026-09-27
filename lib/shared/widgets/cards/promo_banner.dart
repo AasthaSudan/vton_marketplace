@@ -78,7 +78,8 @@ class PromoBanner extends StatelessWidget {
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          if (kicker != null || headline.contains('New Styles')) ...[
+                          if (kicker != null ||
+                              headline.contains('New Styles')) ...[
                             Text(
                               kicker ?? 'New Season',
                               style: AppTypography.caption(
@@ -92,13 +93,14 @@ class PromoBanner extends StatelessWidget {
                             headline.replaceAll('New Season\n', ''),
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
-                            style: AppTypography.display(
-                              color: colors.onPrimary,
-                            ).copyWith(
-                              fontSize: 22,
-                              height: 1.15,
-                              fontWeight: FontWeight.w700,
-                            ),
+                            style:
+                                AppTypography.display(
+                                  color: colors.onPrimary,
+                                ).copyWith(
+                                  fontSize: 22,
+                                  height: 1.15,
+                                  fontWeight: FontWeight.w700,
+                                ),
                           ),
                           const SizedBox(height: 6),
                           Text(
@@ -154,10 +156,10 @@ class PromoBanner extends StatelessWidget {
                         imageUrl: imageUrl!,
                         fit: BoxFit.cover,
                         height: double.infinity,
-                        placeholder: (context, url) => Container(
-                          color: colors.primary.withOpacity(0.2),
-                        ),
-                        errorWidget: (context, url, error) => const SizedBox.shrink(),
+                        placeholder: (context, url) =>
+                            Container(color: colors.primary.withOpacity(0.2)),
+                        errorWidget: (context, url, error) =>
+                            const SizedBox.shrink(),
                       ),
                       // Subtle gradient overlay from card to image
                       Positioned(
@@ -170,10 +172,7 @@ class PromoBanner extends StatelessWidget {
                             gradient: LinearGradient(
                               begin: Alignment.centerLeft,
                               end: Alignment.centerRight,
-                              colors: [
-                                cardBg,
-                                cardBg.withOpacity(0.0),
-                              ],
+                              colors: [cardBg, cardBg.withOpacity(0.0)],
                             ),
                           ),
                         ),

@@ -53,7 +53,11 @@ class _OrdersListScreenState extends ConsumerState<OrdersListScreen> {
           padding: const EdgeInsets.only(left: 12),
           child: ClothsyIconButton(
             size: 38,
-            icon: Icon(Icons.arrow_back_ios_new_rounded, size: 16, color: colors.primary),
+            icon: Icon(
+              Icons.arrow_back_ios_new_rounded,
+              size: 16,
+              color: colors.primary,
+            ),
             onPressed: () => context.pop(),
           ),
         ),
@@ -64,14 +68,19 @@ class _OrdersListScreenState extends ConsumerState<OrdersListScreen> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
             child: Row(
-              children: ['All', 'Active', 'Delivered', 'Cancelled'].map((filter) {
+              children: ['All', 'Active', 'Delivered', 'Cancelled'].map((
+                filter,
+              ) {
                 final isSelected = _selectedFilter == filter;
                 return Padding(
                   padding: const EdgeInsets.only(right: 8),
                   child: PressableScale(
                     onTap: () => setState(() => _selectedFilter = filter),
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 8,
+                      ),
                       decoration: BoxDecoration(
                         color: isSelected ? colors.primary : colors.surface,
                         borderRadius: BorderRadius.circular(100),
@@ -83,8 +92,12 @@ class _OrdersListScreenState extends ConsumerState<OrdersListScreen> {
                       child: Text(
                         filter,
                         style: AppTypography.caption(
-                          color: isSelected ? colors.onPrimary : colors.textPrimary,
-                          weight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                          color: isSelected
+                              ? colors.onPrimary
+                              : colors.textPrimary,
+                          weight: isSelected
+                              ? FontWeight.w700
+                              : FontWeight.w500,
                         ),
                       ),
                     ),
@@ -100,12 +113,16 @@ class _OrdersListScreenState extends ConsumerState<OrdersListScreen> {
                 ? EmptyStateView(
                     icon: Icons.inventory_2_outlined,
                     title: 'No Orders Found',
-                    message: 'You have no $_selectedFilter orders in your history.',
+                    message:
+                        'You have no $_selectedFilter orders in your history.',
                     actionText: 'Explore Collection',
                     onActionPressed: () => context.go('/explore'),
                   )
                 : ListView.builder(
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 8,
+                    ),
                     itemCount: filteredOrders.length,
                     itemBuilder: (context, index) {
                       final order = filteredOrders[index];
@@ -169,7 +186,10 @@ class _OrdersListScreenState extends ConsumerState<OrdersListScreen> {
                     style: AppTypography.bodyMedium(weight: FontWeight.w700),
                   ),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: statusColor.withOpacity(0.12),
                       borderRadius: BorderRadius.circular(100),
@@ -185,7 +205,12 @@ class _OrdersListScreenState extends ConsumerState<OrdersListScreen> {
                 ],
               ),
               const SizedBox(height: 4),
-              Text(dateStr, style: AppTypography.caption(color: colors.textSecondary).copyWith(fontSize: 11)),
+              Text(
+                dateStr,
+                style: AppTypography.caption(
+                  color: colors.textSecondary,
+                ).copyWith(fontSize: 11),
+              ),
               const SizedBox(height: 12),
               Divider(color: colors.border.withOpacity(0.5)),
               const SizedBox(height: 12),
@@ -205,7 +230,8 @@ class _OrdersListScreenState extends ConsumerState<OrdersListScreen> {
                       ),
                       clipBehavior: Clip.antiAlias,
                       child: CachedNetworkImage(
-                        imageUrl: item.variant.imageUrl ?? item.product.primaryImage,
+                        imageUrl:
+                            item.variant.imageUrl ?? item.product.primaryImage,
                         fit: BoxFit.cover,
                       ),
                     );
@@ -237,12 +263,18 @@ class _OrdersListScreenState extends ConsumerState<OrdersListScreen> {
                       ),
                       Text(
                         '${order.items.length} ${order.items.length == 1 ? "item" : "items"}',
-                        style: AppTypography.caption(color: colors.textSecondary),
+                        style: AppTypography.caption(
+                          color: colors.textSecondary,
+                        ),
                       ),
                     ],
                   ),
                   const SizedBox(width: 8),
-                  Icon(Icons.arrow_forward_ios_rounded, size: 14, color: colors.primary),
+                  Icon(
+                    Icons.arrow_forward_ios_rounded,
+                    size: 14,
+                    color: colors.primary,
+                  ),
                 ],
               ),
             ],

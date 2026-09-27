@@ -86,7 +86,11 @@ class _PhotoGuidanceSheetState extends State<PhotoGuidanceSheet> {
                   color: colors.accentSoft,
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(Icons.auto_awesome, color: colors.primary, size: 22),
+                child: Icon(
+                  Icons.auto_awesome,
+                  color: colors.primary,
+                  size: 22,
+                ),
               ),
               const SizedBox(width: 14),
               Expanded(
@@ -114,21 +118,24 @@ class _PhotoGuidanceSheetState extends State<PhotoGuidanceSheet> {
             context,
             icon: Icons.person_outline,
             title: 'Full or Upper Body Silhouette',
-            description: 'Stand naturally facing the camera with arms relaxed at your sides.',
+            description:
+                'Stand naturally facing the camera with arms relaxed at your sides.',
           ),
           const SizedBox(height: 12),
           _buildGuidanceItem(
             context,
             icon: Icons.wb_sunny_outlined,
             title: 'Soft, Even Daylight',
-            description: 'Avoid strong backlighting or heavy shadows across your clothes.',
+            description:
+                'Avoid strong backlighting or heavy shadows across your clothes.',
           ),
           const SizedBox(height: 12),
           _buildGuidanceItem(
             context,
             icon: Icons.wallpaper_outlined,
             title: 'Neutral Background',
-            description: 'A plain wall or uncluttered space gives the most realistic garment drape.',
+            description:
+                'A plain wall or uncluttered space gives the most realistic garment drape.',
           ),
           const SizedBox(height: 20),
 
@@ -149,7 +156,9 @@ class _PhotoGuidanceSheetState extends State<PhotoGuidanceSheet> {
                   child: Checkbox(
                     value: _agreedToPrivacy,
                     activeColor: colors.primary,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(4),
+                    ),
                     onChanged: (val) {
                       setState(() {
                         _agreedToPrivacy = val ?? true;
@@ -164,12 +173,17 @@ class _PhotoGuidanceSheetState extends State<PhotoGuidanceSheet> {
                     children: [
                       Text(
                         'Secure & Private Virtual Try-On',
-                        style: AppTypography.bodyMedium(weight: FontWeight.w600, color: colors.textPrimary),
+                        style: AppTypography.bodyMedium(
+                          weight: FontWeight.w600,
+                          color: colors.textPrimary,
+                        ),
                       ),
                       const SizedBox(height: 2),
                       Text(
                         'Your photo is encrypted in memory during rendering, never shared with third parties, and can be removed anytime in your profile settings.',
-                        style: AppTypography.caption(color: colors.textSecondary).copyWith(fontSize: 11),
+                        style: AppTypography.caption(
+                          color: colors.textSecondary,
+                        ).copyWith(fontSize: 11),
                       ),
                     ],
                   ),
@@ -182,7 +196,11 @@ class _PhotoGuidanceSheetState extends State<PhotoGuidanceSheet> {
           // Actions
           PrimaryButton(
             text: 'Take Studio Photo',
-            icon: const Icon(Icons.camera_alt_outlined, color: Colors.white, size: 18),
+            icon: const Icon(
+              Icons.camera_alt_outlined,
+              color: Colors.white,
+              size: 18,
+            ),
             onPressed: _agreedToPrivacy
                 ? () {
                     Navigator.pop(context);
@@ -206,10 +224,22 @@ class _PhotoGuidanceSheetState extends State<PhotoGuidanceSheet> {
                   style: OutlinedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     side: BorderSide(color: colors.border),
-                    shape: RoundedRectangleBorder(borderRadius: AppRadius.buttonRadius),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: AppRadius.buttonRadius,
+                    ),
                   ),
-                  icon: Icon(Icons.photo_library_outlined, size: 18, color: colors.textPrimary),
-                  label: Text('Upload Gallery', style: AppTypography.bodyMedium(weight: FontWeight.w600, color: colors.textPrimary)),
+                  icon: Icon(
+                    Icons.photo_library_outlined,
+                    size: 18,
+                    color: colors.textPrimary,
+                  ),
+                  label: Text(
+                    'Upload Gallery',
+                    style: AppTypography.bodyMedium(
+                      weight: FontWeight.w600,
+                      color: colors.textPrimary,
+                    ),
+                  ),
                 ),
               ),
               const SizedBox(width: 10),
@@ -225,10 +255,22 @@ class _PhotoGuidanceSheetState extends State<PhotoGuidanceSheet> {
                   style: OutlinedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     side: BorderSide(color: colors.border),
-                    shape: RoundedRectangleBorder(borderRadius: AppRadius.buttonRadius),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: AppRadius.buttonRadius,
+                    ),
                   ),
-                  icon: Icon(Icons.face_retouching_natural, size: 18, color: colors.textPrimary),
-                  label: Text('Pick Model', style: AppTypography.bodyMedium(weight: FontWeight.w600, color: colors.textPrimary)),
+                  icon: Icon(
+                    Icons.face_retouching_natural,
+                    size: 18,
+                    color: colors.textPrimary,
+                  ),
+                  label: Text(
+                    'Pick Model',
+                    style: AppTypography.bodyMedium(
+                      weight: FontWeight.w600,
+                      color: colors.textPrimary,
+                    ),
+                  ),
                 ),
               ),
             ],
@@ -264,7 +306,10 @@ class _PhotoGuidanceSheetState extends State<PhotoGuidanceSheet> {
             children: [
               Text(
                 title,
-                style: AppTypography.bodyMedium(weight: FontWeight.w600, color: colors.textPrimary),
+                style: AppTypography.bodyMedium(
+                  weight: FontWeight.w600,
+                  color: colors.textPrimary,
+                ),
               ),
               const SizedBox(height: 2),
               Text(

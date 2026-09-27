@@ -50,7 +50,9 @@ class _TryonScreenState extends ConsumerState<TryonScreen> {
     if (widget.initialProductId != null) {
       final p = await repo.getProductById(widget.initialProductId!);
       if (p != null && mounted) {
-        ref.read(tryOnNotifierProvider.notifier).selectGarment(
+        ref
+            .read(tryOnNotifierProvider.notifier)
+            .selectGarment(
               p,
               p.variants.isNotEmpty ? p.variants.first : _dummyVariant(p),
             );
@@ -62,7 +64,9 @@ class _TryonScreenState extends ConsumerState<TryonScreen> {
     final all = await repo.getProducts();
     if (all.isNotEmpty && mounted) {
       final p = all.first;
-      ref.read(tryOnNotifierProvider.notifier).selectGarment(
+      ref
+          .read(tryOnNotifierProvider.notifier)
+          .selectGarment(
             p,
             p.variants.isNotEmpty ? p.variants.first : _dummyVariant(p),
           );
@@ -90,12 +94,16 @@ class _TryonScreenState extends ConsumerState<TryonScreen> {
         final customPhoto = TryOnPhoto(
           id: 'camera_capture_${DateTime.now().millisecondsSinceEpoch}',
           label: 'Live Studio Camera',
-          imageUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb',
+          imageUrl:
+              'https://images.unsplash.com/photo-1534528741775-53994a69daeb',
           isPreset: false,
           createdAt: DateTime.now(),
         );
         ref.read(tryOnNotifierProvider.notifier).selectPhoto(customPhoto);
-        ClothsySnackbar.show(context, message: 'Photo captured & ready to style');
+        ClothsySnackbar.show(
+          context,
+          message: 'Photo captured & ready to style',
+        );
       },
       onGallerySelected: () {
         final customPhoto = TryOnPhoto(
@@ -117,7 +125,10 @@ class _TryonScreenState extends ConsumerState<TryonScreen> {
   void _openModelPicker() {
     ModelPhotoPickerSheet.show(context, (photo) {
       ref.read(tryOnNotifierProvider.notifier).selectPhoto(photo);
-      ClothsySnackbar.show(context, message: 'Active photo updated: ${photo.label}');
+      ClothsySnackbar.show(
+        context,
+        message: 'Active photo updated: ${photo.label}',
+      );
     });
   }
 
@@ -130,7 +141,9 @@ class _TryonScreenState extends ConsumerState<TryonScreen> {
     }
 
     HapticFeedback.mediumImpact();
-    final result = await ref.read(tryOnNotifierProvider.notifier).generateTryOn();
+    final result = await ref
+        .read(tryOnNotifierProvider.notifier)
+        .generateTryOn();
     if (result != null && mounted) {
       HapticFeedback.lightImpact();
       ClothsySnackbar.show(
@@ -162,7 +175,11 @@ class _TryonScreenState extends ConsumerState<TryonScreen> {
                   color: colors.accentSoft,
                   shape: BoxShape.circle,
                 ),
-                child: Icon(Icons.auto_awesome, color: colors.primary, size: 16),
+                child: Icon(
+                  Icons.auto_awesome,
+                  color: colors.primary,
+                  size: 16,
+                ),
               ),
               const SizedBox(width: 8),
               Text(
@@ -182,7 +199,9 @@ class _TryonScreenState extends ConsumerState<TryonScreen> {
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (_) => const TryOnHistoryScreen()),
+                    MaterialPageRoute(
+                      builder: (_) => const TryOnHistoryScreen(),
+                    ),
                   );
                 },
               ),
@@ -226,17 +245,20 @@ class _TryonScreenState extends ConsumerState<TryonScreen> {
                 Expanded(
                   child: Row(
                     children: [
-                      Icon(Icons.workspace_premium, size: 16, color: colors.accent),
+                      Icon(
+                        Icons.workspace_premium,
+                        size: 16,
+                        color: colors.accent,
+                      ),
                       const SizedBox(width: 6),
                       Expanded(
                         child: Text(
                           'Clothsy Atelier Tier • Unlimited Try-Ons',
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: AppTypography.caption(color: colors.textPrimary).copyWith(
-                            fontWeight: FontWeight.w600,
-                            fontSize: 12,
-                          ),
+                          style: AppTypography.caption(
+                            color: colors.textPrimary,
+                          ).copyWith(fontWeight: FontWeight.w600, fontSize: 12),
                         ),
                       ),
                     ],
@@ -249,12 +271,16 @@ class _TryonScreenState extends ConsumerState<TryonScreen> {
                     children: [
                       Text(
                         'Change Model',
-                        style: AppTypography.caption(color: colors.primary).copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
+                        style: AppTypography.caption(
+                          color: colors.primary,
+                        ).copyWith(fontWeight: FontWeight.w600),
                       ),
                       const SizedBox(width: 2),
-                      Icon(Icons.chevron_right, size: 14, color: colors.primary),
+                      Icon(
+                        Icons.chevron_right,
+                        size: 14,
+                        color: colors.primary,
+                      ),
                     ],
                   ),
                 ),
@@ -312,10 +338,7 @@ class _TryonScreenState extends ConsumerState<TryonScreen> {
         child: Stack(
           fit: StackFit.expand,
           children: [
-            CachedNetworkImage(
-              imageUrl: photo.imageUrl,
-              fit: BoxFit.cover,
-            ),
+            CachedNetworkImage(imageUrl: photo.imageUrl, fit: BoxFit.cover),
             // Framing silhouette guide overlay
             CustomPaint(
               painter: _FramingOverlayPainter(
@@ -328,7 +351,10 @@ class _TryonScreenState extends ConsumerState<TryonScreen> {
               top: 16,
               left: 16,
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 5,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.black.withOpacity(0.6),
                   borderRadius: BorderRadius.circular(20),
@@ -340,10 +366,9 @@ class _TryonScreenState extends ConsumerState<TryonScreen> {
                     const SizedBox(width: 4),
                     Text(
                       photo.label,
-                      style: AppTypography.caption(color: Colors.white).copyWith(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 11,
-                      ),
+                      style: AppTypography.caption(
+                        color: Colors.white,
+                      ).copyWith(fontWeight: FontWeight.w600, fontSize: 11),
                     ),
                   ],
                 ),
@@ -356,25 +381,34 @@ class _TryonScreenState extends ConsumerState<TryonScreen> {
               child: PressableScale(
                 onTap: _openModelPicker,
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 6,
+                  ),
                   decoration: BoxDecoration(
                     color: colors.surface.withOpacity(0.9),
                     borderRadius: BorderRadius.circular(20),
                     boxShadow: [
-                      BoxShadow(color: Colors.black.withOpacity(0.15), blurRadius: 6),
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.15),
+                        blurRadius: 6,
+                      ),
                     ],
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.cameraswitch_outlined, size: 14, color: colors.textPrimary),
+                      Icon(
+                        Icons.cameraswitch_outlined,
+                        size: 14,
+                        color: colors.textPrimary,
+                      ),
                       const SizedBox(width: 4),
                       Text(
                         'Switch',
-                        style: AppTypography.caption(color: colors.textPrimary).copyWith(
-                          fontWeight: FontWeight.w600,
-                          fontSize: 11,
-                        ),
+                        style: AppTypography.caption(
+                          color: colors.textPrimary,
+                        ).copyWith(fontWeight: FontWeight.w600, fontSize: 11),
                       ),
                     ],
                   ),
@@ -387,7 +421,10 @@ class _TryonScreenState extends ConsumerState<TryonScreen> {
               left: 20,
               right: 20,
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 10,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.black.withOpacity(0.75),
                   borderRadius: BorderRadius.circular(14),
@@ -399,7 +436,9 @@ class _TryonScreenState extends ConsumerState<TryonScreen> {
                     Expanded(
                       child: Text(
                         'Select a garment below and tap "Generate Try-On"',
-                        style: AppTypography.caption(color: Colors.white).copyWith(fontSize: 12),
+                        style: AppTypography.caption(
+                          color: Colors.white,
+                        ).copyWith(fontSize: 12),
                       ),
                     ),
                   ],
@@ -425,16 +464,31 @@ class _TryonScreenState extends ConsumerState<TryonScreen> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.add_a_photo_outlined, size: 48, color: colors.primary),
+                Icon(
+                  Icons.add_a_photo_outlined,
+                  size: 48,
+                  color: colors.primary,
+                ),
                 const SizedBox(height: 12),
-                Text('No Model Photo Selected', style: AppTypography.h3(color: colors.textPrimary)),
+                Text(
+                  'No Model Photo Selected',
+                  style: AppTypography.h3(color: colors.textPrimary),
+                ),
                 const SizedBox(height: 8),
-                Text('Choose a studio preset or take a photo', style: AppTypography.caption(color: colors.textSecondary)),
+                Text(
+                  'Choose a studio preset or take a photo',
+                  style: AppTypography.caption(color: colors.textSecondary),
+                ),
                 const SizedBox(height: 16),
                 ElevatedButton(
-                  style: ElevatedButton.styleFrom(backgroundColor: colors.primary),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: colors.primary,
+                  ),
                   onPressed: _openPhotoGuidance,
-                  child: const Text('Select Photo', style: TextStyle(color: Colors.white)),
+                  child: const Text(
+                    'Select Photo',
+                    style: TextStyle(color: Colors.white),
+                  ),
                 ),
               ],
             ),
@@ -467,7 +521,10 @@ class _TryonScreenState extends ConsumerState<TryonScreen> {
               children: [
                 Text(
                   'Atelier Garments',
-                  style: AppTypography.bodyMedium(weight: FontWeight.w700, color: colors.textPrimary),
+                  style: AppTypography.bodyMedium(
+                    weight: FontWeight.w700,
+                    color: colors.textPrimary,
+                  ),
                 ),
                 if (session.selectedProduct != null)
                   Expanded(
@@ -478,7 +535,9 @@ class _TryonScreenState extends ConsumerState<TryonScreen> {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         textAlign: TextAlign.end,
-                        style: AppTypography.caption(color: colors.textSecondary).copyWith(fontSize: 11),
+                        style: AppTypography.caption(
+                          color: colors.textSecondary,
+                        ).copyWith(fontSize: 11),
                       ),
                     ),
                   ),
@@ -488,8 +547,15 @@ class _TryonScreenState extends ConsumerState<TryonScreen> {
           SizedBox(
             height: 86,
             child: catalogAsync.when(
-              loading: () => const Center(child: CircularProgressIndicator(strokeWidth: 2)),
-              error: (err, stack) => Center(child: Text('Error: $err', style: AppTypography.caption(color: colors.error))),
+              loading: () => const Center(
+                child: CircularProgressIndicator(strokeWidth: 2),
+              ),
+              error: (err, stack) => Center(
+                child: Text(
+                  'Error: $err',
+                  style: AppTypography.caption(color: colors.error),
+                ),
+              ),
               data: (products) {
                 return ListView.builder(
                   scrollDirection: Axis.horizontal,
@@ -497,7 +563,8 @@ class _TryonScreenState extends ConsumerState<TryonScreen> {
                   itemCount: products.length,
                   itemBuilder: (context, index) {
                     final product = products[index];
-                    final isSelected = session.selectedProduct?.id == product.id;
+                    final isSelected =
+                        session.selectedProduct?.id == product.id;
 
                     return PressableScale(
                       onTap: () {
@@ -505,11 +572,16 @@ class _TryonScreenState extends ConsumerState<TryonScreen> {
                         final variant = product.variants.isNotEmpty
                             ? product.variants.first
                             : _dummyVariant(product);
-                        ref.read(tryOnNotifierProvider.notifier).selectGarment(product, variant);
+                        ref
+                            .read(tryOnNotifierProvider.notifier)
+                            .selectGarment(product, variant);
                       },
                       child: Container(
                         width: 72,
-                        margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                        margin: const EdgeInsets.symmetric(
+                          horizontal: 4,
+                          vertical: 2,
+                        ),
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
@@ -535,7 +607,11 @@ class _TryonScreenState extends ConsumerState<TryonScreen> {
                                     color: colors.primary,
                                     shape: BoxShape.circle,
                                   ),
-                                  child: const Icon(Icons.check, color: Colors.white, size: 10),
+                                  child: const Icon(
+                                    Icons.check,
+                                    color: Colors.white,
+                                    size: 10,
+                                  ),
                                 ),
                               ),
                           ],
@@ -552,7 +628,10 @@ class _TryonScreenState extends ConsumerState<TryonScreen> {
     );
   }
 
-  Widget _buildBottomActionBar(BuildContext context, TryOnSessionState session) {
+  Widget _buildBottomActionBar(
+    BuildContext context,
+    TryOnSessionState session,
+  ) {
     final colors = context.colors;
     final isResultReady = session.currentResult != null;
 
@@ -589,13 +668,20 @@ class _TryonScreenState extends ConsumerState<TryonScreen> {
                 const SizedBox(width: 8),
                 ClothsyIconButton(
                   icon: Icon(
-                    session.currentResult?.rating != null ? Icons.star : Icons.star_border,
+                    session.currentResult?.rating != null
+                        ? Icons.star
+                        : Icons.star_border,
                     size: 20,
-                    color: session.currentResult?.rating != null ? Colors.amber : colors.textPrimary,
+                    color: session.currentResult?.rating != null
+                        ? Colors.amber
+                        : colors.textPrimary,
                   ),
                   onPressed: () {
                     ref.read(tryOnNotifierProvider.notifier).rateResult(5);
-                    ClothsySnackbar.show(context, message: 'Saved to your 5-star looks!');
+                    ClothsySnackbar.show(
+                      context,
+                      message: 'Saved to your 5-star looks!',
+                    );
                   },
                 ),
                 const SizedBox(width: 12),
@@ -603,18 +689,27 @@ class _TryonScreenState extends ConsumerState<TryonScreen> {
                 // Direct Add to Cart Button
                 Expanded(
                   child: PrimaryButton(
-                    text: 'Add to Bag • ${CurrencyFormatter.format(session.selectedVariant?.price ?? session.selectedProduct?.price ?? 0)}',
-                    icon: const Icon(Icons.shopping_bag_outlined, color: Colors.white, size: 18),
+                    text:
+                        'Add to Bag • ${CurrencyFormatter.format(session.selectedVariant?.price ?? session.selectedProduct?.price ?? 0)}',
+                    icon: const Icon(
+                      Icons.shopping_bag_outlined,
+                      color: Colors.white,
+                      size: 18,
+                    ),
                     onPressed: () {
-                      if (session.selectedProduct != null && session.selectedVariant != null) {
-                        ref.read(cartProvider.notifier).addToCart(
+                      if (session.selectedProduct != null &&
+                          session.selectedVariant != null) {
+                        ref
+                            .read(cartProvider.notifier)
+                            .addToCart(
                               session.selectedProduct!,
                               session.selectedVariant!,
                             );
                         HapticFeedback.lightImpact();
                         ClothsySnackbar.show(
                           context,
-                          message: 'Added ${session.selectedProduct!.title} to bag',
+                          message:
+                              'Added ${session.selectedProduct!.title} to bag',
                         );
                         context.push('/cart');
                       }
@@ -628,7 +723,11 @@ class _TryonScreenState extends ConsumerState<TryonScreen> {
                 Expanded(
                   child: PrimaryButton(
                     text: 'Generate Try-On',
-                    icon: const Icon(Icons.auto_awesome, color: Colors.white, size: 18),
+                    icon: const Icon(
+                      Icons.auto_awesome,
+                      color: Colors.white,
+                      size: 18,
+                    ),
                     isLoading: session.isProcessing,
                     onPressed: session.canGenerate ? _handleStartTryOn : null,
                   ),
@@ -657,20 +756,52 @@ class _FramingOverlayPainter extends CustomPainter {
     const padding = 16.0;
 
     // Top-Left
-    canvas.drawLine(const Offset(padding, padding), const Offset(padding + cornerSize, padding), borderPaint);
-    canvas.drawLine(const Offset(padding, padding), const Offset(padding, padding + cornerSize), borderPaint);
+    canvas.drawLine(
+      const Offset(padding, padding),
+      const Offset(padding + cornerSize, padding),
+      borderPaint,
+    );
+    canvas.drawLine(
+      const Offset(padding, padding),
+      const Offset(padding, padding + cornerSize),
+      borderPaint,
+    );
 
     // Top-Right
-    canvas.drawLine(Offset(size.width - padding, padding), Offset(size.width - padding - cornerSize, padding), borderPaint);
-    canvas.drawLine(Offset(size.width - padding, padding), Offset(size.width - padding, padding + cornerSize), borderPaint);
+    canvas.drawLine(
+      Offset(size.width - padding, padding),
+      Offset(size.width - padding - cornerSize, padding),
+      borderPaint,
+    );
+    canvas.drawLine(
+      Offset(size.width - padding, padding),
+      Offset(size.width - padding, padding + cornerSize),
+      borderPaint,
+    );
 
     // Bottom-Left
-    canvas.drawLine(Offset(padding, size.height - padding), Offset(padding + cornerSize, size.height - padding), borderPaint);
-    canvas.drawLine(Offset(padding, size.height - padding), Offset(padding, size.height - padding - cornerSize), borderPaint);
+    canvas.drawLine(
+      Offset(padding, size.height - padding),
+      Offset(padding + cornerSize, size.height - padding),
+      borderPaint,
+    );
+    canvas.drawLine(
+      Offset(padding, size.height - padding),
+      Offset(padding, size.height - padding - cornerSize),
+      borderPaint,
+    );
 
     // Bottom-Right
-    canvas.drawLine(Offset(size.width - padding, size.height - padding), Offset(size.width - padding - cornerSize, size.height - padding), borderPaint);
-    canvas.drawLine(Offset(size.width - padding, size.height - padding), Offset(size.width - padding, size.height - padding + cornerSize), borderPaint);
+    canvas.drawLine(
+      Offset(size.width - padding, size.height - padding),
+      Offset(size.width - padding - cornerSize, size.height - padding),
+      borderPaint,
+    );
+    canvas.drawLine(
+      Offset(size.width - padding, size.height - padding),
+      Offset(size.width - padding, size.height - padding + cornerSize),
+      borderPaint,
+    );
   }
 
   @override

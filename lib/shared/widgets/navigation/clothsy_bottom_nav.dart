@@ -92,7 +92,10 @@ class ClothsyBottomNav extends StatelessWidget {
                 return PressableScale(
                   onTap: () => onTap(index),
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 8,
+                    ),
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
                         colors: isSelected
@@ -122,7 +125,9 @@ class ClothsyBottomNav extends StatelessWidget {
                         Text(
                           item.label,
                           style: AppTypography.label(
-                            color: isSelected ? colors.onPrimary : colors.primary,
+                            color: isSelected
+                                ? colors.onPrimary
+                                : colors.primary,
                             weight: FontWeight.w700,
                           ).copyWith(fontSize: 12),
                         ),
@@ -145,7 +150,9 @@ class ClothsyBottomNav extends StatelessWidget {
                           Icon(
                             isSelected ? item.activeIcon : item.icon,
                             size: 24,
-                            color: isSelected ? colors.primary : colors.textSecondary.withOpacity(0.8),
+                            color: isSelected
+                                ? colors.primary
+                                : colors.textSecondary.withOpacity(0.8),
                           ),
                           if (item.badgeCount > 0)
                             Positioned(
@@ -157,11 +164,15 @@ class ClothsyBottomNav extends StatelessWidget {
                                   color: colors.primary,
                                   shape: BoxShape.circle,
                                 ),
-                                constraints: const BoxConstraints(minWidth: 14, minHeight: 14),
+                                constraints: const BoxConstraints(
+                                  minWidth: 14,
+                                  minHeight: 14,
+                                ),
                                 child: Text(
                                   '${item.badgeCount}',
-                                  style: AppTypography.label(color: colors.onPrimary)
-                                      .copyWith(fontSize: 8),
+                                  style: AppTypography.label(
+                                    color: colors.onPrimary,
+                                  ).copyWith(fontSize: 8),
                                   textAlign: TextAlign.center,
                                 ),
                               ),
@@ -172,8 +183,12 @@ class ClothsyBottomNav extends StatelessWidget {
                       Text(
                         item.label,
                         style: AppTypography.label(
-                          color: isSelected ? colors.primary : colors.textSecondary.withOpacity(0.8),
-                          weight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                          color: isSelected
+                              ? colors.primary
+                              : colors.textSecondary.withOpacity(0.8),
+                          weight: isSelected
+                              ? FontWeight.w600
+                              : FontWeight.w500,
                         ).copyWith(fontSize: 10),
                       ),
                     ],

@@ -48,7 +48,10 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     return Scaffold(
       backgroundColor: colors.background,
       appBar: AppBar(
-        title: Text('Search', style: AppTypography.h3(color: colors.textPrimary)),
+        title: Text(
+          'Search',
+          style: AppTypography.h3(color: colors.textPrimary),
+        ),
       ),
       body: Column(
         children: [
@@ -66,36 +69,47 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                 ? _buildTrendingSection(context)
                 : searchResultsAsync.when(
                     loading: () => GridView.builder(
-                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2,
-                        childAspectRatio: 0.55,
-                        crossAxisSpacing: 14,
-                        mainAxisSpacing: 16,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 16,
                       ),
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2,
+                            childAspectRatio: 0.55,
+                            crossAxisSpacing: 14,
+                            mainAxisSpacing: 16,
+                          ),
                       itemCount: 4,
-                      itemBuilder: (context, index) => const ProductCardSkeleton(),
+                      itemBuilder: (context, index) =>
+                          const ProductCardSkeleton(),
                     ),
-                    error: (err, _) => Center(child: Text('Search error: $err')),
+                    error: (err, _) =>
+                        Center(child: Text('Search error: $err')),
                     data: (results) {
                       if (results.isEmpty) {
                         return EmptyStateView(
                           icon: Icons.search_off_rounded,
                           title: 'No Matching Pieces Found',
-                          message: 'Try searching for "Silk", "Blazer", or explore our latest collections.',
+                          message:
+                              'Try searching for "Silk", "Blazer", or explore our latest collections.',
                           actionText: 'View All Collections',
                           onActionPressed: () => context.go('/explore'),
                         );
                       }
 
                       return GridView.builder(
-                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 2,
-                          childAspectRatio: 0.55,
-                          crossAxisSpacing: 14,
-                          mainAxisSpacing: 16,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 16,
                         ),
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 2,
+                              childAspectRatio: 0.55,
+                              crossAxisSpacing: 14,
+                              mainAxisSpacing: 16,
+                            ),
                         itemCount: results.length,
                         itemBuilder: (context, index) {
                           final item = results[index];
@@ -141,7 +155,10 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                   _onSearch(term);
                 },
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 8,
+                  ),
                   decoration: BoxDecoration(
                     color: colors.surface,
                     borderRadius: AppRadius.chipRadius,
@@ -150,11 +167,17 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.trending_up_rounded, size: 14, color: colors.accent),
+                      Icon(
+                        Icons.trending_up_rounded,
+                        size: 14,
+                        color: colors.accent,
+                      ),
                       const SizedBox(width: 6),
                       Text(
                         term,
-                        style: AppTypography.body(color: colors.textPrimary).copyWith(fontSize: 13),
+                        style: AppTypography.body(
+                          color: colors.textPrimary,
+                        ).copyWith(fontSize: 13),
                       ),
                     ],
                   ),

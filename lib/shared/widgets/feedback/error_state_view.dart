@@ -13,7 +13,8 @@ class ErrorStateView extends StatelessWidget {
   const ErrorStateView({
     super.key,
     this.title = 'Something went wrong',
-    this.message = 'We could not load the information. Please check your connection and try again.',
+    this.message =
+        'We could not load the information. Please check your connection and try again.',
     this.retryText = 'Try Again',
     this.onRetry,
     this.illustration,

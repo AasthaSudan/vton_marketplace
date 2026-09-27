@@ -1,4 +1,10 @@
-enum AuthStatus { initial, unauthenticated, authenticating, authenticated, guest }
+enum AuthStatus {
+  initial,
+  unauthenticated,
+  authenticating,
+  authenticated,
+  guest,
+}
 
 class User {
   final String id;

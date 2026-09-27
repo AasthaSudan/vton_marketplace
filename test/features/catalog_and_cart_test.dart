@@ -98,7 +98,11 @@ void main() {
 
     test('applyCoupon applies 10% discount for CLOTHSY10', () {
       final notifier = container.read(cartProvider.notifier);
-      notifier.addToCart(testProduct, testProduct.variants.first, quantity: 1); // 3000
+      notifier.addToCart(
+        testProduct,
+        testProduct.variants.first,
+        quantity: 1,
+      ); // 3000
 
       final applied = notifier.applyCoupon('CLOTHSY10');
       expect(applied, isTrue);

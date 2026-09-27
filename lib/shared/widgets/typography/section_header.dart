@@ -34,10 +34,7 @@ class SectionHeader extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(
-                  title,
-                  style: AppTypography.h2(color: colors.textPrimary),
-                ),
+                Text(title, style: AppTypography.h2(color: colors.textPrimary)),
                 if (subtitle != null) ...[
                   const SizedBox(height: 2),
                   Text(

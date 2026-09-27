@@ -9,11 +9,13 @@ class ThemeModeNotifier extends Notifier<ThemeMode> {
   ThemeMode build() => ThemeMode.light;
 
   void setThemeMode(ThemeMode mode) => state = mode;
-  void toggleTheme() => state = state == ThemeMode.light ? ThemeMode.dark : ThemeMode.light;
+  void toggleTheme() =>
+      state = state == ThemeMode.light ? ThemeMode.dark : ThemeMode.light;
 }
 
-final themeModeProvider =
-    NotifierProvider<ThemeModeNotifier, ThemeMode>(ThemeModeNotifier.new);
+final themeModeProvider = NotifierProvider<ThemeModeNotifier, ThemeMode>(
+  ThemeModeNotifier.new,
+);
 
 class ClothsyShopApp extends ConsumerWidget {
   const ClothsyShopApp({super.key});

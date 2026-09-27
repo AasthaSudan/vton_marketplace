@@ -18,14 +18,18 @@ class ComponentGalleryScreen extends StatelessWidget {
         elevation: 0,
         surfaceTintColor: Colors.transparent,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios_new_rounded,
-              size: 18, color: colors.textPrimary),
+          icon: Icon(
+            Icons.arrow_back_ios_new_rounded,
+            size: 18,
+            color: colors.textPrimary,
+          ),
           onPressed: () => Navigator.of(context).pop(),
         ),
         title: Text(
           'Design Tokens',
-          style: AppTypography.h3(color: colors.textPrimary)
-              .copyWith(fontSize: 17, fontWeight: FontWeight.w700),
+          style: AppTypography.h3(
+            color: colors.textPrimary,
+          ).copyWith(fontSize: 17, fontWeight: FontWeight.w700),
         ),
         centerTitle: true,
       ),
@@ -58,7 +62,10 @@ class ComponentGalleryScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Display', style: AppTypography.display().copyWith(fontSize: 32)),
+                Text(
+                  'Display',
+                  style: AppTypography.display().copyWith(fontSize: 32),
+                ),
                 const SizedBox(height: 4),
                 Text('Headline 1', style: AppTypography.h1()),
                 const SizedBox(height: 4),
@@ -66,14 +73,20 @@ class ComponentGalleryScreen extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text('Headline 3', style: AppTypography.h3()),
                 const SizedBox(height: 4),
-                Text('Body — effortless drape and comfort',
-                    style: AppTypography.body()),
+                Text(
+                  'Body — effortless drape and comfort',
+                  style: AppTypography.body(),
+                ),
                 const SizedBox(height: 4),
-                Text('Caption — express shipping across India',
-                    style: AppTypography.caption()),
+                Text(
+                  'Caption — express shipping across India',
+                  style: AppTypography.caption(),
+                ),
                 const SizedBox(height: 4),
-                Text('LABEL — VIRTUAL TRY-ON READY',
-                    style: AppTypography.label()),
+                Text(
+                  'LABEL — VIRTUAL TRY-ON READY',
+                  style: AppTypography.label(),
+                ),
               ],
             ),
           ),
@@ -99,10 +112,7 @@ class ComponentGalleryScreen extends StatelessWidget {
                   onPressed: () {},
                 ),
                 const SizedBox(height: 10),
-                const PrimaryButton(
-                  text: 'Disabled',
-                  onPressed: null,
-                ),
+                const PrimaryButton(text: 'Disabled', onPressed: null),
               ],
             ),
           ),
@@ -190,10 +200,7 @@ class _ColorDot extends StatelessWidget {
           decoration: BoxDecoration(
             color: color,
             shape: BoxShape.circle,
-            border: Border.all(
-              color: Colors.black.withOpacity(0.06),
-              width: 1,
-            ),
+            border: Border.all(color: Colors.black.withOpacity(0.06), width: 1),
           ),
         ),
         const SizedBox(height: 4),

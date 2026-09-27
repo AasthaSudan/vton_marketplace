@@ -12,7 +12,10 @@ class ModelPhotoPickerSheet extends ConsumerWidget {
 
   const ModelPhotoPickerSheet({super.key, required this.onSelectPhoto});
 
-  static Future<void> show(BuildContext context, Function(TryOnPhoto) onSelectPhoto) {
+  static Future<void> show(
+    BuildContext context,
+    Function(TryOnPhoto) onSelectPhoto,
+  ) {
     return showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -81,7 +84,10 @@ class ModelPhotoPickerSheet extends ConsumerWidget {
               ),
             ),
             error: (err, stack) => Center(
-              child: Text('Failed to load photos: $err', style: AppTypography.caption(color: colors.error)),
+              child: Text(
+                'Failed to load photos: $err',
+                style: AppTypography.caption(color: colors.error),
+              ),
             ),
             data: (presets) {
               return GridView.builder(
@@ -104,7 +110,8 @@ class ModelPhotoPickerSheet extends ConsumerWidget {
                         final customPhoto = TryOnPhoto(
                           id: 'user_uploaded_${DateTime.now().millisecondsSinceEpoch}',
                           label: 'My Custom Pose',
-                          imageUrl: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2',
+                          imageUrl:
+                              'https://images.unsplash.com/photo-1544005313-94ddf0286df2',
                           isPreset: false,
                           createdAt: DateTime.now(),
                         );
@@ -129,17 +136,26 @@ class ModelPhotoPickerSheet extends ConsumerWidget {
                                 color: colors.accentSoft,
                                 shape: BoxShape.circle,
                               ),
-                              child: Icon(Icons.add_a_photo_outlined, color: colors.primary, size: 24),
+                              child: Icon(
+                                Icons.add_a_photo_outlined,
+                                color: colors.primary,
+                                size: 24,
+                              ),
                             ),
                             const SizedBox(height: 10),
                             Text(
                               'Upload Mine',
-                              style: AppTypography.bodyMedium(weight: FontWeight.w600, color: colors.primary),
+                              style: AppTypography.bodyMedium(
+                                weight: FontWeight.w600,
+                                color: colors.primary,
+                              ),
                             ),
                             const SizedBox(height: 2),
                             Text(
                               'Camera or Gallery',
-                              style: AppTypography.caption(color: colors.textSecondary).copyWith(fontSize: 10),
+                              style: AppTypography.caption(
+                                color: colors.textSecondary,
+                              ).copyWith(fontSize: 10),
                             ),
                           ],
                         ),
@@ -177,7 +193,10 @@ class ModelPhotoPickerSheet extends ConsumerWidget {
                             left: 0,
                             right: 0,
                             child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 6,
+                              ),
                               decoration: BoxDecoration(
                                 gradient: LinearGradient(
                                   begin: Alignment.bottomCenter,
@@ -190,10 +209,13 @@ class ModelPhotoPickerSheet extends ConsumerWidget {
                               ),
                               child: Text(
                                 photo.label,
-                                style: AppTypography.caption(color: Colors.white).copyWith(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w600,
-                                ),
+                                style:
+                                    AppTypography.caption(
+                                      color: Colors.white,
+                                    ).copyWith(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w600,
+                                    ),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                               ),
@@ -209,7 +231,11 @@ class ModelPhotoPickerSheet extends ConsumerWidget {
                                   color: colors.primary,
                                   shape: BoxShape.circle,
                                 ),
-                                child: const Icon(Icons.check, color: Colors.white, size: 14),
+                                child: const Icon(
+                                  Icons.check,
+                                  color: Colors.white,
+                                  size: 14,
+                                ),
                               ),
                             ),
                         ],

@@ -58,13 +58,17 @@ class ClothsyBottomSheet {
                             children: [
                               Text(
                                 title,
-                                style: AppTypography.h2(color: colors.textPrimary),
+                                style: AppTypography.h2(
+                                  color: colors.textPrimary,
+                                ),
                               ),
                               if (subtitle != null) ...[
                                 const SizedBox(height: 2),
                                 Text(
                                   subtitle,
-                                  style: AppTypography.caption(color: colors.textSecondary),
+                                  style: AppTypography.caption(
+                                    color: colors.textSecondary,
+                                  ),
                                 ),
                               ],
                             ],
@@ -73,7 +77,11 @@ class ClothsyBottomSheet {
                         if (showCloseButton)
                           ClothsyIconButton(
                             size: 36,
-                            icon: Icon(Icons.close_rounded, size: 18, color: colors.primary),
+                            icon: Icon(
+                              Icons.close_rounded,
+                              size: 18,
+                              color: colors.primary,
+                            ),
                             onPressed: () => Navigator.of(context).pop(),
                           ),
                       ],

@@ -48,7 +48,9 @@ class QuantityStepper extends StatelessWidget {
               child: Icon(
                 Icons.remove_rounded,
                 size: 16,
-                color: canDecrement ? colors.primary : colors.textSecondary.withOpacity(0.3),
+                color: canDecrement
+                    ? colors.primary
+                    : colors.textSecondary.withOpacity(0.3),
               ),
             ),
           ),
@@ -74,7 +76,9 @@ class QuantityStepper extends StatelessWidget {
               child: Icon(
                 Icons.add_rounded,
                 size: 16,
-                color: canIncrement ? colors.primary : colors.textSecondary.withOpacity(0.3),
+                color: canIncrement
+                    ? colors.primary
+                    : colors.textSecondary.withOpacity(0.3),
               ),
             ),
           ),

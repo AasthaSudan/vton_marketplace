@@ -121,7 +121,9 @@ class TryOnSessionState {
       selectedVariant: selectedVariant ?? this.selectedVariant,
       status: status ?? this.status,
       currentStep: currentStep ?? this.currentStep,
-      currentResult: clearCurrentResult ? null : (currentResult ?? this.currentResult),
+      currentResult: clearCurrentResult
+          ? null
+          : (currentResult ?? this.currentResult),
       errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
       remainingCredits: remainingCredits ?? this.remainingCredits,
       hasConsented: hasConsented ?? this.hasConsented,

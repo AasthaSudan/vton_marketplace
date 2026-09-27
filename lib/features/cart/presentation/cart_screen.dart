@@ -67,7 +67,8 @@ class _CartScreenState extends ConsumerState<CartScreen> {
           ? EmptyStateView(
               icon: Icons.shopping_bag_outlined,
               title: 'Your Shopping Bag is Empty',
-              message: 'Discover our luxury collection and find pieces crafted to elevate your wardrobe.',
+              message:
+                  'Discover our luxury collection and find pieces crafted to elevate your wardrobe.',
               actionText: 'Explore Catalog',
               onActionPressed: () => context.go('/explore'),
             )
@@ -75,31 +76,53 @@ class _CartScreenState extends ConsumerState<CartScreen> {
               children: [
                 Expanded(
                   child: ListView(
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 12,
+                    ),
                     children: [
                       // Cart Line Items List
-                      ...cart.items.map((item) => _buildCartItemCard(context, item)),
+                      ...cart.items.map(
+                        (item) => _buildCartItemCard(context, item),
+                      ),
                       const SizedBox(height: 16),
 
                       // Promo Coupon Code Input
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 6,
+                        ),
                         decoration: BoxDecoration(
                           color: colors.surface,
                           borderRadius: AppRadius.cardRadius,
-                          border: Border.all(color: colors.border.withOpacity(0.8)),
+                          border: Border.all(
+                            color: colors.border.withOpacity(0.8),
+                          ),
                         ),
                         child: Row(
                           children: [
-                            Icon(Icons.discount_outlined, color: colors.primary, size: 20),
+                            Icon(
+                              Icons.discount_outlined,
+                              color: colors.primary,
+                              size: 20,
+                            ),
                             const SizedBox(width: 10),
                             Expanded(
                               child: TextField(
                                 controller: _couponController,
-                                style: AppTypography.body(color: colors.textPrimary),
+                                style: AppTypography.body(
+                                  color: colors.textPrimary,
+                                ),
                                 decoration: InputDecoration(
-                                  hintText: cart.couponCode != null ? 'Applied: ${cart.couponCode}' : 'Enter Coupon (e.g. CLOTHSY10)',
-                                  hintStyle: AppTypography.body(color: colors.textSecondary.withOpacity(0.7)),
+                                  hintText: cart.couponCode != null
+                                      ? 'Applied: ${cart.couponCode}'
+                                      : 'Enter Coupon (e.g. CLOTHSY10)',
+                                  hintStyle: AppTypography.body(
+                                    color: colors.textSecondary.withOpacity(
+                                      0.7,
+                                    ),
+                                  ),
                                   border: InputBorder.none,
                                   isDense: true,
                                 ),
@@ -108,22 +131,36 @@ class _CartScreenState extends ConsumerState<CartScreen> {
                             if (cart.couponCode != null)
                               TextButton(
                                 onPressed: () {
-                                  ref.read(cartProvider.notifier).removeCoupon();
+                                  ref
+                                      .read(cartProvider.notifier)
+                                      .removeCoupon();
                                   _couponController.clear();
                                 },
-                                child: Text('Remove', style: AppTypography.label(color: colors.error)),
+                                child: Text(
+                                  'Remove',
+                                  style: AppTypography.label(
+                                    color: colors.error,
+                                  ),
+                                ),
                               )
                             else
                               TextButton(
                                 onPressed: _applyCoupon,
                                 style: TextButton.styleFrom(
                                   backgroundColor: colors.primary,
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
-                                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(100),
+                                  ),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 14,
+                                    vertical: 8,
+                                  ),
                                 ),
                                 child: Text(
                                   'Apply',
-                                  style: AppTypography.label(color: colors.onPrimary).copyWith(fontSize: 12),
+                                  style: AppTypography.label(
+                                    color: colors.onPrimary,
+                                  ).copyWith(fontSize: 12),
                                 ),
                               ),
                           ],
@@ -137,14 +174,24 @@ class _CartScreenState extends ConsumerState<CartScreen> {
                         decoration: BoxDecoration(
                           color: colors.surface,
                           borderRadius: AppRadius.cardRadius,
-                          border: Border.all(color: colors.border.withOpacity(0.8)),
+                          border: Border.all(
+                            color: colors.border.withOpacity(0.8),
+                          ),
                         ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('Order Summary', style: AppTypography.bodyMedium(weight: FontWeight.w700)),
+                            Text(
+                              'Order Summary',
+                              style: AppTypography.bodyMedium(
+                                weight: FontWeight.w700,
+                              ),
+                            ),
                             const SizedBox(height: 14),
-                            _buildSummaryRow('Subtotal', CurrencyFormatter.format(cart.subtotal)),
+                            _buildSummaryRow(
+                              'Subtotal',
+                              CurrencyFormatter.format(cart.subtotal),
+                            ),
                             if (cart.discountAmount > 0) ...[
                               const SizedBox(height: 8),
                               _buildSummaryRow(
@@ -156,7 +203,9 @@ class _CartScreenState extends ConsumerState<CartScreen> {
                             const SizedBox(height: 8),
                             _buildSummaryRow(
                               'Express Delivery',
-                              cart.shippingFee == 0 ? 'FREE' : CurrencyFormatter.format(cart.shippingFee),
+                              cart.shippingFee == 0
+                                  ? 'FREE'
+                                  : CurrencyFormatter.format(cart.shippingFee),
                             ),
                             const Padding(
                               padding: EdgeInsets.symmetric(vertical: 12),
@@ -165,10 +214,18 @@ class _CartScreenState extends ConsumerState<CartScreen> {
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Text('Total Amount', style: AppTypography.h3(color: colors.textPrimary)),
+                                Text(
+                                  'Total Amount',
+                                  style: AppTypography.h3(
+                                    color: colors.textPrimary,
+                                  ),
+                                ),
                                 Text(
                                   CurrencyFormatter.format(cart.total),
-                                  style: AppTypography.h2(color: colors.primary, weight: FontWeight.w700),
+                                  style: AppTypography.h2(
+                                    color: colors.primary,
+                                    weight: FontWeight.w700,
+                                  ),
                                 ),
                               ],
                             ),
@@ -185,11 +242,18 @@ class _CartScreenState extends ConsumerState<CartScreen> {
                   padding: const EdgeInsets.fromLTRB(20, 14, 20, 24),
                   decoration: BoxDecoration(
                     color: colors.surface,
-                    border: Border(top: BorderSide(color: colors.border.withOpacity(0.6))),
+                    border: Border(
+                      top: BorderSide(color: colors.border.withOpacity(0.6)),
+                    ),
                   ),
                   child: PrimaryButton(
-                    text: 'Proceed to Checkout • ${CurrencyFormatter.format(cart.total)}',
-                    trailingIcon: const Icon(Icons.arrow_forward_rounded, size: 18, color: Colors.white),
+                    text:
+                        'Proceed to Checkout • ${CurrencyFormatter.format(cart.total)}',
+                    trailingIcon: const Icon(
+                      Icons.arrow_forward_rounded,
+                      size: 18,
+                      color: Colors.white,
+                    ),
                     onPressed: () => context.push('/checkout'),
                   ),
                 ),
@@ -220,7 +284,11 @@ class _CartScreenState extends ConsumerState<CartScreen> {
           color: colors.error,
           borderRadius: AppRadius.cardRadius,
         ),
-        child: const Icon(Icons.delete_outline_rounded, color: Colors.white, size: 28),
+        child: const Icon(
+          Icons.delete_outline_rounded,
+          color: Colors.white,
+          size: 28,
+        ),
       ),
       child: Container(
         margin: const EdgeInsets.only(bottom: 12),
@@ -261,14 +329,22 @@ class _CartScreenState extends ConsumerState<CartScreen> {
                           item.product.title,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: AppTypography.bodyMedium(weight: FontWeight.w600),
+                          style: AppTypography.bodyMedium(
+                            weight: FontWeight.w600,
+                          ),
                         ),
                       ),
                       ClothsyIconButton(
                         size: 28,
                         borderColor: Colors.transparent,
-                        icon: Icon(Icons.close_rounded, size: 16, color: colors.textSecondary),
-                        onPressed: () => ref.read(cartProvider.notifier).removeFromCart(item.id),
+                        icon: Icon(
+                          Icons.close_rounded,
+                          size: 16,
+                          color: colors.textSecondary,
+                        ),
+                        onPressed: () => ref
+                            .read(cartProvider.notifier)
+                            .removeFromCart(item.id),
                       ),
                     ],
                   ),
@@ -283,13 +359,17 @@ class _CartScreenState extends ConsumerState<CartScreen> {
                     children: [
                       Text(
                         CurrencyFormatter.format(item.variant.price),
-                        style: AppTypography.price(color: colors.textPrimary).copyWith(fontSize: 16),
+                        style: AppTypography.price(
+                          color: colors.textPrimary,
+                        ).copyWith(fontSize: 16),
                       ),
                       QuantityStepper(
                         height: 32,
                         value: item.quantity,
                         onChanged: (newQty) {
-                          ref.read(cartProvider.notifier).updateQuantity(item.id, newQty);
+                          ref
+                              .read(cartProvider.notifier)
+                              .updateQuantity(item.id, newQty);
                         },
                       ),
                     ],
@@ -303,7 +383,11 @@ class _CartScreenState extends ConsumerState<CartScreen> {
     );
   }
 
-  Widget _buildSummaryRow(String label, String value, {bool isHighlight = false}) {
+  Widget _buildSummaryRow(
+    String label,
+    String value, {
+    bool isHighlight = false,
+  }) {
     final colors = context.colors;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,

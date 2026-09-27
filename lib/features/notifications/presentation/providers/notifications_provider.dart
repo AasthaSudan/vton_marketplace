@@ -16,7 +16,8 @@ class NotificationsNotifier extends Notifier<List<AppNotification>> {
       AppNotification(
         id: 'notif_2',
         title: 'Exclusive Offer: 20% Off Silk Edits',
-        message: 'Use code LUXURY20 to get 20% off on all Mulberry silk evening gowns.',
+        message:
+            'Use code LUXURY20 to get 20% off on all Mulberry silk evening gowns.',
         timestamp: DateTime.now().subtract(const Duration(days: 1)),
         type: NotificationType.promotion,
         deepLink: '/explore',
@@ -24,7 +25,8 @@ class NotificationsNotifier extends Notifier<List<AppNotification>> {
       AppNotification(
         id: 'notif_3',
         title: 'Clothsy AI Virtual Try-On Ready',
-        message: 'Try on the new Autumn Atelier collection now with your saved shopper model.',
+        message:
+            'Try on the new Autumn Atelier collection now with your saved shopper model.',
         timestamp: DateTime.now().subtract(const Duration(days: 2)),
         type: NotificationType.tryon,
         deepLink: '/tryon',
@@ -33,7 +35,9 @@ class NotificationsNotifier extends Notifier<List<AppNotification>> {
   }
 
   void markAsRead(String id) {
-    state = state.map((n) => n.id == id ? n.copyWith(isRead: true) : n).toList();
+    state = state
+        .map((n) => n.id == id ? n.copyWith(isRead: true) : n)
+        .toList();
   }
 
   void markAllAsRead() {
@@ -46,7 +50,9 @@ class NotificationsNotifier extends Notifier<List<AppNotification>> {
 }
 
 final notificationsProvider =
-    NotifierProvider<NotificationsNotifier, List<AppNotification>>(NotificationsNotifier.new);
+    NotifierProvider<NotificationsNotifier, List<AppNotification>>(
+      NotificationsNotifier.new,
+    );
 
 final unreadNotificationsCountProvider = Provider<int>((ref) {
   final list = ref.watch(notificationsProvider);

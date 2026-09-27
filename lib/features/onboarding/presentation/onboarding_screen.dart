@@ -179,8 +179,11 @@ class _TopBar extends StatelessWidget {
                   color: colors.primary,
                   borderRadius: BorderRadius.circular(6),
                 ),
-                child: Icon(Icons.bolt_rounded,
-                    size: 14, color: colors.onPrimary),
+                child: Icon(
+                  Icons.bolt_rounded,
+                  size: 14,
+                  color: colors.onPrimary,
+                ),
               ),
               const SizedBox(width: 7),
               Text(
@@ -253,9 +256,21 @@ class _SlideContent extends StatelessWidget {
           final collageH = card2Top + card2H + 4;
 
           // Font sizes
-          final kickerSize = isTiny ? 9.5 : isCompact ? 10.5 : 11.5;
-          final titleSize = isTiny ? 28.0 : isCompact ? 34.0 : 40.0;
-          final subtitleSize = isTiny ? 11.5 : isCompact ? 12.5 : 13.5;
+          final kickerSize = isTiny
+              ? 9.5
+              : isCompact
+              ? 10.5
+              : 11.5;
+          final titleSize = isTiny
+              ? 28.0
+              : isCompact
+              ? 34.0
+              : 40.0;
+          final subtitleSize = isTiny
+              ? 11.5
+              : isCompact
+              ? 12.5
+              : 13.5;
 
           return Row(
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -270,7 +285,9 @@ class _SlideContent extends StatelessWidget {
                     // Kicker pill
                     Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 9, vertical: 4),
+                        horizontal: 9,
+                        vertical: 4,
+                      ),
                       decoration: BoxDecoration(
                         color: const Color(0xFFF0EBF8),
                         borderRadius: BorderRadius.circular(100),
@@ -280,10 +297,7 @@ class _SlideContent extends StatelessWidget {
                         style: AppTypography.label(
                           color: const Color(0xFF6B4FA0),
                           weight: FontWeight.w700,
-                        ).copyWith(
-                          fontSize: kickerSize,
-                          letterSpacing: 2.0,
-                        ),
+                        ).copyWith(fontSize: kickerSize, letterSpacing: 2.0),
                       ),
                     ),
                     SizedBox(height: isTiny ? 10 : 16),
@@ -291,13 +305,15 @@ class _SlideContent extends StatelessWidget {
                     // Headline — each word on its own line, FittedBox prevents overflow
                     ...(slide['headline'] as String)
                         .split('\n')
-                        .map((word) => _HeadlineWord(
-                              word: word,
-                              fontSize: titleSize,
-                              color: word.endsWith(',')
-                                  ? const Color(0xFF5B4574)
-                                  : const Color(0xFF110E1B),
-                            )),
+                        .map(
+                          (word) => _HeadlineWord(
+                            word: word,
+                            fontSize: titleSize,
+                            color: word.endsWith(',')
+                                ? const Color(0xFF5B4574)
+                                : const Color(0xFF110E1B),
+                          ),
+                        ),
 
                     SizedBox(height: isTiny ? 10 : 16),
 
@@ -318,13 +334,14 @@ class _SlideContent extends StatelessWidget {
                       alignment: Alignment.centerLeft,
                       child: Text(
                         slide['subtitle'] as String,
-                        style: AppTypography.body(
-                          color: const Color(0xFF7E7889),
-                        ).copyWith(
-                          fontSize: subtitleSize,
-                          height: 1.5,
-                          fontWeight: FontWeight.w400,
-                        ),
+                        style:
+                            AppTypography.body(
+                              color: const Color(0xFF7E7889),
+                            ).copyWith(
+                              fontSize: subtitleSize,
+                              height: 1.5,
+                              fontWeight: FontWeight.w400,
+                            ),
                       ),
                     ),
                   ],
@@ -457,8 +474,11 @@ class _ImageCard extends StatelessWidget {
             Container(color: const Color(0xFFD4C4E8)),
         errorWidget: (context, url, err) => Container(
           color: const Color(0xFFD4C4E8),
-          child: const Icon(Icons.image_outlined,
-              color: Colors.white60, size: 28),
+          child: const Icon(
+            Icons.image_outlined,
+            color: Colors.white60,
+            size: 28,
+          ),
         ),
       ),
     );
@@ -517,12 +537,7 @@ class _BottomBar extends StatelessWidget {
     final isLast = currentPage == slideCount - 1;
 
     return Padding(
-      padding: EdgeInsets.fromLTRB(
-        20,
-        isTiny ? 8 : 12,
-        20,
-        isTiny ? 16 : 24,
-      ),
+      padding: EdgeInsets.fromLTRB(20, isTiny ? 8 : 12, 20, isTiny ? 16 : 24),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -538,9 +553,7 @@ class _BottomBar extends StatelessWidget {
                   height: 6,
                   width: active ? 22 : 6,
                   decoration: BoxDecoration(
-                    color: active
-                        ? colors.primary
-                        : const Color(0xFFD8D2E2),
+                    color: active ? colors.primary : const Color(0xFFD8D2E2),
                     borderRadius: BorderRadius.circular(10),
                   ),
                 ),

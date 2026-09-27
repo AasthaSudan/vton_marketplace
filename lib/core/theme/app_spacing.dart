@@ -13,7 +13,9 @@ class AppSpacing {
   static const double xxxl = 48.0;
 
   // EdgeInsets helpers
-  static const EdgeInsets screenPadding = EdgeInsets.symmetric(horizontal: screenSide);
+  static const EdgeInsets screenPadding = EdgeInsets.symmetric(
+    horizontal: screenSide,
+  );
   static const EdgeInsets screenPaddingAll = EdgeInsets.all(screenSide);
   static const EdgeInsets cardPadding = EdgeInsets.all(md);
   static const EdgeInsets bannerPadding = EdgeInsets.all(screenSide);

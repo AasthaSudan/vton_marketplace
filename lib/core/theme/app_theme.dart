@@ -54,9 +54,7 @@ class AppTheme {
         thickness: 1,
         space: 1,
       ),
-      extensions: const [
-        ClothsyColorExtension.light,
-      ],
+      extensions: const [ClothsyColorExtension.light],
     );
   }
 
@@ -106,9 +104,7 @@ class AppTheme {
         thickness: 1,
         space: 1,
       ),
-      extensions: const [
-        ClothsyColorExtension.dark,
-      ],
+      extensions: const [ClothsyColorExtension.dark],
     );
   }
 }

@@ -34,7 +34,11 @@ class AddressListScreen extends ConsumerWidget {
           padding: const EdgeInsets.only(left: 12),
           child: ClothsyIconButton(
             size: 38,
-            icon: Icon(Icons.arrow_back_ios_new_rounded, size: 16, color: colors.primary),
+            icon: Icon(
+              Icons.arrow_back_ios_new_rounded,
+              size: 16,
+              color: colors.primary,
+            ),
             onPressed: () => context.pop(),
           ),
         ),
@@ -43,11 +47,14 @@ class AddressListScreen extends ConsumerWidget {
           ? EmptyStateView(
               icon: Icons.location_off_outlined,
               title: 'No Addresses Found',
-              message: 'Add your delivery location to ensure swift and seamless doorstep arrival.',
+              message:
+                  'Add your delivery location to ensure swift and seamless doorstep arrival.',
               actionText: 'Add New Address',
               onActionPressed: () {
                 Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => const AddEditAddressScreen()),
+                  MaterialPageRoute(
+                    builder: (_) => const AddEditAddressScreen(),
+                  ),
                 );
               },
             )
@@ -61,7 +68,9 @@ class AddressListScreen extends ConsumerWidget {
                     padding: const EdgeInsets.only(bottom: 14),
                     child: PressableScale(
                       onTap: () {
-                        ref.read(selectedAddressProvider.notifier).select(address);
+                        ref
+                            .read(selectedAddressProvider.notifier)
+                            .select(address);
                         if (isSelectingForCheckout) {
                           context.pop();
                         }
@@ -72,7 +81,9 @@ class AddressListScreen extends ConsumerWidget {
                           color: colors.surface,
                           borderRadius: AppRadius.cardRadius,
                           border: Border.all(
-                            color: isSelected ? colors.primary : colors.border.withOpacity(0.6),
+                            color: isSelected
+                                ? colors.primary
+                                : colors.border.withOpacity(0.6),
                             width: isSelected ? 2.0 : 1.0,
                           ),
                           boxShadow: isSelected
@@ -95,10 +106,15 @@ class AddressListScreen extends ConsumerWidget {
                                 Row(
                                   children: [
                                     Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 10,
+                                        vertical: 4,
+                                      ),
                                       decoration: BoxDecoration(
                                         color: colors.surfaceMuted,
-                                        borderRadius: BorderRadius.circular(100),
+                                        borderRadius: BorderRadius.circular(
+                                          100,
+                                        ),
                                       ),
                                       child: Text(
                                         address.label.toUpperCase(),
@@ -111,10 +127,15 @@ class AddressListScreen extends ConsumerWidget {
                                     if (address.isDefault) ...[
                                       const SizedBox(width: 8),
                                       Container(
-                                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 8,
+                                          vertical: 4,
+                                        ),
                                         decoration: BoxDecoration(
                                           color: colors.accentSoft,
-                                          borderRadius: BorderRadius.circular(100),
+                                          borderRadius: BorderRadius.circular(
+                                            100,
+                                          ),
                                         ),
                                         child: Text(
                                           'DEFAULT',
@@ -128,8 +149,12 @@ class AddressListScreen extends ConsumerWidget {
                                   ],
                                 ),
                                 Icon(
-                                  isSelected ? Icons.check_circle_rounded : Icons.radio_button_off,
-                                  color: isSelected ? colors.primary : colors.textSecondary.withOpacity(0.5),
+                                  isSelected
+                                      ? Icons.check_circle_rounded
+                                      : Icons.radio_button_off,
+                                  color: isSelected
+                                      ? colors.primary
+                                      : colors.textSecondary.withOpacity(0.5),
                                   size: 22,
                                 ),
                               ],
@@ -139,19 +164,25 @@ class AddressListScreen extends ConsumerWidget {
                             // Recipient Name & Phone
                             Text(
                               address.name,
-                              style: AppTypography.bodyMedium(weight: FontWeight.w700),
+                              style: AppTypography.bodyMedium(
+                                weight: FontWeight.w700,
+                              ),
                             ),
                             const SizedBox(height: 4),
                             Text(
                               address.phone,
-                              style: AppTypography.caption(color: colors.textSecondary),
+                              style: AppTypography.caption(
+                                color: colors.textSecondary,
+                              ),
                             ),
                             const SizedBox(height: 8),
 
                             // Formatted street and postal address
                             Text(
                               address.formattedAddress,
-                              style: AppTypography.body(color: colors.textPrimary).copyWith(fontSize: 14),
+                              style: AppTypography.body(
+                                color: colors.textPrimary,
+                              ).copyWith(fontSize: 14),
                             ),
                             const SizedBox(height: 14),
                             Divider(color: colors.border.withOpacity(0.5)),
@@ -164,7 +195,9 @@ class AddressListScreen extends ConsumerWidget {
                                 if (!address.isDefault)
                                   TextButton(
                                     onPressed: () {
-                                      ref.read(addressesProvider.notifier).setDefaultAddress(address.id);
+                                      ref
+                                          .read(addressesProvider.notifier)
+                                          .setDefaultAddress(address.id);
                                       ClothsySnackbar.show(
                                         context,
                                         message: 'Default address updated',
@@ -181,19 +214,31 @@ class AddressListScreen extends ConsumerWidget {
                                   ),
                                 const Spacer(),
                                 IconButton(
-                                  icon: Icon(Icons.edit_outlined, size: 20, color: colors.primary),
+                                  icon: Icon(
+                                    Icons.edit_outlined,
+                                    size: 20,
+                                    color: colors.primary,
+                                  ),
                                   onPressed: () {
                                     Navigator.of(context).push(
                                       MaterialPageRoute(
-                                        builder: (_) => AddEditAddressScreen(initialAddress: address),
+                                        builder: (_) => AddEditAddressScreen(
+                                          initialAddress: address,
+                                        ),
                                       ),
                                     );
                                   },
                                 ),
                                 IconButton(
-                                  icon: Icon(Icons.delete_outline_rounded, size: 20, color: colors.error),
+                                  icon: Icon(
+                                    Icons.delete_outline_rounded,
+                                    size: 20,
+                                    color: colors.error,
+                                  ),
                                   onPressed: () {
-                                    ref.read(addressesProvider.notifier).deleteAddress(address.id);
+                                    ref
+                                        .read(addressesProvider.notifier)
+                                        .deleteAddress(address.id);
                                     ClothsySnackbar.show(
                                       context,
                                       message: 'Address removed',
@@ -215,7 +260,9 @@ class AddressListScreen extends ConsumerWidget {
                   icon: const Icon(Icons.add, size: 18, color: Colors.white),
                   onPressed: () {
                     Navigator.of(context).push(
-                      MaterialPageRoute(builder: (_) => const AddEditAddressScreen()),
+                      MaterialPageRoute(
+                        builder: (_) => const AddEditAddressScreen(),
+                      ),
                     );
                   },
                 ),

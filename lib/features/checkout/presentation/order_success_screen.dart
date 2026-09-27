@@ -49,7 +49,11 @@ class OrderSuccessScreen extends ConsumerWidget {
                           color: colors.success,
                           shape: BoxShape.circle,
                         ),
-                        child: const Icon(Icons.check_rounded, color: Colors.white, size: 36),
+                        child: const Icon(
+                          Icons.check_rounded,
+                          color: Colors.white,
+                          size: 36,
+                        ),
                       ),
                     ),
                   ),
@@ -79,7 +83,12 @@ class OrderSuccessScreen extends ConsumerWidget {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text('Order Number', style: AppTypography.caption(color: colors.textSecondary)),
+                            Text(
+                              'Order Number',
+                              style: AppTypography.caption(
+                                color: colors.textSecondary,
+                              ),
+                            ),
                             Text(
                               orderNum,
                               style: AppTypography.bodyMedium(
@@ -95,10 +104,17 @@ class OrderSuccessScreen extends ConsumerWidget {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text('Estimated Delivery', style: AppTypography.caption(color: colors.textSecondary)),
+                            Text(
+                              'Estimated Delivery',
+                              style: AppTypography.caption(
+                                color: colors.textSecondary,
+                              ),
+                            ),
                             Text(
                               'In 2–4 Business Days',
-                              style: AppTypography.bodyMedium(weight: FontWeight.w600),
+                              style: AppTypography.bodyMedium(
+                                weight: FontWeight.w600,
+                              ),
                             ),
                           ],
                         ),
@@ -106,10 +122,17 @@ class OrderSuccessScreen extends ConsumerWidget {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text('Delivery Carrier', style: AppTypography.caption(color: colors.textSecondary)),
+                            Text(
+                              'Delivery Carrier',
+                              style: AppTypography.caption(
+                                color: colors.textSecondary,
+                              ),
+                            ),
                             Text(
                               'BlueDart Apex Express',
-                              style: AppTypography.bodyMedium(weight: FontWeight.w600),
+                              style: AppTypography.bodyMedium(
+                                weight: FontWeight.w600,
+                              ),
                             ),
                           ],
                         ),
@@ -121,7 +144,11 @@ class OrderSuccessScreen extends ConsumerWidget {
                   // Actions
                   PrimaryButton(
                     text: 'Track Order',
-                    icon: const Icon(Icons.location_searching_rounded, size: 18, color: Colors.white),
+                    icon: const Icon(
+                      Icons.location_searching_rounded,
+                      size: 18,
+                      color: Colors.white,
+                    ),
                     onPressed: () => context.go('/orders/$orderId'),
                   ),
                   const SizedBox(height: 12),
