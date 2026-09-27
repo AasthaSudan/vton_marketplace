@@ -6,6 +6,57 @@ Browse curated collections, pick any outfit, upload your photo — and see yours
 
 ---
 
+## Architecture
+
+```mermaid
+graph TD
+    subgraph Presentation["🖥️ Presentation Layer"]
+        UI[Screens & Widgets]
+        NAV[go_router Navigation]
+    end
+
+    subgraph State["⚡ State Layer — Riverpod"]
+        PROV[Providers & Notifiers]
+    end
+
+    subgraph Domain["📐 Domain Layer"]
+        ENT[Entities]
+        REPO_I[Repository Interfaces]
+    end
+
+    subgraph Data["🗄️ Data Layer"]
+        REPO_IMPL[Repository Implementations]
+        LOCAL[Local — SharedPrefs / Hive]
+    end
+
+    subgraph External["☁️ External Services"]
+        VTON[FabricVTON AI API]
+        AUTH[Auth — OTP / Google]
+        IMG[Unsplash CDN]
+    end
+
+    UI --> PROV
+    NAV --> UI
+    PROV --> REPO_I
+    REPO_I --> REPO_IMPL
+    REPO_IMPL --> LOCAL
+    REPO_IMPL --> VTON
+    REPO_IMPL --> AUTH
+    UI --> IMG
+```
+
+### Layer Responsibilities
+
+| Layer | What it does |
+|---|---|
+| **Presentation** | Screens, widgets, navigation — pure UI, no business logic |
+| **State (Riverpod)** | Providers & Notifiers bridge UI ↔ Domain |
+| **Domain** | Entities and repository interfaces — framework-independent |
+| **Data** | Implements repositories, talks to APIs and local storage |
+| **External** | FabricVTON AI, Auth providers, image CDN |
+
+---
+
 ## Features
 
 - **AI Virtual Try-On** — Upload a photo and see yourself in any outfit instantly
