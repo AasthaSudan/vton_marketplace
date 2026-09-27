@@ -6,178 +6,6 @@ Browse curated collections, pick any outfit, upload your photo — and see yours
 
 ---
 
-## Project Structure
-
-```
-clothsy_ai/
-├── lib/
-│   ├── app.dart                          # Root MaterialApp + theme setup
-│   ├── bootstrap.dart                    # App initialization (flavor-aware)
-│   ├── main.dart
-│   ├── main_dev.dart                     # Entry point — dev flavor
-│   ├── main_staging.dart                 # Entry point — staging flavor
-│   ├── main_prod.dart                    # Entry point — production flavor
-│   │
-│   ├── core/
-│   │   ├── constants/
-│   │   │   └── app_constants.dart        # App flavors, API base URLs
-│   │   ├── errors/
-│   │   │   └── app_exception.dart        # Typed error classes
-│   │   ├── network/
-│   │   │   └── api_client.dart           # HTTP client wrapper
-│   │   ├── router/
-│   │   │   ├── app_router.dart           # go_router route definitions
-│   │   │   └── scaffold_with_nav_bar.dart# Bottom nav shell
-│   │   ├── theme/
-│   │   │   ├── app_colors.dart           # Color tokens (primary, accent, semantic)
-│   │   │   ├── app_radius.dart           # Border radius tokens
-│   │   │   ├── app_spacing.dart          # Spacing scale
-│   │   │   ├── app_theme.dart            # ThemeData assembly
-│   │   │   └── app_typography.dart       # Text styles (display, h1–h3, body, caption, label)
-│   │   └── utils/
-│   │       └── currency_formatter.dart   # ₹ formatting helper
-│   │
-│   ├── features/
-│   │   ├── address/
-│   │   │   ├── data/repositories/address_repository_impl.dart
-│   │   │   ├── domain/entities/address.dart
-│   │   │   ├── domain/repositories/address_repository.dart
-│   │   │   └── presentation/
-│   │   │       ├── add_edit_address_screen.dart
-│   │   │       ├── address_list_screen.dart
-│   │   │       └── providers/address_providers.dart
-│   │   │
-│   │   ├── auth/
-│   │   │   ├── data/repositories/auth_repository_impl.dart
-│   │   │   ├── domain/entities/user.dart
-│   │   │   ├── domain/repositories/auth_repository.dart
-│   │   │   └── presentation/
-│   │   │       ├── login_screen.dart
-│   │   │       ├── otp_verification_screen.dart
-│   │   │       └── providers/auth_provider.dart
-│   │   │
-│   │   ├── cart/
-│   │   │   ├── domain/entities/cart_item.dart
-│   │   │   └── presentation/
-│   │   │       ├── cart_screen.dart
-│   │   │       └── providers/cart_provider.dart
-│   │   │
-│   │   ├── catalog/
-│   │   │   ├── data/repositories/catalog_repository_impl.dart
-│   │   │   ├── domain/entities/banner.dart
-│   │   │   ├── domain/entities/collection.dart
-│   │   │   ├── domain/entities/product.dart
-│   │   │   ├── domain/repositories/catalog_repository.dart
-│   │   │   └── presentation/
-│   │   │       ├── catalog_screen.dart
-│   │   │       ├── product_detail_screen.dart
-│   │   │       └── providers/catalog_providers.dart
-│   │   │
-│   │   ├── checkout/
-│   │   │   └── presentation/
-│   │   │       ├── checkout_screen.dart
-│   │   │       └── order_success_screen.dart
-│   │   │
-│   │   ├── gallery/
-│   │   │   └── presentation/component_gallery_screen.dart  # Dev: design tokens reference
-│   │   │
-│   │   ├── home/
-│   │   │   └── presentation/home_screen.dart
-│   │   │
-│   │   ├── notifications/
-│   │   │   ├── domain/entities/app_notification.dart
-│   │   │   └── presentation/
-│   │   │       ├── notifications_screen.dart
-│   │   │       └── providers/notifications_provider.dart
-│   │   │
-│   │   ├── onboarding/
-│   │   │   └── presentation/onboarding_screen.dart         # 3-slide editorial intro
-│   │   │
-│   │   ├── orders/
-│   │   │   ├── data/repositories/order_repository_impl.dart
-│   │   │   ├── domain/entities/order.dart
-│   │   │   ├── domain/repositories/order_repository.dart
-│   │   │   └── presentation/
-│   │   │       ├── order_detail_screen.dart
-│   │   │       ├── orders_list_screen.dart
-│   │   │       └── providers/order_providers.dart
-│   │   │
-│   │   ├── profile/
-│   │   │   └── presentation/profile_screen.dart
-│   │   │
-│   │   ├── search/
-│   │   │   └── presentation/search_screen.dart
-│   │   │
-│   │   ├── splash/
-│   │   │   └── presentation/splash_screen.dart
-│   │   │
-│   │   ├── tryon/
-│   │   │   ├── data/repositories/tryon_repository_impl.dart
-│   │   │   ├── domain/entities/tryon_photo.dart
-│   │   │   ├── domain/entities/tryon_session.dart
-│   │   │   ├── domain/repositories/tryon_repository.dart
-│   │   │   └── presentation/
-│   │   │       ├── providers/tryon_provider.dart
-│   │   │       ├── tryon_screen.dart
-│   │   │       ├── tryon_history_screen.dart
-│   │   │       └── widgets/
-│   │   │           ├── before_after_slider.dart
-│   │   │           ├── model_photo_picker_sheet.dart
-│   │   │           ├── photo_guidance_sheet.dart
-│   │   │           └── tryon_shimmer_loading.dart
-│   │   │
-│   │   └── wishlist/
-│   │       └── presentation/
-│   │           ├── wishlist_screen.dart
-│   │           └── providers/wishlist_provider.dart
-│   │
-│   └── shared/
-│       └── widgets/
-│           ├── badges/
-│           │   ├── cart_badge_icon.dart
-│           │   └── discount_badge.dart
-│           ├── buttons/
-│           │   ├── clothsy_icon_button.dart
-│           │   ├── pressable_scale.dart      # Spring-press animation wrapper
-│           │   ├── primary_button.dart
-│           │   └── secondary_button.dart
-│           ├── cards/
-│           │   ├── offer_strip.dart
-│           │   ├── product_card.dart
-│           │   └── promo_banner.dart
-│           ├── feedback/
-│           │   ├── clothsy_bottom_sheet.dart
-│           │   ├── clothsy_snackbar.dart
-│           │   ├── empty_state_view.dart
-│           │   ├── error_state_view.dart
-│           │   └── skeleton_loader.dart
-│           ├── inputs/
-│           │   ├── clothsy_otp_field.dart
-│           │   ├── clothsy_search_bar.dart
-│           │   └── clothsy_text_field.dart
-│           ├── navigation/
-│           │   └── clothsy_bottom_nav.dart
-│           ├── selectors/
-│           │   ├── category_chip.dart
-│           │   ├── color_swatch_selector.dart
-│           │   ├── quantity_stepper.dart
-│           │   └── size_selector.dart
-│           └── typography/
-│               ├── price_row.dart
-│               ├── rating_row.dart
-│               └── section_header.dart
-│
-└── test/
-    ├── components/
-    │   ├── core_components_test.dart
-    │   └── responsiveness_test.dart       # 6 screen sizes (320px → 430px)
-    ├── features/
-    │   ├── auth_and_orders_test.dart
-    │   ├── catalog_and_cart_test.dart
-    │   └── tryon_test.dart
-    └── widget_test.dart
-```
-
 ## Features
 
 - **AI Virtual Try-On** — Upload a photo and see yourself in any outfit instantly
@@ -226,11 +54,45 @@ flutter run -t lib/main_prod.dart      # Production
 
 ```
 lib/
-├── core/           # Theme, router, constants, API client
-├── features/       # Auth, home, catalog, tryon, cart, orders, profile…
-├── shared/         # Reusable widgets — buttons, cards, inputs, selectors
-└── main_*.dart     # Entry points per flavor
-test/               # Widget + unit tests (56/56 passing)
+├── core/
+│   ├── constants/      # App flavors, API base URLs
+│   ├── errors/         # Typed error classes
+│   ├── network/        # HTTP client
+│   ├── router/         # go_router routes + bottom nav shell
+│   ├── theme/          # Colors, typography, radius, spacing tokens
+│   └── utils/          # Currency formatter
+│
+├── features/
+│   ├── address/        # Address management (list, add, edit)
+│   ├── auth/           # Phone OTP + Google Sign-In
+│   ├── cart/           # Shopping bag + cart provider
+│   ├── catalog/        # Product grid, filters, product detail
+│   ├── checkout/       # Checkout flow + order success
+│   ├── gallery/        # Dev-only: design tokens reference
+│   ├── home/           # Home feed, banners, categories
+│   ├── notifications/  # In-app notifications
+│   ├── onboarding/     # 3-slide editorial intro
+│   ├── orders/         # Order list + detail + tracking
+│   ├── profile/        # Account settings
+│   ├── search/         # Search screen
+│   ├── splash/         # Splash screen
+│   ├── tryon/          # AI virtual try-on studio + history
+│   └── wishlist/       # Saved favourites
+│
+└── shared/
+    └── widgets/
+        ├── badges/     # CartBadgeIcon, DiscountBadge
+        ├── buttons/    # PrimaryButton, SecondaryButton, IconButton, PressableScale
+        ├── cards/      # ProductCard, PromoBanner, OfferStrip
+        ├── feedback/   # Snackbar, BottomSheet, EmptyState, ErrorState, Skeletons
+        ├── inputs/     # TextField, SearchBar, OtpField
+        ├── navigation/ # ClothsyBottomNav
+        ├── selectors/  # CategoryChip, SizeSelector, ColorSwatch, QuantityStepper
+        └── typography/ # PriceRow, RatingRow, SectionHeader
+
+test/
+├── components/         # Responsiveness tests (6 screen sizes: 320px → 430px)
+└── features/           # Auth, catalog, cart, try-on unit tests
 ```
 
 ---
