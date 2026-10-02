@@ -1,0 +1,103 @@
+-- Shared helpers for the pgTAP tests (included with \ir). Everything here is
+-- created inside the test's transaction and rolled back with it.
+
+create schema if not exists tests;
+grant usage on schema tests to anon, authenticated, service_role;
+
+-- pgTAP is created by each test as postgres, and Clothsy's migrations stop
+-- PUBLIC from executing new functions; tests also assert while acting as a
+-- shopper, so let every role use the test functions (rolled back anyway).
+grant usage on schema extensions to anon, authenticated, service_role;
+grant execute on all functions in schema extensions to anon, authenticated, service_role;
+
+create or replace function tests.create_user(p_phone text)
+returns uuid language plpgsql security definer set search_path = '' as $$
+declare
+  uid uuid := gen_random_uuid();
+begin
+  insert into auth.users (id, instance_id, aud, role, phone,
+    raw_app_meta_data, raw_user_meta_data, created_at, updated_at)
+  values (uid, '00000000-0000-0000-0000-000000000000', 'authenticated',
+    'authenticated', p_phone, '{"provider": "phone"}', '{}', now(), now());
+  return uid;
+end $$;
+
+-- Act as a signed-in shopper / anonymous visitor / the service role /
+-- the migration owner again.
+create or replace function tests.as_user(p_user uuid)
+returns void language plpgsql as $$
+begin
+  perform set_config('request.jwt.claims',
+    json_build_object('sub', p_user, 'role', 'authenticated')::text, true);
+  perform set_config('role', 'authenticated', true);
+end $$;
+
+create or replace function tests.as_anon()
+returns void language plpgsql as $$
+begin
+  perform set_config('request.jwt.claims', '{"role": "anon"}', true);
+  perform set_config('role', 'anon', true);
+end $$;
+
+create or replace function tests.as_service()
+returns void language plpgsql as $$
+begin
+  perform set_config('request.jwt.claims', '{"role": "service_role"}', true);
+  perform set_config('role', 'service_role', true);
+end $$;
+
+create or replace function tests.as_owner()
+returns void language plpgsql as $$
+begin
+  perform set_config('request.jwt.claims', '', true);
+  perform set_config('role', 'postgres', true);
+end $$;
+
+-- Variant id by SKU, whatever the caller may see.
+create or replace function tests.variant(p_sku text)
+returns uuid language sql stable security definer set search_path = '' as $$
+  select id from public.product_variants where sku = p_sku;
+$$;
+
+create or replace function tests.stock(p_sku text)
+returns integer language sql stable security definer set search_path = '' as $$
+  select stock from public.product_variants where sku = p_sku;
+$$;
+
+-- A saved address for [p_user] at [p_pin].
+create or replace function tests.address(p_user uuid, p_pin text default '110001')
+returns uuid language sql security definer set search_path = '' as $$
+  insert into public.addresses (user_id, name, phone, line1, city, state, pin_code)
+  values (p_user, 'Test Shopper', '+919999900001', '1 MG Road', 'City', 'State', p_pin)
+  returning id;
+$$;
+
+-- {"variant_id": ..., "quantity": n} for place_order.
+create or replace function tests.line(p_sku text, p_quantity integer default 1)
+returns jsonb language sql stable security definer set search_path = '' as $$
+  select jsonb_build_object('variant_id', id, 'quantity', p_quantity)
+  from public.product_variants where sku = p_sku;
+$$;
+
+-- A small extra brand with a cheap piece (ships with a ₹150 charge) and a
+-- draft that must never be visible or orderable.
+create or replace function tests.make_fixtures()
+returns void language plpgsql security definer set search_path = '' as $$
+declare
+  seller uuid := gen_random_uuid();
+  live uuid := gen_random_uuid();
+  draft uuid := gen_random_uuid();
+begin
+  insert into public.sellers (id, handle, name, status, is_verified)
+  values (seller, 'test-label', 'Test Label', 'approved', true);
+  insert into public.products (id, seller_id, handle, title, category, status, is_tryon_eligible, images)
+  values
+    (live, seller, 'test-tee', 'Test Cotton Tee', 'Tops', 'live', true, array['https://example.com/tee.jpg']),
+    (draft, seller, 'test-draft', 'Secret Draft Jacket', 'Outerwear', 'draft', false, '{}');
+  insert into public.product_variants (product_id, seller_id, sku, title, size, price, stock)
+  values
+    (live, seller, 'tst_cheap', 'White / M', 'M', 99900, 3),
+    (draft, seller, 'tst_draft', 'Black / M', 'M', 299900, 5);
+end $$;
+
+grant execute on all functions in schema tests to anon, authenticated, service_role;
