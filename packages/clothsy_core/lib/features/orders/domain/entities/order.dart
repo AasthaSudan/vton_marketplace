@@ -305,6 +305,7 @@ class Order {
     List<SellerOrder>? sellerOrders,
     String? paymentMethod,
     PaymentStatus? paymentStatus,
+    PaymentIntent? paymentIntent,
   }) {
     return Order(
       id: id,
@@ -316,7 +317,7 @@ class Order {
       method: method,
       paymentMethod: paymentMethod ?? this.paymentMethod,
       paymentStatus: paymentStatus ?? this.paymentStatus,
-      paymentIntent: paymentIntent,
+      paymentIntent: paymentIntent ?? this.paymentIntent,
     );
   }
 }

@@ -52,10 +52,8 @@ class SellerBagGroup {
   int get subtotal => items.fold(0, (sum, item) => sum + item.lineTotal);
 
   /// Shipping for this shipment: free once the group reaches the threshold.
-  int get shippingFee {
-    if (subtotal == 0) return 0;
-    return subtotal >= shippingThreshold ? 0 : CartSummary.standardShippingFee;
-  }
+  int get shippingFee =>
+      CartSummary.shippingFeeFor(subtotal, threshold: shippingThreshold);
 
   /// Still to add from this seller for free shipping (0 when already free).
   int get amountToFreeShipping {
@@ -81,6 +79,14 @@ class CartSummary {
 
   /// Flat shipping charge (paise) for a shipment under [shippingThreshold].
   static const int standardShippingFee = 15000;
+
+  /// Shipping for one seller's shipment worth [subtotal] paise: free at or
+  /// above [threshold], nothing for an empty one. The database's
+  /// `private.shipping_fee` applies the same rule.
+  static int shippingFeeFor(int subtotal, {int threshold = 199900}) {
+    if (subtotal <= 0) return 0;
+    return subtotal >= threshold ? 0 : standardShippingFee;
+  }
 
   const CartSummary({
     this.items = const [],
