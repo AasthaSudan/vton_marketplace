@@ -1,12 +1,18 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:clothsy_core/features/address/domain/entities/pin_serviceability.dart';
+import '../../../../core/config/app_config_provider.dart';
+import '../../../../core/supabase/supabase_providers.dart';
 import '../../data/repositories/mock_address_repository.dart';
+import '../../data/repositories/supabase_address_repository.dart';
 import 'package:clothsy_core/features/address/domain/entities/address.dart';
 import 'package:clothsy_core/features/address/domain/repositories/address_repository.dart';
 
 final addressRepositoryProvider = Provider<AddressRepository>((ref) {
-  return MockAddressRepository();
+  if (ref.watch(appConfigProvider).useMockBackend) {
+    return MockAddressRepository();
+  }
+  return SupabaseAddressRepository(ref.watch(supabaseClientProvider));
 });
 
 /// Delivery, COD and transit time for a PIN code (cached per PIN).

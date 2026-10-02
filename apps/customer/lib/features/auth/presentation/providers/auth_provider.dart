@@ -1,5 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/config/app_config_provider.dart';
+import '../../../../core/supabase/supabase_providers.dart';
 import '../../data/repositories/mock_auth_repository.dart';
+import '../../data/repositories/supabase_auth_repository.dart';
 import 'package:clothsy_core/features/auth/domain/entities/user.dart';
 import 'package:clothsy_core/features/auth/domain/repositories/auth_repository.dart';
 
@@ -32,7 +35,8 @@ String _friendly(Object error) => error is AuthFailure
     : 'Something went wrong signing you in. Please try again.';
 
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
-  return MockAuthRepository();
+  if (ref.watch(appConfigProvider).useMockBackend) return MockAuthRepository();
+  return SupabaseAuthRepository(ref.watch(supabaseClientProvider));
 });
 
 class AuthNotifier extends Notifier<AuthState> {
