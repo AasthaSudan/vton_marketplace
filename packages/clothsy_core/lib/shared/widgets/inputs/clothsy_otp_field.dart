@@ -45,6 +45,10 @@ class _ClothsyOtpFieldState extends State<ClothsyOtpField> {
   String get _currentOtp => _controllers.map((c) => c.text).join();
 
   void _onChanged(String value, int index) {
+    if (value.length > 1) {
+      _spread(value, index);
+      return;
+    }
     if (value.isNotEmpty) {
       if (index < widget.length - 1) {
         _focusNodes[index + 1].requestFocus();
@@ -57,6 +61,28 @@ class _ClothsyOtpFieldState extends State<ClothsyOtpField> {
       }
     }
 
+    _report();
+  }
+
+  /// A pasted or SMS-autofilled code (or a digit typed into a filled box)
+  /// arrives in one box: spread it over this box and the ones after it.
+  void _spread(String digits, int index) {
+    var i = index;
+    for (final digit in digits.split('')) {
+      if (i == widget.length) break;
+      _controllers[i].text = digit;
+      i++;
+    }
+    if (i < widget.length) {
+      _focusNodes[i].requestFocus();
+    } else {
+      _focusNodes[index].unfocus();
+    }
+    setState(() {});
+    _report();
+  }
+
+  void _report() {
     final otp = _currentOtp;
     widget.onChanged?.call(otp);
     if (otp.length == widget.length) {
@@ -101,12 +127,16 @@ class _ClothsyOtpFieldState extends State<ClothsyOtpField> {
         focusNode: _focusNodes[index],
         keyboardType: TextInputType.number,
         textAlign: TextAlign.center,
-        maxLength: 1,
+        // More than one digit is allowed in so a whole pasted or
+        // autofilled code can be spread over the boxes (_spread).
+        autofillHints: index == 0 ? const [AutofillHints.oneTimeCode] : null,
         style: AppTypography.h2(color: colors.textPrimary),
         cursorColor: colors.primary,
-        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+        inputFormatters: [
+          FilteringTextInputFormatter.digitsOnly,
+          LengthLimitingTextInputFormatter(widget.length),
+        ],
         decoration: InputDecoration(
-          counterText: '',
           filled: true,
           fillColor: isFilled ? colors.surfaceMuted : colors.surface,
           contentPadding: EdgeInsets.zero,

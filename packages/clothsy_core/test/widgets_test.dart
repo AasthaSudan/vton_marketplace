@@ -1,5 +1,6 @@
 import 'package:clothsy_core/core/theme/app_theme.dart';
 import 'package:clothsy_core/shared/widgets/cards/product_card.dart';
+import 'package:clothsy_core/shared/widgets/inputs/clothsy_otp_field.dart';
 import 'package:clothsy_core/shared/widgets/navigation/clothsy_bottom_nav.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -102,6 +103,57 @@ void main() {
       );
       await tester.tap(find.text('Clothsy AI'));
       expect(tapped, ClothsyBottomNav.clothsyAiIndex);
+    });
+  });
+
+  group('ClothsyOtpField', () {
+    String boxes(WidgetTester tester) => tester
+        .widgetList<TextField>(find.byType(TextField))
+        .map((f) => f.controller!.text)
+        .join(',');
+
+    testWidgets('a pasted or autofilled code fills every box', (tester) async {
+      final completed = <String>[];
+      await tester.pumpWidget(
+        _wrap(ClothsyOtpField(onCompleted: completed.add)),
+      );
+
+      await tester.enterText(find.byType(TextField).first, '123456');
+      await tester.pump();
+
+      expect(boxes(tester), '1,2,3,4,5,6');
+      expect(completed, ['123456']);
+    });
+
+    testWidgets('typing digit by digit moves along and completes once', (
+      tester,
+    ) async {
+      final completed = <String>[];
+      await tester.pumpWidget(
+        _wrap(ClothsyOtpField(onCompleted: completed.add)),
+      );
+
+      final fields = find.byType(TextField);
+      for (var i = 0; i < 6; i++) {
+        await tester.enterText(fields.at(i), '${i + 1}');
+        await tester.pump();
+      }
+
+      expect(boxes(tester), '1,2,3,4,5,6');
+      expect(completed, ['123456']);
+    });
+
+    testWidgets('only digits are kept and extra digits are dropped', (
+      tester,
+    ) async {
+      final changes = <String>[];
+      await tester.pumpWidget(_wrap(ClothsyOtpField(onChanged: changes.add)));
+
+      await tester.enterText(find.byType(TextField).at(4), '9a87');
+      await tester.pump();
+
+      expect(boxes(tester), ',,,,9,8');
+      expect(changes.last, '98');
     });
   });
 }
