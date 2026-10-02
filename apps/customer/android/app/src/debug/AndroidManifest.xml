@@ -4,4 +4,7 @@
          to allow setting breakpoints, to provide hot reload, etc.
     -->
     <uses-permission android:name="android.permission.INTERNET"/>
+    <!-- Debug builds may talk plain HTTP to the local Docker backend
+         (http://10.0.2.2:54321 from the emulator). Release builds may not. -->
+    <application android:usesCleartextTraffic="true" />
 </manifest>
