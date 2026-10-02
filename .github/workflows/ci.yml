@@ -1,4 +1,4 @@
-name: Clothsy Shop CI
+name: Clothsy CI
 
 on:
   push:
@@ -9,6 +9,45 @@ on:
 jobs:
   validate:
     name: Code Quality & Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: Install workspace dependencies
+        run: flutter pub get
+
+      - name: Check code formatting
+        run: dart format --output=none --set-exit-if-changed apps packages
+
+      - name: Static code analysis
+        run: flutter analyze --fatal-infos --fatal-warnings apps packages
+
+      - name: Test shared core
+        working-directory: packages/clothsy_core
+        run: flutter test --coverage
+
+      - name: Test customer app
+        working-directory: apps/customer
+        run: flutter test --coverage
+
+      - name: Test seller panel
+        working-directory: apps/seller_web
+        run: flutter test
+
+      - name: Test admin panel
+        working-directory: apps/admin_web
+        run: flutter test
+
+  build:
+    name: Build apps
+    needs: validate
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -26,17 +65,17 @@ jobs:
           channel: 'stable'
           cache: true
 
-      - name: Install dependencies
+      - name: Install workspace dependencies
         run: flutter pub get
 
-      - name: Check code formatting
-        run: dart format --output=none --set-exit-if-changed .
+      - name: Build customer APK (debug, mock flavor)
+        working-directory: apps/customer
+        run: flutter build apk --debug -t lib/main_mock.dart
 
-      - name: Static code analysis
-        run: flutter analyze --fatal-infos --fatal-warnings
+      - name: Build seller panel (web)
+        working-directory: apps/seller_web
+        run: flutter build web --release
 
-      - name: Run unit & widget tests
-        run: flutter test --coverage
-
-      - name: Build Android APK (Debug Dev Flavor)
-        run: flutter build apk --debug -t lib/main_dev.dart
+      - name: Build admin panel (web)
+        working-directory: apps/admin_web
+        run: flutter build web --release

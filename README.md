@@ -1,107 +1,86 @@
-# Clothsy AI
+# Clothsy Marketplace
 
-**AI-powered virtual try-on fashion marketplace built with Flutter.**
+**See it on you.** A discovery-led, multi-brand fashion marketplace for India,
+with Clothsy AI Try-On built into every product page.
 
-Browse curated collections, pick any outfit, upload your photo — and see yourself wearing it in photorealistic quality before you buy.
+This repo is a Dart/Flutter **workspace** containing every Clothsy surface:
 
----
-
-## Features
-
-- **AI Virtual Try-On** — Upload a photo and see yourself in any outfit instantly
-- **Product Catalog** — Browse by category with filters and search
-- **Product Detail** — Size, color, quantity, ratings, and reviews
-- **Cart & Checkout** — Full shopping bag and order flow
-- **Order History** — Track all past orders
-- **Wishlist** — Save favourites across sessions
-- **Auth** — Phone OTP + Google Sign-In
-- **Onboarding** — 3-slide animated editorial intro
+```
+apps/
+├── customer/      # Customer app — Android, iOS & web (Flutter)
+├── seller_web/    # Seller / Brand Panel (Flutter web)
+└── admin_web/     # Admin & Operations Panel (Flutter web)
+packages/
+└── clothsy_core/  # Shared domain entities, money, theme tokens & widgets
+supabase/          # Backend: migrations, Edge Functions, seed (Phase 1+)
+```
 
 ---
 
-## Stack
-
-| | |
-|---|---|
-| Framework | Flutter (Dart) |
-| State | Riverpod |
-| Navigation | go_router |
-| AI Backend | FabricVTON API |
-| Fonts | Google Fonts (Playfair Display, Inter) |
-
----
-
-## Getting Started
+## Getting started
 
 ```bash
 git clone https://github.com/AasthaSudan/vton_marketplace.git
 cd vton_marketplace
-flutter pub get
-flutter run
+flutter pub get          # resolves the whole workspace
 ```
 
-### Flavors
+### Customer app
 
 ```bash
-flutter run -t lib/main_dev.dart       # Development
-flutter run -t lib/main_staging.dart   # Staging
-flutter run -t lib/main_prod.dart      # Production
+cd apps/customer
+flutter run                         # mock flavor — no backend or keys needed
+flutter run -t lib/main_dev.dart --dart-define-from-file=config/dev.json
+```
+
+| Flavor | Entry point | Backend |
+|---|---|---|
+| mock | `lib/main_mock.dart` (default `main.dart`) | In-memory mock repositories |
+| dev | `lib/main_dev.dart` | Supabase dev (falls back to mock without a config) |
+| staging | `lib/main_staging.dart` | Supabase staging — config required |
+| prod | `lib/main_prod.dart` | Supabase prod — config required |
+
+Copy `apps/customer/config/example.json` to `config/<flavor>.json` and fill in
+the public client values. Real config files are git-ignored; secrets live only
+in Supabase Edge Functions.
+
+### Seller & Admin panels
+
+```bash
+cd apps/seller_web && flutter run -d chrome
+cd apps/admin_web  && flutter run -d chrome
 ```
 
 ---
 
-## Project Structure
+## Conventions
 
-```
-lib/
-├── core/
-│   ├── constants/      # App flavors, API base URLs
-│   ├── errors/         # Typed error classes
-│   ├── network/        # HTTP client
-│   ├── router/         # go_router routes + bottom nav shell
-│   ├── theme/          # Colors, typography, radius, spacing tokens
-│   └── utils/          # Currency formatter
-│
-├── features/
-│   ├── address/        # Address management (list, add, edit)
-│   ├── auth/           # Phone OTP + Google Sign-In
-│   ├── cart/           # Shopping bag + cart provider
-│   ├── catalog/        # Product grid, filters, product detail
-│   ├── checkout/       # Checkout flow + order success
-│   ├── gallery/        # Dev-only: design tokens reference
-│   ├── home/           # Home feed, banners, categories
-│   ├── notifications/  # In-app notifications
-│   ├── onboarding/     # 3-slide editorial intro
-│   ├── orders/         # Order list + detail + tracking
-│   ├── profile/        # Account settings
-│   ├── search/         # Search screen
-│   ├── splash/         # Splash screen
-│   ├── tryon/          # AI virtual try-on studio + history
-│   └── wishlist/       # Saved favourites
-│
-└── shared/
-    └── widgets/
-        ├── badges/     # CartBadgeIcon, DiscountBadge
-        ├── buttons/    # PrimaryButton, SecondaryButton, IconButton, PressableScale
-        ├── cards/      # ProductCard, PromoBanner, OfferStrip
-        ├── feedback/   # Snackbar, BottomSheet, EmptyState, ErrorState, Skeletons
-        ├── inputs/     # TextField, SearchBar, OtpField
-        ├── navigation/ # ClothsyBottomNav
-        ├── selectors/  # CategoryChip, SizeSelector, ColorSwatch, QuantityStepper
-        └── typography/ # PriceRow, RatingRow, SectionHeader
-
-test/
-├── components/         # Responsiveness tests (6 screen sizes: 320px → 430px)
-└── features/           # Auth, catalog, cart, try-on unit tests
-```
+- **Brand:** Clothsy Violet `#5C25FC`, Deep Ink, Soft Lilac; Try-On Coral
+  `#FF4F7B` is reserved for Clothsy AI. Poppins type scale. Use theme tokens
+  (`context.colors`, `AppTypography`) — never raw hex in screens.
+- **Money:** always integer **paise** (`₹1 = 100`). Format only at the UI edge
+  with `CurrencyFormatter.format(paise)` → `₹1,499`.
+- **Copy:** key microcopy (try-on consent, disclaimers, empty states) lives in
+  `ClothsyCopy` so every app speaks with one voice.
+- **Product images:** portrait 3:4 — size grids with `ProductCardGridDelegate`.
+- **Architecture:** feature-first clean architecture; screens depend on
+  repository interfaces in `clothsy_core`, implementations are swapped in
+  Riverpod providers (mock ↔ Supabase).
 
 ---
 
 ## Tests
 
 ```bash
-flutter test
+flutter analyze apps packages
+(cd packages/clothsy_core && flutter test)
+(cd apps/customer && flutter test)      # incl. 320px → 430px responsiveness matrix
+(cd apps/seller_web && flutter test)
+(cd apps/admin_web && flutter test)
 ```
+
+CI (`.github/workflows/ci.yml`) runs formatting, analysis and all tests, then
+builds the customer APK and both web panels.
 
 ---
 
