@@ -40,10 +40,13 @@ def call(method, path, body=None, token=None, headers=None, raw=None, ctype=None
     req = urllib.request.Request(B + path, data=data, method=method, headers=h)
     try:
         with urllib.request.urlopen(req, timeout=60) as r:
-            txt = r.read().decode()
+            raw_body = r.read()
+            if 'json' not in (r.headers.get('Content-Type') or ''):
+                return r.status, raw_body  # a file download
+            txt = raw_body.decode()
             return r.status, (json.loads(txt) if txt else None)
     except urllib.error.HTTPError as e:
-        txt = e.read().decode()
+        txt = e.read().decode(errors='replace')
         try:
             return e.code, json.loads(txt)
         except ValueError:
@@ -310,6 +313,150 @@ s, d = call('POST', '/rest/v1/rpc/delete_my_tryon_data', {}, token=A)
 check(s == 200, 'delete my try-on data', (s, d))
 s, rows = call('GET', '/rest/v1/tryon_photos?select=id', token=A)
 check(rows == [], 'no photo rows left', rows)
+
+# ---------------------------------------------------------------------------
+# Phase 2: a new brand joins, lists, sells, ships and gets paid
+# ---------------------------------------------------------------------------
+
+def password_sign_in(email, password='clothsy-local'):
+    s, d = call('POST', '/auth/v1/token?grant_type=password', {'email': email, 'password': password})
+    if s != 200:
+        sys.exit(f'sign-in failed for {email}: {s} {d}')
+    return d['access_token']
+
+
+def rpc(name, args, token):
+    return call('POST', f'/rest/v1/rpc/{name}', args, token=token)
+
+
+step('11. A brand signs up and applies')
+suffix = uuid.uuid4().hex[:6]
+s, d = call('POST', '/auth/v1/signup', {'email': f'founder-{suffix}@brand.test', 'password': 'brand-pass-123'})
+check(s == 200 and bool(d.get('access_token')), 'a founder signs up with email and password', (s, d))
+F = d['access_token']
+s, d = rpc('register_seller', {'p_brand_name': f'Kiet Threads {suffix}'}, F)
+check(s == 200 and bool(d.get('seller_id')), 'the store is registered', (s, d))
+seller_id = d['seller_id']
+s, d = rpc('submit_seller_application', {'p_seller_id': seller_id}, F)
+missing = json.loads(d.get('details') or '{}').get('missing', []) if isinstance(d, dict) else []
+check(s == 400 and 'APPLICATION_INCOMPLETE' in json.dumps(d) and 'pan' in missing,
+      'an incomplete application says what is missing', (s, d))
+s, d = call('PATCH', f'/rest/v1/seller_applications?seller_id=eq.{seller_id}', {
+    'owner_name': 'Kiet Founder', 'contact_phone': '+919999900021', 'business_type': 'proprietorship',
+    'legal_name': f'Kiet Threads {suffix}', 'pan': 'abcpk1234f', 'pickup_line1': '1 Knowledge Park',
+    'pickup_city': 'New Delhi', 'pickup_state': 'Delhi', 'pickup_pin_code': '110020'}, token=F)
+check(s in (200, 204), 'business, tax and pickup details saved', (s, d))
+s, d = rpc('set_seller_bank_account', {'p_seller_id': seller_id, 'p_account_holder': 'Kiet Threads',
+           'p_account_number': '50100099887766', 'p_ifsc': 'HDFC0000123'}, F)
+check(s == 200 and d.get('last4') == '7766' and 'account_number' not in d,
+      'payout account saved; only the last 4 digits come back', d)
+pdf = b'%PDF-1.4\n1 0 obj<<>>endobj\ntrailer<<>>\n%%EOF\n'
+for kind in ('pan_card', 'cancelled_cheque'):
+    path = f'{seller_id}/{kind}.pdf'
+    s, d = call('POST', f'/storage/v1/object/seller-documents/{path}', raw=pdf, ctype='application/pdf', token=F)
+    s2, d2 = call('POST', '/rest/v1/seller_documents',
+                  {'seller_id': seller_id, 'kind': kind, 'storage_path': path, 'file_name': f'{kind}.pdf'},
+                  token=F)
+    check(s == 200 and s2 == 201, f'{kind} uploaded to the private documents bucket', (s, d, s2, d2))
+s, d = call('GET', f'/storage/v1/object/authenticated/seller-documents/{seller_id}/pan_card.pdf', token=A)
+check(s >= 400, "shoppers cannot read a brand's KYC documents", s)
+s, d = rpc('submit_seller_application', {'p_seller_id': seller_id}, F)
+check(s == 200 and d.get('status') == 'submitted', 'application submitted for review', (s, d))
+
+step('12. Clothsy reviews and approves')
+OPS = password_sign_in('ops@clothsy.test')
+s, d = call('GET', f'/storage/v1/object/authenticated/seller-documents/{seller_id}/pan_card.pdf', token=OPS)
+check(s == 200, 'the verification team can open the documents', s)
+s, d = rpc('review_seller_application', {'p_seller_id': seller_id, 'p_decision': 'approve'}, OPS)
+check(s == 200 and d.get('status') == 'approved', 'approved', (s, d))
+s, d = rpc('my_sellers', {}, F)
+check(d and d[0]['status'] == 'approved', 'the founder sees the store approved', d)
+
+step('13. The brand lists a product; Clothsy moderates it')
+s, d = call('POST', f'/storage/v1/object/catalog/sellers/{seller_id}/shirt-{suffix}.png', raw=png(),
+            ctype='image/png', token=F)
+check(s == 200, 'product photo uploaded to the brand folder', (s, d))
+image_url = f'{B}/storage/v1/object/public/catalog/sellers/{seller_id}/shirt-{suffix}.png'
+s, _ = call('GET', image_url.replace(B, ''))
+check(s == 200, 'product photos are public', s)
+title = f'Kiet Linen Shirt {suffix}'
+s, rows = call('POST', '/rest/v1/products', {
+    'seller_id': seller_id, 'title': title, 'category': 'Tops', 'category_handles': ['women', 'tops'],
+    'description': 'Breathable linen shirt with a relaxed fit and shell buttons.',
+    'images': [image_url], 'tryon_requested': True, 'hsn_code': '6206'},
+    token=F, headers={'Prefer': 'return=representation'})
+check(s == 201 and rows[0]['status'] == 'draft', 'listing saved as a draft', (s, rows))
+product_id = rows[0]['id']
+s, rows = call('POST', '/rest/v1/product_variants', {
+    'product_id': product_id, 'sku': 'KLS-M', 'title': 'Ivory / M', 'size': 'M', 'color_name': 'Ivory',
+    'color_hex': '#F4EFE6', 'price': 189900, 'stock': 4}, token=F, headers={'Prefer': 'return=representation'})
+check(s == 201, 'a size with price and stock', (s, rows))
+variant = rows[0]
+s, d = rpc('submit_product', {'p_product_id': product_id}, F)
+check(s == 200 and d.get('status') == 'pending_review', 'submitted for review', (s, d))
+s, d = rpc('moderate_product', {'p_product_id': product_id, 'p_decision': 'approve'}, F)
+check(s >= 400, 'brands cannot approve their own listings', (s, d))
+s, d = rpc('moderate_product', {'p_product_id': product_id, 'p_decision': 'approve'}, OPS)
+check(s == 200 and d.get('status') == 'live', 'the moderator approves it', (s, d))
+s, hits = call('POST', '/rest/v1/rpc/search_products?select=id', {'q': title})
+check(any(h['id'] == product_id for h in hits), 'shoppers find it in search', hits)
+
+step('14. A shopper buys it; the brand fulfils the order')
+expected = variant['price'] + 15000
+s, order = call('POST', '/functions/v1/create-order', {
+    'items': [{'variant_id': variant['id'], 'quantity': 1}], 'address_id': address_id,
+    'payment_method': 'cod', 'payment_label': 'COD', 'idempotency_key': str(uuid.uuid4()),
+    'expected_total': expected}, token=A)
+check(s == 200 and order.get('amount') == expected, f'COD order placed ({expected} paise)', (s, order))
+s, parts = call('GET', f'/rest/v1/seller_orders?seller_id=eq.{seller_id}&select=id,status,reference', token=F)
+check(len(parts) == 1 and parts[0]['status'] == 'placed', 'the brand sees its new order', parts)
+part_id = parts[0]['id']
+s, d = call('GET', '/rest/v1/orders?select=id', token=F)
+check(d == [], "the brand never sees the shopper's whole order or payment", d)
+s, d = rpc('seller_accept_order', {'p_seller_order_id': part_id}, F)
+check(s == 200 and d.get('status') == 'confirmed', 'accepted', (s, d))
+s, d = rpc('seller_pack_order', {'p_seller_order_id': part_id}, F)
+check(s == 200 and bool(d.get('invoice_number')), f"packed, invoice {d.get('invoice_number')}", (s, d))
+s, inv = rpc('seller_order_invoice', {'p_seller_order_id': part_id}, F)
+check(s == 200 and inv['intra_state'] and inv['totals']['total'] == 189900
+      and inv['totals']['cgst'] + inv['totals']['sgst'] + inv['totals']['taxable_value'] == 189900
+      and inv['cod_amount'] == expected,
+      'tax invoice: Delhi to Delhi, CGST + SGST, COD amount for the courier', inv)
+s, d = rpc('seller_ship_order', {'p_seller_order_id': part_id, 'p_carrier': 'Delhivery',
+           'p_tracking_number': f'DLV{suffix}9', 'p_tracking_url': None}, F)
+check(s == 200 and d.get('status') == 'shipped', 'handed to the courier with its AWB', (s, d))
+s, d = rpc('advance_seller_order', {'p_seller_order_id': part_id, 'p_to_status': 'delivered'}, F)
+check(s == 200 and d.get('status') == 'delivered', 'delivered', (s, d))
+s, parts = call('GET', f'/rest/v1/seller_orders?id=eq.{part_id}&select=status', token=A)
+check(parts and parts[0]['status'] == 'delivered', 'the shopper sees it delivered', parts)
+
+step('15. Settlement and payout')
+s, st = call('GET', f'/rest/v1/seller_settlements?seller_order_id=eq.{part_id}&select=gross,net,status', token=F)
+check(st and st[0]['gross'] == 189900 and st[0]['net'] == 144726 and st[0]['status'] == 'pending',
+      'the brand sees what it earns: ₹1,447.26 of ₹1,899 after fees', st)
+sql(f"update public.seller_settlements set eligible_at = now() - interval '1 minute'"
+    f" where seller_order_id = '{part_id}'")  # the 7-day return window has passed
+s, d = rpc('create_payouts', {}, F)
+check(s >= 400, 'brands cannot trigger payouts', (s, d))
+s, d = rpc('create_payouts', {}, OPS)
+check(s == 200 and d.get('payouts', 0) >= 1, 'finance runs the daily payout batch', (s, d))
+# What the payout-sweep cron job runs.
+sql("""select private.invoke_edge_function('payout', '{"sweep": true}'::jsonb)""")
+for _ in range(20):
+    s, payouts = call('GET', f'/rest/v1/payouts?seller_id=eq.{seller_id}&select=amount,status,utr', token=F)
+    if payouts and payouts[0]['status'] != 'pending':
+        break
+    time.sleep(1)
+check(payouts and payouts[0]['amount'] == 144726 and payouts[0]['status'] == 'paid'
+      and (payouts[0]['utr'] or '').startswith('MOCKUTR'),
+      'the payout reaches the verified bank account with a UTR', payouts)
+
+step('16. Seller dashboard')
+s, dash = rpc('seller_dashboard', {'p_seller_id': seller_id}, F)
+check(s == 200 and dash['sales_30d']['gmv'] == 189900 and dash['products']['live'] == 1
+      and dash['performance']['score'] == 100, 'sales, products and a clean performance score', dash)
+s, d = rpc('seller_dashboard', {'p_seller_id': seller_id}, A)
+check(s >= 400, "shoppers cannot see a brand's dashboard", (s, d))
 
 print('\nALL PASSED' if not failures else f'\n{len(failures)} FAILED: ' + '; '.join(failures))
 sys.exit(1 if failures else 0)
