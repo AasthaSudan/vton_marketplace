@@ -41,6 +41,11 @@ class ClothsyCopy {
       "Payment didn't go through. If any amount was debited, it will be "
       'refunded automatically. Try again or pick another method.';
 
+  static const String paymentConfirming =
+      "We're still confirming your payment with your bank. If it went "
+      'through, your order will appear in My Orders shortly; if not, any '
+      'amount debited is refunded automatically.';
+
   static const String paymentCancelled =
       "Payment cancelled. Your bag is saved — try again whenever you're ready.";
 

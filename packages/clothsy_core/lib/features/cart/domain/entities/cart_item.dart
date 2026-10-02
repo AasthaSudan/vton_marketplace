@@ -1,3 +1,4 @@
+import 'package:clothsy_core/features/cart/domain/entities/coupon.dart';
 import 'package:clothsy_core/features/catalog/domain/entities/product.dart';
 
 class CartLineItem {
@@ -69,6 +70,10 @@ class SellerBagGroup {
 class CartSummary {
   final List<CartLineItem> items;
   final String? couponCode;
+
+  /// The validated rule behind [couponCode], used to recompute the discount
+  /// as the bag changes.
+  final CouponRule? coupon;
   final int discountAmount;
 
   /// Per-seller threshold (a seller's shipment ships free at or above it).
@@ -80,6 +85,7 @@ class CartSummary {
   const CartSummary({
     this.items = const [],
     this.couponCode,
+    this.coupon,
     this.discountAmount = 0,
     this.shippingThreshold = 199900,
   });

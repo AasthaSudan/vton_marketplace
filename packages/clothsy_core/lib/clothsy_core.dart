@@ -18,6 +18,8 @@ export 'features/address/domain/repositories/address_repository.dart';
 export 'features/auth/domain/entities/user.dart';
 export 'features/auth/domain/repositories/auth_repository.dart';
 export 'features/cart/domain/entities/cart_item.dart';
+export 'features/cart/domain/entities/coupon.dart';
+export 'features/cart/domain/repositories/coupon_repository.dart';
 export 'features/catalog/domain/entities/banner.dart';
 export 'features/catalog/domain/entities/collection.dart';
 export 'features/catalog/domain/entities/product.dart';
