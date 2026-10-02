@@ -3,6 +3,7 @@ import '../../data/repositories/mock_catalog_repository.dart';
 import 'package:clothsy_core/features/catalog/domain/entities/banner.dart';
 import 'package:clothsy_core/features/catalog/domain/entities/collection.dart';
 import 'package:clothsy_core/features/catalog/domain/entities/product.dart';
+import 'package:clothsy_core/features/catalog/domain/entities/product_filter.dart';
 import 'package:clothsy_core/features/catalog/domain/entities/seller.dart';
 import 'package:clothsy_core/features/catalog/domain/repositories/catalog_repository.dart';
 
@@ -45,12 +46,94 @@ final sortOptionProvider = NotifierProvider<SortOptionNotifier, String>(
   SortOptionNotifier.new,
 );
 
-final productsProvider = FutureProvider<List<Product>>((ref) async {
+class ProductFilterNotifier extends Notifier<ProductFilter> {
+  @override
+  ProductFilter build() => ProductFilter.none;
+
+  void apply(ProductFilter filter) => state = filter;
+  void clear() => state = ProductFilter.none;
+}
+
+/// Size / price / brand filters for Explore.
+final productFilterProvider =
+    NotifierProvider<ProductFilterNotifier, ProductFilter>(
+      ProductFilterNotifier.new,
+    );
+
+/// Every live product, unfiltered — e.g. the Try-On garment tray, which must
+/// not change when Explore's category or filters do.
+final allProductsProvider = FutureProvider<List<Product>>((ref) async {
   final repo = ref.watch(catalogRepositoryProvider);
-  final category = ref.watch(selectedCategoryProvider);
-  final sort = ref.watch(sortOptionProvider);
-  return repo.getProducts(category: category, sortBy: sort);
+  return repo.getProducts(limit: 100);
 });
+
+/// One page of Explore, plus whether more can be loaded.
+class ExploreFeed {
+  final List<Product> items;
+  final bool hasMore;
+  final bool loadingMore;
+
+  const ExploreFeed({
+    this.items = const [],
+    this.hasMore = true,
+    this.loadingMore = false,
+  });
+}
+
+/// Explore grid for the selected category, sort and filters, loaded a page
+/// at a time as the shopper scrolls.
+class ExploreFeedNotifier extends AsyncNotifier<ExploreFeed> {
+  static const pageSize = 12;
+  int _page = 1;
+  String _category = 'All';
+  String _sort = 'popular';
+  ProductFilter _filter = ProductFilter.none;
+
+  @override
+  Future<ExploreFeed> build() async {
+    // Watching these restarts the feed from page 1 whenever they change.
+    _category = ref.watch(selectedCategoryProvider);
+    _sort = ref.watch(sortOptionProvider);
+    _filter = ref.watch(productFilterProvider);
+    _page = 1;
+    final items = await _fetch(1);
+    return ExploreFeed(items: items, hasMore: items.length == pageSize);
+  }
+
+  Future<List<Product>> _fetch(int page) {
+    return ref
+        .read(catalogRepositoryProvider)
+        .getProducts(
+          category: _category,
+          sortBy: _sort,
+          filter: _filter,
+          page: page,
+          limit: pageSize,
+        );
+  }
+
+  Future<void> loadMore() async {
+    final current = state.asData?.value;
+    if (current == null || !current.hasMore || current.loadingMore) return;
+    state = AsyncData(
+      ExploreFeed(items: current.items, hasMore: true, loadingMore: true),
+    );
+    final next = await _fetch(_page + 1);
+    if (!ref.mounted) return;
+    _page++;
+    state = AsyncData(
+      ExploreFeed(
+        items: [...current.items, ...next],
+        hasMore: next.length == pageSize,
+      ),
+    );
+  }
+}
+
+final exploreFeedProvider =
+    AsyncNotifierProvider<ExploreFeedNotifier, ExploreFeed>(
+      ExploreFeedNotifier.new,
+    );
 
 final bestPicksProvider = FutureProvider<List<Product>>((ref) async {
   final repo = ref.watch(catalogRepositoryProvider);

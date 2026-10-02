@@ -7,7 +7,9 @@ import 'package:clothsy_shop/features/brands/presentation/brand_storefront_scree
 import 'package:clothsy_shop/features/cart/presentation/cart_screen.dart';
 import 'package:clothsy_shop/features/cart/presentation/providers/cart_provider.dart';
 import 'package:clothsy_shop/features/catalog/data/repositories/mock_catalog_repository.dart';
+import 'package:clothsy_shop/features/catalog/presentation/catalog_screen.dart';
 import 'package:clothsy_shop/features/catalog/presentation/product_detail_screen.dart';
+import 'package:clothsy_shop/features/search/presentation/search_screen.dart';
 import 'package:clothsy_shop/features/home/presentation/home_screen.dart';
 import 'package:clothsy_shop/features/onboarding/presentation/onboarding_screen.dart';
 import 'package:clothsy_shop/features/onboarding/presentation/style_onboarding_screen.dart';
@@ -87,6 +89,34 @@ void main() {
             expect(find.text(title), findsOneWidget);
           }
           expect(find.text('Show my feed'), findsOneWidget);
+        },
+      );
+
+      testWidgets(
+        'Explore (CatalogScreen) renders on ${size.width}x${size.height} with zero overflow',
+        (tester) async {
+          await tester.binding.setSurfaceSize(size);
+          await tester.pumpWidget(wrapWithScope(const CatalogScreen(), size));
+          await tester.pump();
+          await tester.pump(const Duration(milliseconds: 500));
+          await tester.pump(const Duration(milliseconds: 500));
+
+          expect(tester.takeException(), isNull);
+          expect(find.text('Explore'), findsOneWidget);
+          expect(find.textContaining('pieces'), findsOneWidget);
+        },
+      );
+
+      testWidgets(
+        'SearchScreen suggestions render on ${size.width}x${size.height} with zero overflow',
+        (tester) async {
+          await tester.binding.setSurfaceSize(size);
+          await tester.pumpWidget(wrapWithScope(const SearchScreen(), size));
+          await tester.pump();
+          await tester.pump(const Duration(milliseconds: 100));
+
+          expect(tester.takeException(), isNull);
+          expect(find.text('Trending searches'), findsOneWidget);
         },
       );
 

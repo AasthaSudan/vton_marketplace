@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:clothsy_core/features/catalog/domain/entities/banner.dart';
 import 'package:clothsy_core/features/catalog/domain/entities/collection.dart';
 import 'package:clothsy_core/features/catalog/domain/entities/product.dart';
+import 'package:clothsy_core/features/catalog/domain/entities/product_filter.dart';
 import 'package:clothsy_core/features/catalog/domain/entities/seller.dart';
 import 'package:clothsy_core/features/catalog/domain/repositories/catalog_repository.dart';
 
@@ -520,6 +521,24 @@ class MockCatalogRepository implements CatalogRepository {
         icon: Icons.woman_outlined,
       ),
       ProductCollection(
+        id: 'col_dresses',
+        handle: 'dresses',
+        title: 'Dresses',
+        icon: Icons.dry_cleaning_outlined,
+      ),
+      ProductCollection(
+        id: 'col_tops',
+        handle: 'tops',
+        title: 'Tops',
+        icon: Icons.checkroom_outlined,
+      ),
+      ProductCollection(
+        id: 'col_outerwear',
+        handle: 'outerwear',
+        title: 'Outerwear',
+        icon: Icons.layers_outlined,
+      ),
+      ProductCollection(
         id: 'col_shoes',
         handle: 'shoes',
         title: 'Shoes',
@@ -540,9 +559,10 @@ class MockCatalogRepository implements CatalogRepository {
     int page = 1,
     int limit = 20,
     String? sortBy,
+    ProductFilter filter = ProductFilter.none,
   }) async {
     await Future.delayed(const Duration(milliseconds: 250));
-    var results = List<Product>.from(_products);
+    var results = _products.where(filter.matches).toList();
 
     if (category != null && category.toLowerCase() != 'all') {
       final cat = category.toLowerCase();
@@ -574,7 +594,7 @@ class MockCatalogRepository implements CatalogRepository {
       results.sort((a, b) => b.reviewCount.compareTo(a.reviewCount));
     }
 
-    return results;
+    return results.skip((page - 1) * limit).take(limit).toList();
   }
 
   @override

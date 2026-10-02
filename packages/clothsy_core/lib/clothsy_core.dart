@@ -24,6 +24,7 @@ export 'features/cart/domain/repositories/coupon_repository.dart';
 export 'features/catalog/domain/entities/banner.dart';
 export 'features/catalog/domain/entities/collection.dart';
 export 'features/catalog/domain/entities/product.dart';
+export 'features/catalog/domain/entities/product_filter.dart';
 export 'features/catalog/domain/entities/seller.dart';
 export 'features/catalog/domain/repositories/catalog_repository.dart';
 export 'features/notifications/domain/entities/app_notification.dart';

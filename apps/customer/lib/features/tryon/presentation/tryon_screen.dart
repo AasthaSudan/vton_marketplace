@@ -164,7 +164,7 @@ class _TryonScreenState extends ConsumerState<TryonScreen> {
     final colors = context.colors;
     final session = ref.watch(tryOnNotifierProvider);
     final history = ref.watch(tryOnHistoryProvider);
-    final catalogAsync = ref.watch(productsProvider);
+    final catalogAsync = ref.watch(allProductsProvider);
 
     return Scaffold(
       backgroundColor: colors.background,

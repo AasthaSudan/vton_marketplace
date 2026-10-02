@@ -7,6 +7,7 @@ import '../buttons/pressable_scale.dart';
 class ClothsySearchBar extends StatelessWidget {
   final TextEditingController? controller;
   final ValueChanged<String>? onChanged;
+  final ValueChanged<String>? onSubmitted;
   final VoidCallback? onFilterTap;
   final VoidCallback? onTap;
   final bool readOnly;
@@ -18,6 +19,7 @@ class ClothsySearchBar extends StatelessWidget {
     super.key,
     this.controller,
     this.onChanged,
+    this.onSubmitted,
     this.onFilterTap,
     this.onTap,
     this.readOnly = false,
@@ -56,6 +58,8 @@ class ClothsySearchBar extends StatelessWidget {
               autofocus: autoFocus,
               onTap: onTap,
               onChanged: onChanged,
+              onSubmitted: onSubmitted,
+              textInputAction: TextInputAction.search,
               style: AppTypography.body(color: colors.textPrimary),
               cursorColor: colors.primary,
               decoration: InputDecoration(
