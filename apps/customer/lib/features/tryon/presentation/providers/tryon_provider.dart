@@ -2,13 +2,17 @@ import 'dart:typed_data';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:clothsy_core/core/constants/clothsy_copy.dart';
 import 'package:clothsy_core/features/catalog/domain/entities/product.dart';
+import '../../../../core/config/app_config_provider.dart';
+import '../../../../core/supabase/supabase_providers.dart';
 import '../../data/repositories/mock_tryon_repository.dart';
+import '../../data/repositories/supabase_tryon_repository.dart';
 import 'package:clothsy_core/features/tryon/domain/entities/tryon_photo.dart';
 import 'package:clothsy_core/features/tryon/domain/entities/tryon_session.dart';
 import 'package:clothsy_core/features/tryon/domain/repositories/tryon_repository.dart';
 
 final tryOnRepositoryProvider = Provider<TryOnRepository>((ref) {
-  return MockTryOnRepository();
+  if (ref.watch(appConfigProvider).useMockBackend) return MockTryOnRepository();
+  return SupabaseTryOnRepository(ref.watch(supabaseClientProvider));
 });
 
 final tryOnPresetsProvider = FutureProvider<List<TryOnPhoto>>((ref) async {
