@@ -21,7 +21,7 @@ class User {
     required this.email,
     required this.phone,
     this.avatarUrl,
-    this.memberTier = 'Atelier Member',
+    this.memberTier = 'Clothsy Member',
     this.isGuest = false,
   });
 

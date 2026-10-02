@@ -30,7 +30,7 @@ class ProfileScreen extends ConsumerWidget {
 
     ClothsyBottomSheet.show(
       context: context,
-      title: 'Edit Atelier Profile',
+      title: 'Edit profile',
       subtitle: 'Update your contact and membership details',
       child: Padding(
         padding: const EdgeInsets.all(20),
@@ -193,7 +193,7 @@ class ProfileScreen extends ConsumerWidget {
                           borderRadius: BorderRadius.circular(100),
                         ),
                         child: Text(
-                          user?.memberTier ?? 'Atelier Member',
+                          user?.memberTier ?? 'Clothsy Member',
                           style: AppTypography.label(
                             color: colors.primary,
                             weight: FontWeight.w700,
@@ -269,7 +269,7 @@ class ProfileScreen extends ConsumerWidget {
             context,
             icon: Icons.auto_awesome_outlined,
             title: 'Virtual Try-On Studio',
-            subtitle: 'Manage model photo & Atelier credits',
+            subtitle: 'Your photos, try-on credits and saved looks',
             onTap: () => context.go('/tryon'),
           ),
           _buildMenuItem(
@@ -288,7 +288,8 @@ class ProfileScreen extends ConsumerWidget {
             onTap: () {
               ClothsySnackbar.show(
                 context,
-                message: 'Connecting with a Clothsy luxury stylist...',
+                message:
+                    'Help centre is coming soon. Our team will be with you shortly.',
                 type: SnackbarType.info,
               );
             },

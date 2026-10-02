@@ -150,7 +150,7 @@ class _SectionLabel extends StatelessWidget {
       child: Text(
         label.toUpperCase(),
         style: AppTypography.label(
-          color: AppColors.mutedGrey,
+          color: context.colors.textSecondary,
           weight: FontWeight.w700,
         ).copyWith(fontSize: 11, letterSpacing: 2),
       ),
@@ -170,10 +170,10 @@ class _Card extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.softLilac, width: 1),
+        border: Border.all(color: context.colors.surfaceMuted, width: 1),
         boxShadow: [
           BoxShadow(
-            color: AppColors.deepInk.withOpacity(0.04),
+            color: context.colors.textPrimary.withOpacity(0.04),
             blurRadius: 12,
             offset: const Offset(0, 3),
           ),
@@ -206,9 +206,9 @@ class _ColorDot extends StatelessWidget {
         const SizedBox(height: 4),
         Text(
           name,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 10,
-            color: AppColors.mutedGrey,
+            color: context.colors.textSecondary,
             fontWeight: FontWeight.w500,
           ),
         ),
@@ -239,9 +239,9 @@ class _RadiusSwatch extends StatelessWidget {
         const SizedBox(height: 6),
         Text(
           label,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 10,
-            color: AppColors.mutedGrey,
+            color: context.colors.textSecondary,
             fontWeight: FontWeight.w500,
           ),
         ),

@@ -26,7 +26,7 @@ class OfferStrip extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         decoration: BoxDecoration(
-          color: AppColors.softLilac,
+          color: context.colors.surfaceMuted,
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(

@@ -75,7 +75,7 @@ class _TryOnShimmerLoadingState extends State<TryOnShimmerLoading>
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      // Rotating & Pulsing Atelier AI Orb
+                      // Rotating, pulsing Clothsy AI orb
                       Transform.rotate(
                         angle: _controller.value * 2 * math.pi,
                         child: Container(

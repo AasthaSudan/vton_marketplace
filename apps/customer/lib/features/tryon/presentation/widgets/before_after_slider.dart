@@ -129,9 +129,9 @@ class _BeforeAfterSliderState extends State<BeforeAfterSlider> {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(
+                        Icon(
                           Icons.auto_awesome,
-                          color: Colors.amber,
+                          color: context.colors.rating,
                           size: 12,
                         ),
                         const SizedBox(width: 4),
@@ -158,7 +158,7 @@ class _BeforeAfterSliderState extends State<BeforeAfterSlider> {
                 ),
               ),
 
-              // 6. Luxury Circular Slider Handle
+              // 6. Circular slider handle
               Positioned(
                 left: width * _splitPercent - 20,
                 top: height / 2 - 20,

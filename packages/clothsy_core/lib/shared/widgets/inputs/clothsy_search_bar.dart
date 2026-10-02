@@ -21,7 +21,7 @@ class ClothsySearchBar extends StatelessWidget {
     this.onFilterTap,
     this.onTap,
     this.readOnly = false,
-    this.hintText = 'Search luxury fashion, dresses, styles...',
+    this.hintText = 'Search styles, brands and more',
     this.showFilterButton = true,
     this.autoFocus = false,
   });

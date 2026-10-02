@@ -80,7 +80,7 @@ class _TryonScreenState extends ConsumerState<TryonScreen> {
       title: 'Standard Fit',
       size: p.availableSizes.isNotEmpty ? p.availableSizes.first : 'M',
       colorName: 'Classic',
-      colorHex: '#2B1E3F',
+      colorHex: '0xFF14102B',
       price: p.price,
     );
   }
@@ -254,7 +254,7 @@ class _TryonScreenState extends ConsumerState<TryonScreen> {
                       const SizedBox(width: 6),
                       Expanded(
                         child: Text(
-                          'Clothsy Atelier Tier • Unlimited Try-Ons',
+                          '${session.remainingCredits} AI previews left',
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: AppTypography.caption(
@@ -549,7 +549,7 @@ class _TryonScreenState extends ConsumerState<TryonScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Atelier Garments',
+                  'Pick a piece',
                   style: AppTypography.bodyMedium(
                     weight: FontWeight.w700,
                     color: colors.textPrimary,
@@ -702,7 +702,7 @@ class _TryonScreenState extends ConsumerState<TryonScreen> {
                         : Icons.star_border,
                     size: 20,
                     color: session.currentResult?.rating != null
-                        ? Colors.amber
+                        ? context.colors.rating
                         : colors.textPrimary,
                   ),
                   onPressed: () {

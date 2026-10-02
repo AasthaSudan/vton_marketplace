@@ -40,9 +40,9 @@ class _OnboardingScreenState extends State<OnboardingScreen>
           'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=900&auto=format&fit=crop&q=80',
     },
     {
-      'kicker': 'ATELIER',
-      'headline': 'Pure\nLuxury,\nModern\nChic',
-      'subtitle': 'Crafted silks, linens\nand contemporary cuts.',
+      'kicker': 'BRANDS',
+      'headline': 'One\nBag,\nMany\nBrands',
+      'subtitle': 'Independent labels you\'ll love next,\nin one checkout.',
       'card1Image':
           'https://images.unsplash.com/photo-1556905055-8f358a7a47b2?w=900&auto=format&fit=crop&q=80',
       'card2Image':
@@ -93,7 +93,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
     final colors = context.colors;
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: colors.background,
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
@@ -189,7 +189,7 @@ class _TopBar extends StatelessWidget {
               Text(
                 'Clothsy',
                 style: AppTypography.label(
-                  color: AppColors.deepInk,
+                  color: context.colors.textPrimary,
                   weight: FontWeight.w700,
                 ).copyWith(fontSize: 15, letterSpacing: 0.2),
               ),
@@ -203,7 +203,7 @@ class _TopBar extends StatelessWidget {
               child: Text(
                 'Skip',
                 style: AppTypography.caption(
-                  color: AppColors.mutedGrey,
+                  color: context.colors.textSecondary,
                   weight: FontWeight.w600,
                 ).copyWith(fontSize: 13),
               ),
@@ -289,13 +289,13 @@ class _SlideContent extends StatelessWidget {
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: AppColors.softLilac,
+                        color: context.colors.surfaceMuted,
                         borderRadius: BorderRadius.circular(100),
                       ),
                       child: Text(
                         slide['kicker'] as String,
                         style: AppTypography.label(
-                          color: AppColors.clothsyViolet,
+                          color: context.colors.primary,
                           weight: FontWeight.w700,
                         ).copyWith(fontSize: kickerSize, letterSpacing: 2.0),
                       ),
@@ -310,8 +310,8 @@ class _SlideContent extends StatelessWidget {
                             word: word,
                             fontSize: titleSize,
                             color: word.endsWith(',')
-                                ? AppColors.clothsyViolet
-                                : AppColors.deepInk,
+                                ? context.colors.primary
+                                : context.colors.textPrimary,
                           ),
                         ),
 
@@ -322,7 +322,7 @@ class _SlideContent extends StatelessWidget {
                       width: 28,
                       height: 2.5,
                       decoration: BoxDecoration(
-                        color: AppColors.clothsyViolet,
+                        color: context.colors.primary,
                         borderRadius: BorderRadius.circular(2),
                       ),
                     ),
@@ -334,8 +334,10 @@ class _SlideContent extends StatelessWidget {
                       alignment: Alignment.centerLeft,
                       child: Text(
                         slide['subtitle'] as String,
-                        style: AppTypography.body(color: AppColors.mutedGrey)
-                            .copyWith(
+                        style:
+                            AppTypography.body(
+                              color: context.colors.textSecondary,
+                            ).copyWith(
                               fontSize: subtitleSize,
                               height: 1.5,
                               fontWeight: FontWeight.w400,
@@ -453,12 +455,14 @@ class _ImageCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.lilacMid,
+        color: context.colors.surfaceMuted,
         borderRadius: borderRadius,
         border: hasBorder ? Border.all(color: Colors.white, width: 3.5) : null,
         boxShadow: [
           BoxShadow(
-            color: AppColors.deepInk.withOpacity(hasBorder ? 0.22 : 0.14),
+            color: context.colors.textPrimary.withOpacity(
+              hasBorder ? 0.22 : 0.14,
+            ),
             blurRadius: hasBorder ? 20 : 16,
             offset: const Offset(0, 8),
           ),
@@ -468,12 +472,13 @@ class _ImageCard extends StatelessWidget {
       child: CachedNetworkImage(
         imageUrl: imageUrl,
         fit: BoxFit.cover,
-        placeholder: (context, url) => Container(color: AppColors.lilacMid),
+        placeholder: (context, url) =>
+            Container(color: context.colors.surfaceMuted),
         errorWidget: (context, url, err) => Container(
-          color: AppColors.lilacMid,
-          child: const Icon(
+          color: context.colors.surfaceMuted,
+          child: Icon(
             Icons.image_outlined,
-            color: Colors.white60,
+            color: context.colors.textSecondary,
             size: 28,
           ),
         ),
@@ -498,8 +503,8 @@ class _PillColumns extends StatelessWidget {
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               colors: [
-                AppColors.lilacMid.withOpacity(0.8),
-                AppColors.lilacMid.withOpacity(0.0),
+                context.colors.surfaceMuted.withOpacity(0.8),
+                context.colors.surfaceMuted.withOpacity(0.0),
               ],
             ),
             borderRadius: BorderRadius.circular(4),
@@ -568,7 +573,7 @@ class _BottomBar extends StatelessWidget {
                 vertical: isTiny ? 11 : 13,
               ),
               decoration: BoxDecoration(
-                color: isLast ? colors.primary : AppColors.deepInk,
+                color: isLast ? colors.primary : context.colors.textPrimary,
                 borderRadius: BorderRadius.circular(100),
                 boxShadow: [
                   BoxShadow(

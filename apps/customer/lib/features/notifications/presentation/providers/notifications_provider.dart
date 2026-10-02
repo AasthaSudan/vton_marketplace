@@ -26,7 +26,7 @@ class NotificationsNotifier extends Notifier<List<AppNotification>> {
         id: 'notif_3',
         title: 'Clothsy AI Virtual Try-On Ready',
         message:
-            'Try on the new Autumn Atelier collection now with your saved shopper model.',
+            'New autumn drops from Noor Atelier are live. See them on you with Clothsy AI Try-On.',
         timestamp: DateTime.now().subtract(const Duration(days: 2)),
         type: NotificationType.tryon,
         deepLink: '/tryon',
