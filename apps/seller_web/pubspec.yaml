@@ -1,0 +1,23 @@
+name: clothsy_seller
+description: Clothsy Seller Panel — onboard, list products, fulfil orders, get paid and grow.
+publish_to: none
+version: 0.1.0+1
+
+environment:
+  sdk: ^3.10.8
+
+resolution: workspace
+
+dependencies:
+  flutter:
+    sdk: flutter
+  clothsy_core:
+    path: ../../packages/clothsy_core
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true

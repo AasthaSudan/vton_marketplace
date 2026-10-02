@@ -7,4 +7,6 @@ environment:
 
 workspace:
   - apps/customer
+  - apps/seller_web
+  - apps/admin_web
   - packages/clothsy_core
