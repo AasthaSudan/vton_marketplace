@@ -9,6 +9,7 @@ import 'package:clothsy_core/shared/widgets/buttons/pressable_scale.dart';
 import 'package:clothsy_core/shared/widgets/buttons/primary_button.dart';
 import 'package:clothsy_core/shared/widgets/feedback/clothsy_snackbar.dart';
 import 'package:clothsy_core/shared/widgets/inputs/clothsy_otp_field.dart';
+import 'after_sign_in.dart';
 import 'providers/auth_provider.dart';
 
 class OtpVerificationScreen extends ConsumerStatefulWidget {
@@ -106,8 +107,7 @@ class _OtpVerificationScreenState extends ConsumerState<OtpVerificationScreen> {
       message: 'Welcome to Clothsy!',
       type: SnackbarType.success,
     );
-    final redirect = widget.redirectPath;
-    context.go(redirect != null && redirect.isNotEmpty ? redirect : '/');
+    await goAfterSignIn(context, ref, widget.redirectPath);
   }
 
   @override

@@ -10,6 +10,7 @@ import 'package:clothsy_shop/features/catalog/data/repositories/mock_catalog_rep
 import 'package:clothsy_shop/features/catalog/presentation/product_detail_screen.dart';
 import 'package:clothsy_shop/features/home/presentation/home_screen.dart';
 import 'package:clothsy_shop/features/onboarding/presentation/onboarding_screen.dart';
+import 'package:clothsy_shop/features/onboarding/presentation/style_onboarding_screen.dart';
 import 'package:clothsy_shop/features/tryon/presentation/tryon_screen.dart';
 
 void main() {
@@ -60,6 +61,32 @@ void main() {
           expect(find.text('Next'), findsOneWidget);
           // Skip link always visible
           expect(find.text('Skip'), findsOneWidget);
+        },
+      );
+
+      testWidgets(
+        'StyleOnboardingScreen walks every step on ${size.width}x${size.height} with zero overflow',
+        (tester) async {
+          await tester.binding.setSurfaceSize(size);
+          await tester.pumpWidget(
+            wrapWithScope(const StyleOnboardingScreen(), size),
+          );
+          await tester.pump();
+          expect(find.text('What should we call you?'), findsOneWidget);
+
+          for (final title in [
+            'What do you shop for?',
+            'Pick looks you like',
+            'Brands you love',
+            'Your usual budget',
+          ]) {
+            await tester.tap(find.text('Continue'));
+            await tester.pump(const Duration(milliseconds: 400));
+            await tester.pump(const Duration(milliseconds: 400));
+            expect(tester.takeException(), isNull);
+            expect(find.text(title), findsOneWidget);
+          }
+          expect(find.text('Show my feed'), findsOneWidget);
         },
       );
 

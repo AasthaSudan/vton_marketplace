@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:clothsy_core/features/auth/domain/entities/user.dart';
+import '../config/app_config_provider.dart';
+import '../../features/auth/presentation/providers/auth_provider.dart';
 import '../../features/address/presentation/address_list_screen.dart';
 import '../../features/auth/presentation/login_screen.dart';
 import '../../features/auth/presentation/otp_verification_screen.dart';
@@ -15,6 +18,7 @@ import '../../features/gallery/presentation/component_gallery_screen.dart';
 import '../../features/home/presentation/home_screen.dart';
 import '../../features/notifications/presentation/notifications_screen.dart';
 import '../../features/onboarding/presentation/onboarding_screen.dart';
+import '../../features/onboarding/presentation/style_onboarding_screen.dart';
 import '../../features/orders/presentation/order_detail_screen.dart';
 import '../../features/orders/presentation/orders_list_screen.dart';
 import '../../features/profile/presentation/profile_screen.dart';
@@ -42,10 +46,43 @@ final _sectionProfileNavigatorKey = GlobalKey<NavigatorState>(
   debugLabel: 'sectionProfile',
 );
 
+/// Pages that need a signed-in shopper. Everything else — browsing, search,
+/// product pages, the bag and trying things on — stays open to guests;
+/// Clothsy asks for sign-in at checkout (Blueprint fig. 13).
+bool needsSignIn(String path) =>
+    path == '/checkout' ||
+    path == '/orders' ||
+    path.startsWith('/orders/') ||
+    path.startsWith('/order-success/') ||
+    path == '/addresses' ||
+    path == '/tryon/history' ||
+    path == '/style-preferences';
+
 final appRouterProvider = Provider<GoRouter>((ref) {
+  // Re-run the redirect whenever sign-in state changes (e.g. sign-out on a
+  // protected page), without rebuilding the router itself.
+  final authChanges = ValueNotifier<int>(0);
+  ref.listen(authProvider, (_, _) => authChanges.value++);
+  ref.onDispose(authChanges.dispose);
+
   return GoRouter(
     navigatorKey: rootNavigatorKey,
     initialLocation: '/splash',
+    refreshListenable: authChanges,
+    redirect: (context, state) {
+      final auth = ref.read(authProvider);
+      // Still restoring the session: decide once we know.
+      if (auth.status == AuthStatus.initial) return null;
+      if (!needsSignIn(state.uri.path)) return null;
+      // Guest checkout only exists in the mock flavor; real orders need an
+      // account to belong to.
+      final signedIn =
+          auth.isAuthenticated ||
+          (auth.isGuest && ref.read(appConfigProvider).useMockBackend);
+      if (signedIn) return null;
+      final back = Uri.encodeQueryComponent(state.uri.toString());
+      return '/login?redirect=$back';
+    },
     routes: [
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) {
@@ -136,6 +173,13 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             redirectPath: redirect,
           );
         },
+      ),
+      GoRoute(
+        path: '/style-preferences',
+        parentNavigatorKey: rootNavigatorKey,
+        builder: (context, state) => StyleOnboardingScreen(
+          redirectPath: state.uri.queryParameters['redirect'],
+        ),
       ),
       GoRoute(
         path: '/gallery',

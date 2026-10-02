@@ -9,6 +9,7 @@ import 'package:clothsy_core/shared/widgets/buttons/primary_button.dart';
 import 'package:clothsy_core/shared/widgets/buttons/secondary_button.dart';
 import 'package:clothsy_core/shared/widgets/feedback/clothsy_snackbar.dart';
 import 'package:clothsy_core/shared/widgets/inputs/clothsy_text_field.dart';
+import 'after_sign_in.dart';
 import 'providers/auth_provider.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
@@ -35,13 +36,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     super.dispose();
   }
 
-  void _onSuccessRedirect() {
-    if (widget.redirectPath != null) {
-      context.go(widget.redirectPath!);
-    } else {
-      context.go('/');
-    }
-  }
+  void _onSuccessRedirect() => goAfterSignIn(context, ref, widget.redirectPath);
 
   void _showAuthError() {
     final message = ref.read(authProvider).errorMessage;

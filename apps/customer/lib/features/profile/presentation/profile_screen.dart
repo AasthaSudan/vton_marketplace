@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -233,15 +234,22 @@ class ProfileScreen extends ConsumerWidget {
             context,
             icon: Icons.receipt_long_outlined,
             title: 'My Orders',
-            subtitle: 'Track live status, invoices & cancellations',
+            subtitle: 'Track each shipment, cancel and see refunds',
             onTap: () => context.push('/orders'),
           ),
           _buildMenuItem(
             context,
             icon: Icons.favorite_outline_rounded,
             title: 'Wishlist',
-            subtitle: 'Saved favourites, price-drop & restock alerts',
+            subtitle: 'Pieces you saved for later',
             onTap: () => context.push('/wishlist'),
+          ),
+          _buildMenuItem(
+            context,
+            icon: Icons.style_outlined,
+            title: 'Style preferences',
+            subtitle: 'Categories, looks, brands and budget',
+            onTap: () => context.push('/style-preferences?redirect=/profile'),
           ),
           _buildMenuItem(
             context,
@@ -272,19 +280,21 @@ class ProfileScreen extends ConsumerWidget {
             subtitle: 'Your photos, try-on credits and saved looks',
             onTap: () => context.go('/tryon'),
           ),
-          _buildMenuItem(
-            context,
-            icon: Icons.palette_outlined,
-            title: 'Design Tokens',
-            subtitle: 'Colors, typography & component reference',
-            onTap: () => context.push('/gallery'),
-          ),
+          // Developer reference for the design system; not for shoppers.
+          if (kDebugMode)
+            _buildMenuItem(
+              context,
+              icon: Icons.palette_outlined,
+              title: 'Design Tokens',
+              subtitle: 'Colors, typography & component reference',
+              onTap: () => context.push('/gallery'),
+            ),
 
           _buildMenuItem(
             context,
             icon: Icons.help_outline_rounded,
-            title: 'Help & Stylist Concierge',
-            subtitle: '24/7 dedicated support via WhatsApp & chat',
+            title: 'Help & support',
+            subtitle: 'FAQs and tickets are coming soon',
             onTap: () {
               ClothsySnackbar.show(
                 context,

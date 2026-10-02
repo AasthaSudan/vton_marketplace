@@ -30,6 +30,8 @@ export 'features/orders/domain/entities/order.dart';
 export 'features/orders/domain/order_splitter.dart';
 export 'features/orders/domain/repositories/order_repository.dart';
 export 'features/payments/domain/payment_gateway.dart';
+export 'features/profile/domain/entities/style_preferences.dart';
+export 'features/profile/domain/repositories/profile_repository.dart';
 export 'features/tryon/domain/entities/tryon_photo.dart';
 export 'features/tryon/domain/entities/tryon_session.dart';
 export 'features/tryon/domain/repositories/tryon_repository.dart';
