@@ -378,7 +378,7 @@ class OrderDetailScreen extends ConsumerWidget {
                         '${order.items.length} items added to your shopping bag!',
                     type: SnackbarType.success,
                   );
-                  context.push('/cart');
+                  context.go('/bag');
                 },
               ),
               if (order.canBeCancelled) ...[

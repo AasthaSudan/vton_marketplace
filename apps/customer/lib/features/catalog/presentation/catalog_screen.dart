@@ -40,7 +40,7 @@ class CatalogScreen extends ConsumerWidget {
             padding: const EdgeInsets.only(right: 16),
             child: CartBadgeIcon(
               count: cartCount,
-              onTap: () => context.push('/cart'),
+              onTap: () => context.go('/bag'),
             ),
           ),
         ],

@@ -556,7 +556,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                                   ref
                                       .read(cartProvider.notifier)
                                       .addToCart(product, activeVariant);
-                                  context.push('/cart');
+                                  context.go('/bag');
                                 },
                               ),
                             ),

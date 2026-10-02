@@ -72,7 +72,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             padding: const EdgeInsets.only(right: 14),
             child: CartBadgeIcon(
               count: cartCount,
-              onTap: () => context.push('/cart'),
+              onTap: () => context.go('/bag'),
             ),
           ),
         ],
@@ -283,7 +283,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     message: 'Coupon FIRST15 (15% OFF) applied to your bag!',
                     type: SnackbarType.success,
                   );
-                  context.push('/cart');
+                  context.go('/bag');
                 },
               ),
             ),
@@ -373,7 +373,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     title: 'Wishlist',
                     onTap: () {
                       Navigator.pop(context);
-                      context.go('/wishlist');
+                      context.push('/wishlist');
                     },
                   ),
                   _buildDrawerTile(
@@ -382,7 +382,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     title: 'My Bag',
                     onTap: () {
                       Navigator.pop(context);
-                      context.push('/cart');
+                      context.go('/bag');
                     },
                   ),
                   _buildDrawerTile(

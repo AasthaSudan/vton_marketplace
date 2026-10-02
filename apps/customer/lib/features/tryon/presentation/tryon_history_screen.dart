@@ -186,7 +186,7 @@ class TryOnHistoryScreen extends ConsumerWidget {
                                   context,
                                   message: 'Added ${item.product.title} to bag',
                                 );
-                                context.push('/cart');
+                                context.go('/bag');
                               },
                               child: Container(
                                 width: double.infinity,

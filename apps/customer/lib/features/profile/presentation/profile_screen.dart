@@ -231,10 +231,17 @@ class ProfileScreen extends ConsumerWidget {
           // Menu Options
           _buildMenuItem(
             context,
-            icon: Icons.shopping_bag_outlined,
+            icon: Icons.receipt_long_outlined,
             title: 'My Orders',
             subtitle: 'Track live status, invoices & cancellations',
             onTap: () => context.push('/orders'),
+          ),
+          _buildMenuItem(
+            context,
+            icon: Icons.favorite_outline_rounded,
+            title: 'Wishlist',
+            subtitle: 'Saved favourites, price-drop & restock alerts',
+            onTap: () => context.push('/wishlist'),
           ),
           _buildMenuItem(
             context,

@@ -740,7 +740,7 @@ class _TryonScreenState extends ConsumerState<TryonScreen> {
                           message:
                               'Added ${session.selectedProduct!.title} to bag',
                         );
-                        context.push('/cart');
+                        context.go('/bag');
                       }
                     },
                   ),

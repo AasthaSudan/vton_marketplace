@@ -24,8 +24,8 @@ void main() {
     // Verify Bottom Navigation items exist
     expect(find.text('Home'), findsOneWidget);
     expect(find.text('Explore'), findsOneWidget);
-    expect(find.text('Try-On'), findsOneWidget);
-    expect(find.text('Wishlist'), findsOneWidget);
+    expect(find.text('Clothsy AI'), findsOneWidget);
+    expect(find.text('Bag'), findsOneWidget);
     expect(find.text('Profile'), findsOneWidget);
   });
 }

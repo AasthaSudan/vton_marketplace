@@ -33,8 +33,8 @@ final _sectionExploreNavigatorKey = GlobalKey<NavigatorState>(
 final _sectionTryonNavigatorKey = GlobalKey<NavigatorState>(
   debugLabel: 'sectionTryon',
 );
-final _sectionWishlistNavigatorKey = GlobalKey<NavigatorState>(
-  debugLabel: 'sectionWishlist',
+final _sectionBagNavigatorKey = GlobalKey<NavigatorState>(
+  debugLabel: 'sectionBag',
 );
 final _sectionProfileNavigatorKey = GlobalKey<NavigatorState>(
   debugLabel: 'sectionProfile',
@@ -84,12 +84,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             ],
           ),
           StatefulShellBranch(
-            navigatorKey: _sectionWishlistNavigatorKey,
+            navigatorKey: _sectionBagNavigatorKey,
             routes: [
               GoRoute(
-                path: '/wishlist',
+                path: '/bag',
                 pageBuilder: (context, state) =>
-                    const NoTransitionPage(child: WishlistScreen()),
+                    const NoTransitionPage(child: CartScreen()),
               ),
             ],
           ),
@@ -145,10 +145,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         parentNavigatorKey: rootNavigatorKey,
         builder: (context, state) => const SearchScreen(),
       ),
+      // Legacy deep links (e.g. notifications) — the bag is now a tab.
+      GoRoute(path: '/cart', redirect: (context, state) => '/bag'),
       GoRoute(
-        path: '/cart',
+        path: '/wishlist',
         parentNavigatorKey: rootNavigatorKey,
-        builder: (context, state) => const CartScreen(),
+        builder: (context, state) => const WishlistScreen(),
       ),
       GoRoute(
         path: '/checkout',
