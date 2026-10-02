@@ -1,0 +1,31 @@
+name: clothsy_shop
+description: Clothsy Marketplace customer app — discover, try on and shop from the brands you'll love next.
+publish_to: none
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.10.8
+
+resolution: workspace
+
+dependencies:
+  flutter:
+    sdk: flutter
+  clothsy_core:
+    path: ../../packages/clothsy_core
+  cupertino_icons: ^1.0.9
+  flutter_riverpod: ^3.3.2
+  go_router: ^17.5.0
+  google_fonts: ^8.2.1
+  cached_network_image: ^3.4.1
+  dio: ^5.11.1
+  shared_preferences: ^2.5.5
+  intl: ^0.20.3
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true

@@ -1,0 +1,25 @@
+name: clothsy_core
+description: Shared Clothsy domain entities, design system, theme and widgets used by the customer app, seller panel and admin panel.
+publish_to: none
+version: 0.1.0
+
+environment:
+  sdk: ^3.10.8
+
+resolution: workspace
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cached_network_image: ^3.4.1
+  dio: ^5.11.1
+  google_fonts: ^8.2.1
+  intl: ^0.20.3
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
