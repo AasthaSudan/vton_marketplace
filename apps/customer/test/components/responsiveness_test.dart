@@ -87,8 +87,9 @@ void main() {
           await tester.pump(const Duration(milliseconds: 500));
 
           expect(tester.takeException(), isNull);
-          expect(find.text('Add to Cart'), findsOneWidget);
-          expect(find.text('Buy Now'), findsOneWidget);
+          // Try-On eligible product: "Try it on" sits beside "Add to bag".
+          expect(find.text('Try it on'), findsOneWidget);
+          expect(find.text('Add to bag'), findsOneWidget);
         },
       );
 
@@ -102,7 +103,7 @@ void main() {
           await tester.pump(const Duration(milliseconds: 500));
 
           expect(tester.takeException(), isNull);
-          expect(find.text('Virtual Try-On'), findsOneWidget);
+          expect(find.text('Clothsy AI Try-On'), findsOneWidget);
         },
       );
     }

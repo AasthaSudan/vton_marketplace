@@ -227,7 +227,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   Center(child: Text('Error loading best picks: $err')),
               data: (products) {
                 return SizedBox(
-                  height: 320,
+                  height: ProductCard.heightForWidth(185),
                   child: ListView.separated(
                     padding: const EdgeInsets.symmetric(horizontal: 20),
                     scrollDirection: Axis.horizontal,

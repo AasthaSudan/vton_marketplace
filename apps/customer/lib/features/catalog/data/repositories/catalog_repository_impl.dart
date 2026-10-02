@@ -397,7 +397,7 @@ class CatalogRepositoryImpl implements CatalogRepository {
       ),
       PromoBannerItem(
         id: 'b2',
-        headline: 'See Yourself In\nEvery Outfit',
+        headline: 'See it\non you.',
         subtitle: 'Experience photorealistic AI Virtual Try-On',
         ctaText: 'Try It On',
         imageUrl:

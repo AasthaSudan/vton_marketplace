@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_radius.dart';
 import '../../../core/theme/app_typography.dart';
@@ -8,7 +9,23 @@ import '../buttons/clothsy_icon_button.dart';
 import '../buttons/pressable_scale.dart';
 import '../typography/price_row.dart';
 
+/// Image-first product card. Product imagery is always portrait 3:4
+/// (Brand Blueprint, section 10) so feeds stay neat and Try-On results line up.
+///
+/// The card's height is fully determined by its width
+/// ([heightForWidth]), so lists and grids can size themselves exactly — use
+/// [ProductCardGridDelegate] for grids.
 class ProductCard extends StatelessWidget {
+  /// Width : height of the product image.
+  static const double imageAspectRatio = 3 / 4;
+
+  /// Fixed height of the brand / title / price block under the image.
+  static const double infoHeight = 88;
+
+  /// Total card height for a given card [width].
+  static double heightForWidth(double width) =>
+      width / imageAspectRatio + infoHeight;
+
   final String id;
   final String title;
   final String? brand;
@@ -71,7 +88,7 @@ class ProductCard extends StatelessWidget {
           children: [
             // Image Stack
             AspectRatio(
-              aspectRatio: 0.94,
+              aspectRatio: imageAspectRatio,
               child: Stack(
                 fit: StackFit.expand,
                 children: [
@@ -204,40 +221,44 @@ class ProductCard extends StatelessWidget {
               ),
             ),
             // Product info
-            Padding(
-              padding: const EdgeInsets.fromLTRB(10.0, 8.0, 10.0, 10.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  if (brand != null) ...[
+            SizedBox(
+              height: infoHeight,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(10.0, 8.0, 10.0, 10.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (brand != null) ...[
+                      Text(
+                        brand!.toUpperCase(),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTypography.label(
+                          color: colors.textSecondary,
+                          weight: FontWeight.w600,
+                        ).copyWith(fontSize: 10, letterSpacing: 0.8),
+                      ),
+                      const SizedBox(height: 3),
+                    ],
                     Text(
-                      brand!.toUpperCase(),
+                      title,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: AppTypography.label(
-                        color: colors.textSecondary,
+                      style: AppTypography.bodyMedium(
+                        color: colors.textPrimary,
                         weight: FontWeight.w600,
-                      ).copyWith(fontSize: 10, letterSpacing: 0.8),
+                      ).copyWith(fontSize: 14),
                     ),
-                    const SizedBox(height: 3),
+                    const SizedBox(height: 6),
+                    PriceRow(
+                      price: price,
+                      originalPrice: originalPrice,
+                      showDiscountBadge: false,
+                      singleLine: true,
+                      currentPriceFontSize: 15,
+                    ),
                   ],
-                  Text(
-                    title,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: AppTypography.bodyMedium(
-                      color: colors.textPrimary,
-                      weight: FontWeight.w600,
-                    ).copyWith(fontSize: 14),
-                  ),
-                  const SizedBox(height: 6),
-                  PriceRow(
-                    price: price,
-                    originalPrice: originalPrice,
-                    showDiscountBadge: false,
-                    currentPriceFontSize: 15,
-                  ),
-                ],
+                ),
               ),
             ),
           ],
@@ -245,4 +266,40 @@ class ProductCard extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Grid delegate for [ProductCard] grids: tiles are as tall as the card needs
+/// for the actual tile width, so 3:4 images never overflow on any screen size.
+class ProductCardGridDelegate extends SliverGridDelegate {
+  final int crossAxisCount;
+  final double crossAxisSpacing;
+  final double mainAxisSpacing;
+
+  const ProductCardGridDelegate({
+    this.crossAxisCount = 2,
+    this.crossAxisSpacing = 14,
+    this.mainAxisSpacing = 16,
+  });
+
+  @override
+  SliverGridLayout getLayout(SliverConstraints constraints) {
+    final usableWidth =
+        constraints.crossAxisExtent - crossAxisSpacing * (crossAxisCount - 1);
+    final tileWidth = usableWidth / crossAxisCount;
+    final tileHeight = ProductCard.heightForWidth(tileWidth);
+    return SliverGridRegularTileLayout(
+      crossAxisCount: crossAxisCount,
+      mainAxisStride: tileHeight + mainAxisSpacing,
+      crossAxisStride: tileWidth + crossAxisSpacing,
+      childMainAxisExtent: tileHeight,
+      childCrossAxisExtent: tileWidth,
+      reverseCrossAxis: axisDirectionIsReversed(constraints.crossAxisDirection),
+    );
+  }
+
+  @override
+  bool shouldRelayout(ProductCardGridDelegate oldDelegate) =>
+      oldDelegate.crossAxisCount != crossAxisCount ||
+      oldDelegate.crossAxisSpacing != crossAxisSpacing ||
+      oldDelegate.mainAxisSpacing != mainAxisSpacing;
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:clothsy_core/core/constants/clothsy_copy.dart';
 import 'package:clothsy_core/core/theme/app_colors.dart';
 import 'package:clothsy_core/core/theme/app_radius.dart';
 import 'package:clothsy_core/core/theme/app_typography.dart';
@@ -60,12 +61,14 @@ class OrderSuccessScreen extends ConsumerWidget {
                   const SizedBox(height: 24),
 
                   Text(
-                    'Order Confirmed!',
+                    ClothsyCopy.orderPlacedTitle,
+                    textAlign: TextAlign.center,
                     style: AppTypography.h1(color: colors.textPrimary),
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Thank you for shopping with Clothsy Atelier.',
+                    ClothsyCopy.orderPlacedMessage,
+                    textAlign: TextAlign.center,
                     style: AppTypography.body(color: colors.textSecondary),
                   ),
                   const SizedBox(height: 24),

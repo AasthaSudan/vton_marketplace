@@ -2,6 +2,8 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:clothsy_core/core/constants/clothsy_copy.dart';
+import 'package:clothsy_core/features/catalog/domain/entities/product.dart';
 import 'package:clothsy_core/core/theme/app_colors.dart';
 import 'package:clothsy_core/core/theme/app_radius.dart';
 import 'package:clothsy_core/core/theme/app_typography.dart';
@@ -147,7 +149,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                           aspectRatio: 0.78,
                           child: Container(
                             decoration: BoxDecoration(
-                              color: const Color(0xFFECE7F4),
+                              color: AppColors.softLilac,
                               borderRadius: const BorderRadius.vertical(
                                 top: Radius.circular(500),
                                 bottom: Radius.circular(32),
@@ -194,11 +196,11 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                                         fit: BoxFit.cover,
                                         placeholder: (context, url) =>
                                             Container(
-                                              color: const Color(0xFFECE7F4),
+                                              color: AppColors.softLilac,
                                             ),
                                         errorWidget: (context, url, err) =>
                                             Container(
-                                              color: const Color(0xFFECE7F4),
+                                              color: AppColors.softLilac,
                                               child: Icon(
                                                 Icons.checkroom_rounded,
                                                 size: 60,
@@ -209,71 +211,6 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                                     );
                                   },
                                 ),
-
-                                // Floating AI Try-On Badge
-                                if (product.isTryonEligible)
-                                  Positioned(
-                                    bottom: 16,
-                                    left: 18,
-                                    child: PressableScale(
-                                      onTap: () {
-                                        ClothsySnackbar.show(
-                                          context,
-                                          message:
-                                              'Opening Virtual Try-On for ${product.title}...',
-                                          type: SnackbarType.success,
-                                        );
-                                        context.push(
-                                          '/tryon?productId=${product.id}',
-                                        );
-                                      },
-                                      child: Container(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 14,
-                                          vertical: 7,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color: Colors.white.withOpacity(0.92),
-                                          borderRadius: BorderRadius.circular(
-                                            100,
-                                          ),
-                                          border: Border.all(
-                                            color: colors.accent.withOpacity(
-                                              0.5,
-                                            ),
-                                            width: 1,
-                                          ),
-                                          boxShadow: [
-                                            BoxShadow(
-                                              color: colors.primary.withOpacity(
-                                                0.12,
-                                              ),
-                                              blurRadius: 10,
-                                              offset: const Offset(0, 3),
-                                            ),
-                                          ],
-                                        ),
-                                        child: Row(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            Icon(
-                                              Icons.auto_awesome,
-                                              size: 14,
-                                              color: colors.primary,
-                                            ),
-                                            const SizedBox(width: 5),
-                                            Text(
-                                              'AI Try-On',
-                                              style: AppTypography.label(
-                                                color: colors.primary,
-                                                weight: FontWeight.w700,
-                                              ).copyWith(fontSize: 11),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                  ),
 
                                 // Gallery Counter Pill Badge (Screen 3 Mockup: "1/4" centered)
                                 Positioned(
@@ -354,7 +291,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                                   children: [
                                     const Icon(
                                       Icons.star_rounded,
-                                      color: Color(0xFFFBBF24),
+                                      color: AppColors.rating,
                                       size: 18,
                                     ),
                                     const SizedBox(width: 4),
@@ -389,7 +326,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                             ),
                             const SizedBox(height: 12),
 
-                            // Price Row: $79.99 $99.99 20% OFF
+                            // Price Row: ₹7,999 ₹9,999 20% OFF
                             PriceRow(
                               price: activeVariant.price,
                               originalPrice:
@@ -576,101 +513,54 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                       ),
                     ],
                   ),
+                  // Blueprint section 26: Try-On sits right beside the
+                  // purchase button and always leads back to buying.
                   child: Row(
-                    children: [
-                      // Outlined Pill: [ 🛒 Add to Cart ]
-                      Expanded(
-                        child: PressableScale(
-                          onTap: () {
-                            ref
-                                .read(cartProvider.notifier)
-                                .addToCart(product, activeVariant);
-                            ClothsySnackbar.show(
-                              context,
-                              message: '${product.title} added to your cart!',
-                              type: SnackbarType.success,
-                            );
-                          },
-                          child: Container(
-                            height: 52,
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(100),
-                              border: Border.all(
-                                color: colors.primary,
-                                width: 1.4,
-                              ),
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 10,
-                              ),
-                              child: FittedBox(
-                                fit: BoxFit.scaleDown,
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Icon(
-                                      Icons.shopping_cart_outlined,
-                                      size: 18,
-                                      color: colors.primary,
-                                    ),
-                                    const SizedBox(width: 6),
-                                    Text(
-                                      'Add to Cart',
-                                      style: AppTypography.button(
-                                        color: colors.primary,
-                                        weight: FontWeight.w700,
-                                      ).copyWith(fontSize: 14),
-                                    ),
-                                  ],
+                    children: product.isTryonEligible
+                        ? [
+                            Expanded(
+                              child: _ActionPill(
+                                label: ClothsyCopy.tryOnButton,
+                                icon: Icons.auto_awesome,
+                                style: _ActionPillStyle.ai,
+                                onTap: () => context.push(
+                                  '/tryon?productId=${product.id}',
                                 ),
                               ),
                             ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 14),
-
-                      // Filled Dark Plum Pill: [ Buy Now ]
-                      Expanded(
-                        child: PressableScale(
-                          onTap: () {
-                            ref
-                                .read(cartProvider.notifier)
-                                .addToCart(product, activeVariant);
-                            context.push('/cart');
-                          },
-                          child: Container(
-                            height: 52,
-                            padding: const EdgeInsets.symmetric(horizontal: 10),
-                            decoration: BoxDecoration(
-                              color: colors.primary,
-                              borderRadius: BorderRadius.circular(100),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: colors.primary.withOpacity(0.24),
-                                  blurRadius: 12,
-                                  offset: const Offset(0, 4),
-                                ),
-                              ],
-                            ),
-                            child: Center(
-                              child: FittedBox(
-                                fit: BoxFit.scaleDown,
-                                child: Text(
-                                  'Buy Now',
-                                  style: AppTypography.button(
-                                    color: colors.onPrimary,
-                                    weight: FontWeight.w700,
-                                  ).copyWith(fontSize: 14),
-                                ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: _ActionPill(
+                                label: 'Add to bag',
+                                icon: Icons.shopping_bag_outlined,
+                                style: _ActionPillStyle.primary,
+                                onTap: () => _addToBag(product, activeVariant),
                               ),
                             ),
-                          ),
-                        ),
-                      ),
-                    ],
+                          ]
+                        : [
+                            Expanded(
+                              child: _ActionPill(
+                                label: 'Add to bag',
+                                icon: Icons.shopping_bag_outlined,
+                                style: _ActionPillStyle.secondary,
+                                onTap: () => _addToBag(product, activeVariant),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: _ActionPill(
+                                label: 'Buy now',
+                                style: _ActionPillStyle.primary,
+                                onTap: () {
+                                  ref
+                                      .read(cartProvider.notifier)
+                                      .addToCart(product, activeVariant);
+                                  context.push('/cart');
+                                },
+                              ),
+                            ),
+                          ],
                   ),
                 ),
               ),
@@ -678,6 +568,15 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
           );
         },
       ),
+    );
+  }
+
+  void _addToBag(Product product, ProductVariant variant) {
+    ref.read(cartProvider.notifier).addToCart(product, variant);
+    ClothsySnackbar.show(
+      context,
+      message: '${product.title} is in your bag.',
+      type: SnackbarType.success,
     );
   }
 
@@ -742,7 +641,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
           data: (products) {
             if (products.isEmpty) return const SizedBox.shrink();
             return SizedBox(
-              height: 290,
+              height: ProductCard.heightForWidth(175),
               child: ListView.separated(
                 scrollDirection: Axis.horizontal,
                 itemCount: products.length,
@@ -1056,6 +955,81 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
             style: AppTypography.caption(color: colors.textSecondary),
           ),
         ],
+      ),
+    );
+  }
+}
+
+enum _ActionPillStyle { primary, secondary, ai }
+
+/// Full-width pill used in the sticky purchase bar: violet for the main
+/// action, outlined violet for secondary, Try-On Coral for Clothsy AI.
+class _ActionPill extends StatelessWidget {
+  final String label;
+  final IconData? icon;
+  final _ActionPillStyle style;
+  final VoidCallback onTap;
+
+  const _ActionPill({
+    required this.label,
+    required this.style,
+    required this.onTap,
+    this.icon,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final Color background;
+    final Color foreground;
+    Border? border;
+    switch (style) {
+      case _ActionPillStyle.primary:
+        background = colors.primary;
+        foreground = colors.onPrimary;
+      case _ActionPillStyle.secondary:
+        background = colors.surface;
+        foreground = colors.primary;
+        border = Border.all(color: colors.primary, width: 1.4);
+      case _ActionPillStyle.ai:
+        background = colors.tryOn;
+        foreground = colors.onPrimary;
+    }
+
+    return PressableScale(
+      onTap: onTap,
+      child: Container(
+        height: 52,
+        padding: const EdgeInsets.symmetric(horizontal: 10),
+        decoration: BoxDecoration(
+          color: background,
+          borderRadius: BorderRadius.circular(100),
+          border: border,
+          boxShadow: style == _ActionPillStyle.secondary
+              ? null
+              : [
+                  BoxShadow(
+                    color: background.withOpacity(0.24),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+        ),
+        child: Center(
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (icon != null) ...[
+                  Icon(icon, size: 18, color: foreground),
+                  const SizedBox(width: 6),
+                ],
+                Text(label, style: AppTypography.button(color: foreground)),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }

@@ -2,6 +2,7 @@
 library;
 
 export 'core/constants/app_config.dart';
+export 'core/constants/clothsy_copy.dart';
 export 'core/constants/app_constants.dart';
 export 'core/errors/app_exception.dart';
 export 'core/network/api_client.dart';

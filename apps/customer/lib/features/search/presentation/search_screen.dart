@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:clothsy_core/core/constants/clothsy_copy.dart';
 import 'package:clothsy_core/core/theme/app_colors.dart';
 import 'package:clothsy_core/core/theme/app_radius.dart';
 import 'package:clothsy_core/core/theme/app_typography.dart';
@@ -73,13 +74,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                         horizontal: 20,
                         vertical: 16,
                       ),
-                      gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 2,
-                            childAspectRatio: 0.55,
-                            crossAxisSpacing: 14,
-                            mainAxisSpacing: 16,
-                          ),
+                      gridDelegate: const ProductCardGridDelegate(),
                       itemCount: 4,
                       itemBuilder: (context, index) =>
                           const ProductCardSkeleton(),
@@ -90,9 +85,8 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                       if (results.isEmpty) {
                         return EmptyStateView(
                           icon: Icons.search_off_rounded,
-                          title: 'No Matching Pieces Found',
-                          message:
-                              'Try searching for "Silk", "Blazer", or explore our latest collections.',
+                          title: ClothsyCopy.emptySearchTitle,
+                          message: ClothsyCopy.emptySearchMessage,
                           actionText: 'View All Collections',
                           onActionPressed: () => context.go('/explore'),
                         );
@@ -103,13 +97,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                           horizontal: 20,
                           vertical: 16,
                         ),
-                        gridDelegate:
-                            const SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 2,
-                              childAspectRatio: 0.55,
-                              crossAxisSpacing: 14,
-                              mainAxisSpacing: 16,
-                            ),
+                        gridDelegate: const ProductCardGridDelegate(),
                         itemCount: results.length,
                         itemBuilder: (context, index) {
                           final item = results[index];

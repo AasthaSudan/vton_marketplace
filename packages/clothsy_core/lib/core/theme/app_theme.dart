@@ -10,7 +10,7 @@ class AppTheme {
 
   static ThemeData get lightTheme {
     final base = ThemeData.light(useMaterial3: true);
-    final textTheme = GoogleFonts.interTextTheme(base.textTheme);
+    final textTheme = GoogleFonts.poppinsTextTheme(base.textTheme);
 
     return base.copyWith(
       scaffoldBackgroundColor: AppColors.background,
@@ -60,7 +60,7 @@ class AppTheme {
 
   static ThemeData get darkTheme {
     final base = ThemeData.dark(useMaterial3: true);
-    final textTheme = GoogleFonts.interTextTheme(base.textTheme);
+    final textTheme = GoogleFonts.poppinsTextTheme(base.textTheme);
 
     return base.copyWith(
       scaffoldBackgroundColor: AppColors.backgroundDark,

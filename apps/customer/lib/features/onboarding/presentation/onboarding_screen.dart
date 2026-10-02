@@ -189,7 +189,7 @@ class _TopBar extends StatelessWidget {
               Text(
                 'Clothsy',
                 style: AppTypography.label(
-                  color: const Color(0xFF1E142B),
+                  color: AppColors.deepInk,
                   weight: FontWeight.w700,
                 ).copyWith(fontSize: 15, letterSpacing: 0.2),
               ),
@@ -203,7 +203,7 @@ class _TopBar extends StatelessWidget {
               child: Text(
                 'Skip',
                 style: AppTypography.caption(
-                  color: const Color(0xFF9A91A4),
+                  color: AppColors.mutedGrey,
                   weight: FontWeight.w600,
                 ).copyWith(fontSize: 13),
               ),
@@ -289,13 +289,13 @@ class _SlideContent extends StatelessWidget {
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFF0EBF8),
+                        color: AppColors.softLilac,
                         borderRadius: BorderRadius.circular(100),
                       ),
                       child: Text(
                         slide['kicker'] as String,
                         style: AppTypography.label(
-                          color: const Color(0xFF6B4FA0),
+                          color: AppColors.clothsyViolet,
                           weight: FontWeight.w700,
                         ).copyWith(fontSize: kickerSize, letterSpacing: 2.0),
                       ),
@@ -310,8 +310,8 @@ class _SlideContent extends StatelessWidget {
                             word: word,
                             fontSize: titleSize,
                             color: word.endsWith(',')
-                                ? const Color(0xFF5B4574)
-                                : const Color(0xFF110E1B),
+                                ? AppColors.clothsyViolet
+                                : AppColors.deepInk,
                           ),
                         ),
 
@@ -322,7 +322,7 @@ class _SlideContent extends StatelessWidget {
                       width: 28,
                       height: 2.5,
                       decoration: BoxDecoration(
-                        color: const Color(0xFF8B5CF6),
+                        color: AppColors.clothsyViolet,
                         borderRadius: BorderRadius.circular(2),
                       ),
                     ),
@@ -334,10 +334,8 @@ class _SlideContent extends StatelessWidget {
                       alignment: Alignment.centerLeft,
                       child: Text(
                         slide['subtitle'] as String,
-                        style:
-                            AppTypography.body(
-                              color: const Color(0xFF7E7889),
-                            ).copyWith(
+                        style: AppTypography.body(color: AppColors.mutedGrey)
+                            .copyWith(
                               fontSize: subtitleSize,
                               height: 1.5,
                               fontWeight: FontWeight.w400,
@@ -455,12 +453,12 @@ class _ImageCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFFB49DCF),
+        color: AppColors.lilacMid,
         borderRadius: borderRadius,
         border: hasBorder ? Border.all(color: Colors.white, width: 3.5) : null,
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF1E142B).withOpacity(hasBorder ? 0.22 : 0.14),
+            color: AppColors.deepInk.withOpacity(hasBorder ? 0.22 : 0.14),
             blurRadius: hasBorder ? 20 : 16,
             offset: const Offset(0, 8),
           ),
@@ -470,10 +468,9 @@ class _ImageCard extends StatelessWidget {
       child: CachedNetworkImage(
         imageUrl: imageUrl,
         fit: BoxFit.cover,
-        placeholder: (context, url) =>
-            Container(color: const Color(0xFFD4C4E8)),
+        placeholder: (context, url) => Container(color: AppColors.lilacMid),
         errorWidget: (context, url, err) => Container(
-          color: const Color(0xFFD4C4E8),
+          color: AppColors.lilacMid,
           child: const Icon(
             Icons.image_outlined,
             color: Colors.white60,
@@ -501,8 +498,8 @@ class _PillColumns extends StatelessWidget {
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               colors: [
-                const Color(0xFFC7B6DC).withOpacity(0.8),
-                const Color(0xFFC7B6DC).withOpacity(0.0),
+                AppColors.lilacMid.withOpacity(0.8),
+                AppColors.lilacMid.withOpacity(0.0),
               ],
             ),
             borderRadius: BorderRadius.circular(4),
@@ -553,7 +550,7 @@ class _BottomBar extends StatelessWidget {
                   height: 6,
                   width: active ? 22 : 6,
                   decoration: BoxDecoration(
-                    color: active ? colors.primary : const Color(0xFFD8D2E2),
+                    color: active ? colors.primary : AppColors.border,
                     borderRadius: BorderRadius.circular(10),
                   ),
                 ),
@@ -571,7 +568,7 @@ class _BottomBar extends StatelessWidget {
                 vertical: isTiny ? 11 : 13,
               ),
               decoration: BoxDecoration(
-                color: isLast ? colors.primary : const Color(0xFF1E142B),
+                color: isLast ? colors.primary : AppColors.deepInk,
                 borderRadius: BorderRadius.circular(100),
                 boxShadow: [
                   BoxShadow(

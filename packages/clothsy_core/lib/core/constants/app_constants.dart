@@ -6,7 +6,7 @@ class AppConstants {
   AppConstants._();
 
   static const String appName = 'Clothsy';
-  static const String appTagline = 'See Yourself In Every Outfit';
+  static const String appTagline = 'See it on you.';
   static const String defaultCurrencySymbol = '₹';
   static const int defaultPageSize = 20;
 

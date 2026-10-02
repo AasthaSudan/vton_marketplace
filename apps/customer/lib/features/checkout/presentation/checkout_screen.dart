@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:clothsy_core/core/constants/clothsy_copy.dart';
 import 'package:clothsy_core/core/theme/app_colors.dart';
 import 'package:clothsy_core/core/theme/app_radius.dart';
 import 'package:clothsy_core/core/theme/app_typography.dart';
@@ -75,7 +76,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     if (cart.isEmpty) {
       ClothsySnackbar.show(
         context,
-        message: 'Your shopping bag is empty',
+        message: ClothsyCopy.emptyBagTitle,
         type: SnackbarType.error,
       );
       return;

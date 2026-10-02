@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:clothsy_core/core/constants/clothsy_copy.dart';
 import 'package:clothsy_core/core/theme/app_colors.dart';
 import 'package:clothsy_core/core/theme/app_radius.dart';
 import 'package:clothsy_core/core/theme/app_typography.dart';
@@ -59,17 +60,16 @@ class _CartScreenState extends ConsumerState<CartScreen> {
       backgroundColor: colors.background,
       appBar: AppBar(
         title: Text(
-          'Shopping Bag (${cart.totalCount})',
+          'Your bag (${cart.totalCount})',
           style: AppTypography.h3(color: colors.textPrimary),
         ),
       ),
       body: cart.isEmpty
           ? EmptyStateView(
               icon: Icons.shopping_bag_outlined,
-              title: 'Your Shopping Bag is Empty',
-              message:
-                  'Discover our luxury collection and find pieces crafted to elevate your wardrobe.',
-              actionText: 'Explore Catalog',
+              title: ClothsyCopy.emptyBagTitle,
+              message: ClothsyCopy.emptyBagMessage,
+              actionText: 'Start exploring',
               onActionPressed: () => context.go('/explore'),
             )
           : Column(

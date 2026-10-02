@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:clothsy_core/core/constants/clothsy_copy.dart';
 import 'package:clothsy_core/core/theme/app_colors.dart';
 import 'package:clothsy_core/core/theme/app_typography.dart';
 import 'package:clothsy_core/core/utils/currency_formatter.dart';
@@ -183,7 +184,7 @@ class _TryonScreenState extends ConsumerState<TryonScreen> {
               ),
               const SizedBox(width: 8),
               Text(
-                'Virtual Try-On',
+                'Clothsy AI Try-On',
                 style: AppTypography.h3(color: colors.textPrimary),
               ),
             ],
@@ -322,11 +323,39 @@ class _TryonScreenState extends ConsumerState<TryonScreen> {
     // 2. Completed State: Before / After Slider
     if (session.currentResult != null && session.selectedPhoto != null) {
       final res = session.currentResult!;
-      return BeforeAfterSlider(
-        beforeImageUrl: session.selectedPhoto!.imageUrl,
-        afterImageUrl: res.resultImageUrl,
-        beforeLabel: 'Your Photo',
-        afterLabel: 'Clothsy AI Drape',
+      return Stack(
+        fit: StackFit.expand,
+        children: [
+          BeforeAfterSlider(
+            beforeImageUrl: session.selectedPhoto!.imageUrl,
+            afterImageUrl: res.resultImageUrl,
+            beforeLabel: 'Your photo',
+            afterLabel: ClothsyCopy.tryOnResultLabel,
+          ),
+          // Every result is labelled honestly (Blueprint section 35).
+          Positioned(
+            left: 12,
+            right: 12,
+            bottom: 12,
+            child: IgnorePointer(
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.black.withOpacity(0.55),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  ClothsyCopy.tryOnDisclaimer,
+                  textAlign: TextAlign.center,
+                  style: AppTypography.caption(color: Colors.white),
+                ),
+              ),
+            ),
+          ),
+        ],
       );
     }
 

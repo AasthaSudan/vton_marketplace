@@ -25,7 +25,7 @@ class CategoryChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
 
-    final circleBgColor = isSelected ? colors.primary : const Color(0xFFF2EDF7);
+    final circleBgColor = isSelected ? colors.primary : AppColors.softLilac;
     final iconColor = isSelected ? Colors.white : colors.primary;
     final textColor = isSelected ? colors.primary : colors.textSecondary;
     final fontWeight = isSelected ? FontWeight.w700 : FontWeight.w500;

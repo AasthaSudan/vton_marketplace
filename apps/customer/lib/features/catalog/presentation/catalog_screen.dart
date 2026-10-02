@@ -167,12 +167,7 @@ class CatalogScreen extends ConsumerWidget {
                   horizontal: 20,
                   vertical: 12,
                 ),
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  childAspectRatio: 0.55,
-                  crossAxisSpacing: 14,
-                  mainAxisSpacing: 16,
-                ),
+                gridDelegate: const ProductCardGridDelegate(),
                 itemCount: 4,
                 itemBuilder: (context, index) => const ProductCardSkeleton(),
               ),
@@ -197,12 +192,7 @@ class CatalogScreen extends ConsumerWidget {
                     horizontal: 20,
                     vertical: 12,
                   ),
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    childAspectRatio: 0.55,
-                    crossAxisSpacing: 14,
-                    mainAxisSpacing: 16,
-                  ),
+                  gridDelegate: const ProductCardGridDelegate(),
                   itemCount: products.length,
                   itemBuilder: (context, index) {
                     final product = products[index];

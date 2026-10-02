@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:clothsy_core/core/constants/clothsy_copy.dart';
 import 'package:clothsy_core/core/theme/app_colors.dart';
 import 'package:clothsy_core/core/theme/app_radius.dart';
 import 'package:clothsy_core/core/theme/app_typography.dart';
@@ -180,7 +181,7 @@ class _PhotoGuidanceSheetState extends State<PhotoGuidanceSheet> {
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        'Your photo is encrypted in memory during rendering, never shared with third parties, and can be removed anytime in your profile settings.',
+                        ClothsyCopy.tryOnConsent,
                         style: AppTypography.caption(
                           color: colors.textSecondary,
                         ).copyWith(fontSize: 11),

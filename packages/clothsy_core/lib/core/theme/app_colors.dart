@@ -1,45 +1,64 @@
 import 'package:flutter/material.dart';
 
-/// Design tokens for Clothsy Shop App.
-/// Pure brand colors matching clothsyai.fabricvton.com and the editorial style.
+/// Design tokens for Clothsy Marketplace.
+/// Palette from the Product & Brand Blueprint v1.0 (section 07): Clothsy Violet
+/// for key actions, Deep Ink for text, Soft Lilac for calm surfaces and
+/// Try-On Coral reserved for Clothsy AI moments.
+/// Balance: white 60% · lilac 22% · violet 10% · ink 6% · accents 2%.
 class AppColors {
   AppColors._();
+
+  // Brand
+  static const Color clothsyViolet = Color(0xFF5C25FC);
+  static const Color deepInk = Color(0xFF14102B);
+  static const Color softLilac = Color(0xFFF1ECFF);
+  static const Color lilacMid = Color(0xFFD9CCFF);
+  static const Color tryOnCoral = Color(0xFFFF4F7B);
+  static const Color successMint = Color(0xFF0FA67A);
+  static const Color alertAmber = Color(0xFFF08C00);
+  static const Color mutedGrey = Color(0xFF6B6880);
 
   // Core Light Palette
   static const Color background = Color(0xFFFFFFFF);
   static const Color surface = Color(0xFFFFFFFF);
-  static const Color surfaceMuted = Color(0xFFF2EDF7);
-  static const Color primary = Color(0xFF2B1E3F);
+  static const Color surfaceMuted = softLilac;
+  static const Color primary = clothsyViolet;
   static const Color onPrimary = Color(0xFFFFFFFF);
-  static const Color accent = Color(0xFFB9A6E0);
-  static const Color accentSoft = Color(0xFFE7DFF6);
-  static const Color textPrimary = Color(0xFF1A1523);
-  static const Color textSecondary = Color(0xFF6E6878);
-  static const Color strikethrough = Color(0xFFA39FAB);
-  static const Color border = Color(0xFFE6E1EA);
-  static const Color success = Color(0xFF2E7D5B);
-  static const Color error = Color(0xFFC2413B);
+  static const Color accent = tryOnCoral;
+  static const Color accentSoft = softLilac;
+  static const Color textPrimary = deepInk;
+  static const Color textSecondary = mutedGrey;
+  static const Color strikethrough = Color(0xFFA3A1B3);
+  static const Color border = Color(0xFFE7E3F3);
+  static const Color success = successMint;
+  static const Color error = Color(0xFFD63A3A);
+  static const Color warning = alertAmber;
   static const Color rating = Color(0xFFF2B63C);
+  static const Color tryOn = tryOnCoral;
+  static const Color tryOnSoft = Color(0xFFFFE8EE);
 
-  // Dark Palette equivalents
-  static const Color backgroundDark = Color(0xFF131018);
-  static const Color surfaceDark = Color(0xFF1F1A28);
-  static const Color surfaceMutedDark = Color(0xFF282234);
-  static const Color primaryDark = Color(0xFFD6C8F5);
-  static const Color onPrimaryDark = Color(0xFF1A1326);
-  static const Color accentDark = Color(0xFFC6B5E8);
-  static const Color accentSoftDark = Color(0xFF382E4B);
-  static const Color textPrimaryDark = Color(0xFFF7F5F9);
-  static const Color textSecondaryDark = Color(0xFFA9A3B5);
-  static const Color strikethroughDark = Color(0xFF756E82);
-  static const Color borderDark = Color(0xFF362E44);
-  static const Color successDark = Color(0xFF48A57A);
-  static const Color errorDark = Color(0xFFE05D56);
+  // Dark Palette equivalents (Deep Ink surfaces)
+  static const Color backgroundDark = deepInk;
+  static const Color surfaceDark = Color(0xFF1E1940);
+  static const Color surfaceMutedDark = Color(0xFF2A2452);
+  static const Color primaryDark = Color(0xFF9B7BFF);
+  static const Color onPrimaryDark = deepInk;
+  static const Color accentDark = Color(0xFFFF6F93);
+  static const Color accentSoftDark = Color(0xFF2A2452);
+  static const Color textPrimaryDark = Color(0xFFF5F3FF);
+  static const Color textSecondaryDark = Color(0xFFA9A5C0);
+  static const Color strikethroughDark = Color(0xFF77738F);
+  static const Color borderDark = Color(0xFF332C5E);
+  static const Color successDark = Color(0xFF2EC497);
+  static const Color errorDark = Color(0xFFEF6461);
+  static const Color warningDark = Color(0xFFFFA733);
   static const Color ratingDark = Color(0xFFFFC95C);
+  static const Color tryOnDark = Color(0xFFFF6F93);
+  static const Color tryOnSoftDark = Color(0xFF3A1F35);
 
   // Glass / Shading
-  static const Color shadow = Color(0x0C2B1E3F);
-  static const Color overlay = Color(0x661A1523);
+  static const Color shadow = Color(0x0F14102B);
+  static const Color overlay = Color(0x6614102B);
 }
 
 /// ThemeExtension to access custom semantic colors in context cleanly
@@ -58,6 +77,9 @@ class ClothsyColorExtension extends ThemeExtension<ClothsyColorExtension> {
   final Color success;
   final Color error;
   final Color rating;
+  final Color warning;
+  final Color tryOn;
+  final Color tryOnSoft;
 
   const ClothsyColorExtension({
     required this.background,
@@ -74,6 +96,9 @@ class ClothsyColorExtension extends ThemeExtension<ClothsyColorExtension> {
     required this.success,
     required this.error,
     required this.rating,
+    required this.warning,
+    required this.tryOn,
+    required this.tryOnSoft,
   });
 
   static const light = ClothsyColorExtension(
@@ -91,6 +116,9 @@ class ClothsyColorExtension extends ThemeExtension<ClothsyColorExtension> {
     success: AppColors.success,
     error: AppColors.error,
     rating: AppColors.rating,
+    warning: AppColors.warning,
+    tryOn: AppColors.tryOn,
+    tryOnSoft: AppColors.tryOnSoft,
   );
 
   static const dark = ClothsyColorExtension(
@@ -108,6 +136,9 @@ class ClothsyColorExtension extends ThemeExtension<ClothsyColorExtension> {
     success: AppColors.successDark,
     error: AppColors.errorDark,
     rating: AppColors.ratingDark,
+    warning: AppColors.warningDark,
+    tryOn: AppColors.tryOnDark,
+    tryOnSoft: AppColors.tryOnSoftDark,
   );
 
   @override
@@ -126,6 +157,9 @@ class ClothsyColorExtension extends ThemeExtension<ClothsyColorExtension> {
     Color? success,
     Color? error,
     Color? rating,
+    Color? warning,
+    Color? tryOn,
+    Color? tryOnSoft,
   }) {
     return ClothsyColorExtension(
       background: background ?? this.background,
@@ -142,6 +176,9 @@ class ClothsyColorExtension extends ThemeExtension<ClothsyColorExtension> {
       success: success ?? this.success,
       error: error ?? this.error,
       rating: rating ?? this.rating,
+      warning: warning ?? this.warning,
+      tryOn: tryOn ?? this.tryOn,
+      tryOnSoft: tryOnSoft ?? this.tryOnSoft,
     );
   }
 
@@ -166,6 +203,9 @@ class ClothsyColorExtension extends ThemeExtension<ClothsyColorExtension> {
       success: Color.lerp(success, other.success, t)!,
       error: Color.lerp(error, other.error, t)!,
       rating: Color.lerp(rating, other.rating, t)!,
+      warning: Color.lerp(warning, other.warning, t)!,
+      tryOn: Color.lerp(tryOn, other.tryOn, t)!,
+      tryOnSoft: Color.lerp(tryOnSoft, other.tryOnSoft, t)!,
     );
   }
 }

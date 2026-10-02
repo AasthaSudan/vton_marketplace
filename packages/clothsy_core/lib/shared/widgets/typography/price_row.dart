@@ -11,6 +11,10 @@ class PriceRow extends StatelessWidget {
   final double currentPriceFontSize;
   final bool showDiscountBadge;
 
+  /// Keeps everything on one line (for fixed-height cards): the MRP is
+  /// truncated with an ellipsis instead of wrapping to a second line.
+  final bool singleLine;
+
   const PriceRow({
     super.key,
     required this.price,
@@ -18,6 +22,7 @@ class PriceRow extends StatelessWidget {
     this.discountText,
     this.currentPriceFontSize = 18.0,
     this.showDiscountBadge = true,
+    this.singleLine = false,
   });
 
   @override
@@ -34,17 +39,44 @@ class PriceRow extends StatelessWidget {
       }
     }
 
+    final currentPrice = Text(
+      CurrencyFormatter.format(price),
+      maxLines: 1,
+      style: AppTypography.price(
+        color: colors.textPrimary,
+      ).copyWith(fontSize: currentPriceFontSize),
+    );
+
+    if (singleLine) {
+      return Row(
+        children: [
+          currentPrice,
+          if (hasDiscount) ...[
+            const SizedBox(width: 6),
+            Flexible(
+              child: Text(
+                CurrencyFormatter.format(originalPrice!),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                softWrap: false,
+                style: AppTypography.strikeThrough(color: colors.strikethrough),
+              ),
+            ),
+          ],
+          if (showDiscountBadge && calculatedDiscount != null) ...[
+            const SizedBox(width: 6),
+            DiscountBadge(text: calculatedDiscount),
+          ],
+        ],
+      );
+    }
+
     return Wrap(
       crossAxisAlignment: WrapCrossAlignment.center,
       spacing: 6,
       runSpacing: 2,
       children: [
-        Text(
-          CurrencyFormatter.format(price),
-          style: AppTypography.price(
-            color: colors.textPrimary,
-          ).copyWith(fontSize: currentPriceFontSize),
-        ),
+        currentPrice,
         if (hasDiscount)
           Text(
             CurrencyFormatter.format(originalPrice!),
