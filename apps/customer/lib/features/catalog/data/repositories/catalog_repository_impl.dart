@@ -14,8 +14,8 @@ class CatalogRepositoryImpl implements CatalogRepository {
       brand: 'Clothsy Atelier',
       description:
           'Tailored to perfection, this blazer adds a touch of elegance to any outfit. Crafted from premium breathable stretch twill with structured notch lapels, flap pockets, and a graceful tailored silhouette. Perfect for both casual and formal occasions.',
-      price: 79.99,
-      originalPrice: 99.99,
+      price: 799900,
+      originalPrice: 999900,
       category: 'Women',
       rating: 4.8,
       reviewCount: 120,
@@ -37,8 +37,8 @@ class CatalogRepositoryImpl implements CatalogRepository {
           size: 'M',
           colorName: 'Soft Lavender',
           colorHex: '0xFFB9A6E0',
-          price: 79.99,
-          originalPrice: 99.99,
+          price: 799900,
+          originalPrice: 999900,
           imageUrl:
               'https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=900&auto=format&fit=crop&q=80',
         ),
@@ -48,8 +48,8 @@ class CatalogRepositoryImpl implements CatalogRepository {
           size: 'S',
           colorName: 'Warm Sand',
           colorHex: '0xFFE7DCC7',
-          price: 79.99,
-          originalPrice: 99.99,
+          price: 799900,
+          originalPrice: 999900,
         ),
         ProductVariant(
           id: 'v_blazer_charcoal',
@@ -57,8 +57,8 @@ class CatalogRepositoryImpl implements CatalogRepository {
           size: 'L',
           colorName: 'Charcoal',
           colorHex: '0xFF363636',
-          price: 79.99,
-          originalPrice: 99.99,
+          price: 799900,
+          originalPrice: 999900,
         ),
         ProductVariant(
           id: 'v_blazer_black',
@@ -66,8 +66,8 @@ class CatalogRepositoryImpl implements CatalogRepository {
           size: 'XL',
           colorName: 'Midnight Black',
           colorHex: '0xFF1A1A1A',
-          price: 79.99,
-          originalPrice: 99.99,
+          price: 799900,
+          originalPrice: 999900,
         ),
       ],
     ),
@@ -78,8 +78,8 @@ class CatalogRepositoryImpl implements CatalogRepository {
       brand: 'Clothsy Studio',
       description:
           'Clean-cut contemporary overshirt made with premium structured cotton twill. Features natural horn buttons, tailored collar, and clean dual utility chest pockets.',
-      price: 49.99,
-      originalPrice: 59.99,
+      price: 499900,
+      originalPrice: 599900,
       category: 'Men',
       rating: 4.9,
       reviewCount: 88,
@@ -99,7 +99,7 @@ class CatalogRepositoryImpl implements CatalogRepository {
           size: 'M',
           colorName: 'Khaki Sand',
           colorHex: '0xFFD2C4AE',
-          price: 49.99,
+          price: 499900,
         ),
         ProductVariant(
           id: 'v_overshirt_charcoal',
@@ -107,7 +107,7 @@ class CatalogRepositoryImpl implements CatalogRepository {
           size: 'L',
           colorName: 'Deep Charcoal',
           colorHex: '0xFF2E2E2E',
-          price: 49.99,
+          price: 499900,
         ),
       ],
     ),
@@ -118,8 +118,8 @@ class CatalogRepositoryImpl implements CatalogRepository {
       brand: 'Clothsy Edit',
       description:
           'Ultra-soft heavyweight brushed organic cotton fleece hoodie with relaxed dropped shoulders, double-layered hood, and ribbed trims.',
-      price: 39.99,
-      originalPrice: 49.99,
+      price: 399900,
+      originalPrice: 499900,
       category: 'Women',
       rating: 4.7,
       reviewCount: 145,
@@ -139,8 +139,8 @@ class CatalogRepositoryImpl implements CatalogRepository {
           size: 'M',
           colorName: 'Pastel Lilac',
           colorHex: '0xFFB9A6E0',
-          price: 39.99,
-          originalPrice: 49.99,
+          price: 399900,
+          originalPrice: 499900,
         ),
         ProductVariant(
           id: 'v_hoodie_white',
@@ -148,8 +148,8 @@ class CatalogRepositoryImpl implements CatalogRepository {
           size: 'S',
           colorName: 'Cloud White',
           colorHex: '0xFFF5F5F7',
-          price: 39.99,
-          originalPrice: 49.99,
+          price: 399900,
+          originalPrice: 499900,
         ),
       ],
     ),
@@ -160,8 +160,8 @@ class CatalogRepositoryImpl implements CatalogRepository {
       brand: 'Clothsy Atelier',
       description:
           'Cut on the bias for an effortless, figure-skimming drape. Crafted from premium 22-momme Mulberry silk satin with adjustable delicate straps and a subtle cowl neckline. Perfect for evenings and celebrations.',
-      price: 4999,
-      originalPrice: 7999,
+      price: 499900,
+      originalPrice: 799900,
       category: 'Dresses',
       rating: 4.9,
       reviewCount: 184,
@@ -182,8 +182,8 @@ class CatalogRepositoryImpl implements CatalogRepository {
           size: 'M',
           colorName: 'Plum Noir',
           colorHex: '0xFF2B1E3F',
-          price: 4999,
-          originalPrice: 7999,
+          price: 499900,
+          originalPrice: 799900,
           imageUrl:
               'https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?w=900&auto=format&fit=crop&q=80',
         ),
@@ -193,8 +193,8 @@ class CatalogRepositoryImpl implements CatalogRepository {
           size: 'S',
           colorName: 'Soft Lilac',
           colorHex: '0xFFB9A6E0',
-          price: 4999,
-          originalPrice: 7999,
+          price: 499900,
+          originalPrice: 799900,
           imageUrl:
               'https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?w=900&auto=format&fit=crop&q=80',
         ),
@@ -204,8 +204,8 @@ class CatalogRepositoryImpl implements CatalogRepository {
           size: 'L',
           colorName: 'Champagne',
           colorHex: '0xFFFAF7F3',
-          price: 4999,
-          originalPrice: 7999,
+          price: 499900,
+          originalPrice: 799900,
         ),
       ],
     ),
@@ -216,8 +216,8 @@ class CatalogRepositoryImpl implements CatalogRepository {
       brand: 'Clothsy Studio',
       description:
           'Structured yet lightweight, crafted from pure Normandy flax linen. Features structured lapels, tortoiseshell buttons, and a relaxed tailored fit that pairs effortlessly with tailored trousers or slip skirts.',
-      price: 6499,
-      originalPrice: 8999,
+      price: 649900,
+      originalPrice: 899900,
       category: 'Outerwear',
       rating: 4.8,
       reviewCount: 96,
@@ -237,8 +237,8 @@ class CatalogRepositoryImpl implements CatalogRepository {
           size: 'M',
           colorName: 'Warm Sand',
           colorHex: '0xFFD9CCA8',
-          price: 6499,
-          originalPrice: 8999,
+          price: 649900,
+          originalPrice: 899900,
         ),
         ProductVariant(
           id: 'v2_sage',
@@ -246,8 +246,8 @@ class CatalogRepositoryImpl implements CatalogRepository {
           size: 'L',
           colorName: 'Sage Olive',
           colorHex: '0xFF2E7D5B',
-          price: 6499,
-          originalPrice: 8999,
+          price: 649900,
+          originalPrice: 899900,
         ),
       ],
     ),
@@ -258,8 +258,8 @@ class CatalogRepositoryImpl implements CatalogRepository {
       brand: 'Clothsy Edit',
       description:
           'Delicate micro-accordion pleats enhance every movement. Finished with a subtle asymmetric hemline and graceful silhouette.',
-      price: 5299,
-      originalPrice: 6999,
+      price: 529900,
+      originalPrice: 699900,
       category: 'Dresses',
       rating: 4.7,
       reviewCount: 65,
@@ -279,8 +279,8 @@ class CatalogRepositoryImpl implements CatalogRepository {
           size: 'S',
           colorName: 'Lilac Dusk',
           colorHex: '0xFFB9A6E0',
-          price: 5299,
-          originalPrice: 6999,
+          price: 529900,
+          originalPrice: 699900,
         ),
       ],
     ),
@@ -291,8 +291,8 @@ class CatalogRepositoryImpl implements CatalogRepository {
       brand: 'Clothsy Essentials',
       description:
           'Supremely soft Mongolian cashmere spun with organic cotton. A timeless mock-neck silhouette designed for transitional season layering.',
-      price: 3499,
-      originalPrice: 4999,
+      price: 349900,
+      originalPrice: 499900,
       category: 'Tops',
       rating: 4.9,
       reviewCount: 112,
@@ -311,8 +311,8 @@ class CatalogRepositoryImpl implements CatalogRepository {
           size: 'M',
           colorName: 'Ivory Cream',
           colorHex: '0xFFFAF7F3',
-          price: 3499,
-          originalPrice: 4999,
+          price: 349900,
+          originalPrice: 499900,
         ),
       ],
     ),
@@ -323,8 +323,8 @@ class CatalogRepositoryImpl implements CatalogRepository {
       brand: 'Clothsy Atelier',
       description:
           'Full-grain Italian calfskin leather handcrafted with architectural curved handles and gold-tone custom hardware.',
-      price: 8499,
-      originalPrice: 11999,
+      price: 849900,
+      originalPrice: 1199900,
       category: 'Bags',
       rating: 4.9,
       reviewCount: 78,
@@ -343,8 +343,8 @@ class CatalogRepositoryImpl implements CatalogRepository {
           size: 'One Size',
           colorName: 'Obsidian Black',
           colorHex: '0xFF1A1523',
-          price: 8499,
-          originalPrice: 11999,
+          price: 849900,
+          originalPrice: 1199900,
         ),
       ],
     ),
@@ -355,8 +355,8 @@ class CatalogRepositoryImpl implements CatalogRepository {
       brand: 'Clothsy Studio',
       description:
           '75mm sculptural stiletto heel with delicate ankle strap and cushioned memory foam insole for all-evening comfort.',
-      price: 5499,
-      originalPrice: 7499,
+      price: 549900,
+      originalPrice: 749900,
       category: 'Shoes',
       rating: 4.8,
       reviewCount: 53,
@@ -375,8 +375,8 @@ class CatalogRepositoryImpl implements CatalogRepository {
           size: '38',
           colorName: 'Champagne',
           colorHex: '0xFFE7DFF6',
-          price: 5499,
-          originalPrice: 7499,
+          price: 549900,
+          originalPrice: 749900,
         ),
       ],
     ),
@@ -469,14 +469,16 @@ class CatalogRepositoryImpl implements CatalogRepository {
         final pCat = p.category.toLowerCase();
         if (pCat == cat) return true;
         if (cat == 'men' &&
-            (pCat == 'men' || p.tags.any((t) => t.toLowerCase() == 'men')))
+            (pCat == 'men' || p.tags.any((t) => t.toLowerCase() == 'men'))) {
           return true;
+        }
         if (cat == 'women' &&
             (pCat == 'women' ||
                 pCat == 'dresses' ||
                 pCat == 'outerwear' ||
-                p.tags.any((t) => t.toLowerCase() == 'women')))
+                p.tags.any((t) => t.toLowerCase() == 'women'))) {
           return true;
+        }
         if (cat == 'shoes' && pCat == 'shoes') return true;
         if (cat == 'bags' && pCat == 'bags') return true;
         return p.tags.any((t) => t.toLowerCase() == cat);

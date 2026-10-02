@@ -27,10 +27,10 @@ class OrdersNotifier extends Notifier<List<Order>> {
     required List<CartLineItem> items,
     required Address address,
     required String paymentMethod,
-    required num subtotal,
-    required num discount,
-    required num shippingFee,
-    required num total,
+    required int subtotal,
+    required int discount,
+    required int shippingFee,
+    required int total,
   }) async {
     final repo = ref.read(orderRepositoryProvider);
     final order = await repo.createOrder(

@@ -13,7 +13,7 @@ class CartLineItem {
     this.quantity = 1,
   });
 
-  num get lineTotal => variant.price * quantity;
+  int get lineTotal => variant.price * quantity;
 
   CartLineItem copyWith({
     String? id,
@@ -30,29 +30,33 @@ class CartLineItem {
   }
 }
 
+/// Bag totals. All amounts are integer paise (₹1 = 100 paise).
 class CartSummary {
   final List<CartLineItem> items;
   final String? couponCode;
-  final num discountAmount;
-  final num shippingThreshold;
+  final int discountAmount;
+  final int shippingThreshold;
+
+  /// Flat shipping charge (paise) when the bag is under [shippingThreshold].
+  static const int standardShippingFee = 15000;
 
   const CartSummary({
     this.items = const [],
     this.couponCode,
     this.discountAmount = 0,
-    this.shippingThreshold = 1999,
+    this.shippingThreshold = 199900,
   });
 
   int get totalCount => items.fold(0, (sum, item) => sum + item.quantity);
 
-  num get subtotal => items.fold(0, (sum, item) => sum + item.lineTotal);
+  int get subtotal => items.fold(0, (sum, item) => sum + item.lineTotal);
 
-  num get shippingFee {
+  int get shippingFee {
     if (subtotal == 0) return 0;
-    return subtotal >= shippingThreshold ? 0 : 150;
+    return subtotal >= shippingThreshold ? 0 : standardShippingFee;
   }
 
-  num get total {
+  int get total {
     final t = subtotal - discountAmount + shippingFee;
     return t < 0 ? 0 : t;
   }

@@ -55,10 +55,10 @@ class Order {
   final String deliveryMethod;
   final String paymentMethod;
   final String paymentStatus; // Paid, Pending, COD
-  final num subtotal;
-  final num discount;
-  final num shippingFee;
-  final num total;
+  final int subtotal;
+  final int discount;
+  final int shippingFee;
+  final int total;
   final OrderStatus status;
   final List<TrackingStep> trackingSteps;
 
@@ -91,10 +91,10 @@ class Order {
     String? deliveryMethod,
     String? paymentMethod,
     String? paymentStatus,
-    num? subtotal,
-    num? discount,
-    num? shippingFee,
-    num? total,
+    int? subtotal,
+    int? discount,
+    int? shippingFee,
+    int? total,
     OrderStatus? status,
     List<TrackingStep>? trackingSteps,
   }) {

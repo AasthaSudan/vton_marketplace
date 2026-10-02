@@ -25,10 +25,10 @@ class OrderRepositoryImpl implements OrderRepository {
       deliveryMethod: 'Complimentary Express (2-4 Days)',
       paymentMethod: 'UPI (Google Pay)',
       paymentStatus: 'Paid',
-      subtotal: 6499,
-      discount: 650,
+      subtotal: 649900,
+      discount: 65000,
       shippingFee: 0,
-      total: 5849,
+      total: 584900,
       status: OrderStatus.shipped,
       items: const [
         CartLineItem(
@@ -39,7 +39,7 @@ class OrderRepositoryImpl implements OrderRepository {
             title: 'Linen Tailored Blazer',
             brand: 'Clothsy Studio',
             description: 'Structured Normandy flax linen blazer.',
-            price: 6499,
+            price: 649900,
             images: [
               'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=900&auto=format&fit=crop&q=80',
             ],
@@ -53,7 +53,7 @@ class OrderRepositoryImpl implements OrderRepository {
             size: 'M',
             colorName: 'Warm Sand',
             colorHex: '0xFFD9CCA8',
-            price: 6499,
+            price: 649900,
           ),
           quantity: 1,
         ),
@@ -110,10 +110,10 @@ class OrderRepositoryImpl implements OrderRepository {
       deliveryMethod: 'Complimentary Express',
       paymentMethod: 'Credit Card (HDFC Visa)',
       paymentStatus: 'Paid',
-      subtotal: 4999,
+      subtotal: 499900,
       discount: 0,
       shippingFee: 0,
-      total: 4999,
+      total: 499900,
       status: OrderStatus.delivered,
       items: const [
         CartLineItem(
@@ -124,7 +124,7 @@ class OrderRepositoryImpl implements OrderRepository {
             title: 'Silk Satin Maxi Dress',
             brand: 'Clothsy Atelier',
             description: '22-momme Mulberry silk satin cowl neck maxi dress.',
-            price: 4999,
+            price: 499900,
             images: [
               'https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?w=900&auto=format&fit=crop&q=80',
             ],
@@ -138,7 +138,7 @@ class OrderRepositoryImpl implements OrderRepository {
             size: 'M',
             colorName: 'Plum Noir',
             colorHex: '0xFF2B1E3F',
-            price: 4999,
+            price: 499900,
           ),
           quantity: 1,
         ),
@@ -176,10 +176,10 @@ class OrderRepositoryImpl implements OrderRepository {
     required List<CartLineItem> items,
     required Address address,
     required String paymentMethod,
-    required num subtotal,
-    required num discount,
-    required num shippingFee,
-    required num total,
+    required int subtotal,
+    required int discount,
+    required int shippingFee,
+    required int total,
   }) async {
     await Future.delayed(const Duration(milliseconds: 400));
     final randomDigits = 10000 + Random().nextInt(90000);

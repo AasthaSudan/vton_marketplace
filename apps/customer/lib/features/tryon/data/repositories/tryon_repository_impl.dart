@@ -56,7 +56,7 @@ class TryOnRepositoryImpl implements TryOnRepository {
       size: 'S',
       colorName: 'Midnight Plum',
       colorHex: '#2B1E3F',
-      price: 18999,
+      price: 1899900,
     );
 
     const demoProduct = Product(
@@ -66,7 +66,7 @@ class TryOnRepositoryImpl implements TryOnRepository {
       brand: 'Clothsy Atelier',
       category: 'Outerwear',
       description: 'Hand-tailored double-faced Mongolian cashmere wrap coat.',
-      price: 18999,
+      price: 1899900,
       images: [
         'https://images.unsplash.com/photo-1539533018447-63fcce2678e3',
         'https://images.unsplash.com/photo-1591047139829-d91aecb6caea',

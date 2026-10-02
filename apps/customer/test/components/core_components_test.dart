@@ -74,11 +74,11 @@ void main() {
       tester,
     ) async {
       await tester.pumpWidget(
-        _wrap(const PriceRow(price: 2999, originalPrice: 4999)),
+        _wrap(const PriceRow(price: 299900, originalPrice: 499900)),
       );
 
-      expect(find.text('\$2,999'), findsOneWidget);
-      expect(find.text('\$4,999'), findsOneWidget);
+      expect(find.text('₹2,999'), findsOneWidget);
+      expect(find.text('₹4,999'), findsOneWidget);
       expect(find.text('40% OFF'), findsOneWidget);
     });
   });

@@ -7,7 +7,7 @@ class AppConstants {
 
   static const String appName = 'Clothsy';
   static const String appTagline = 'See Yourself In Every Outfit';
-  static const String defaultCurrencySymbol = '\$';
+  static const String defaultCurrencySymbol = '₹';
   static const int defaultPageSize = 20;
 
   static const Duration defaultAnimationDuration = Duration(milliseconds: 250);

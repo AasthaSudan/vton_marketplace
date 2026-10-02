@@ -12,8 +12,8 @@ class ProductCard extends StatelessWidget {
   final String id;
   final String title;
   final String? brand;
-  final num price;
-  final num? originalPrice;
+  final int price;
+  final int? originalPrice;
   final String imageUrl;
   final bool isWishlisted;
   final VoidCallback? onTap;

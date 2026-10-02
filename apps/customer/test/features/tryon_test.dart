@@ -22,7 +22,7 @@ void main() {
     size: 'S',
     colorName: 'Ivory',
     colorHex: '#F7F5F9',
-    price: 8999,
+    price: 899900,
   );
 
   const sampleProduct = Product(
@@ -32,7 +32,7 @@ void main() {
     brand: 'Clothsy Atelier',
     category: 'Tops',
     description: 'Pure Mulberry silk tailored blouse.',
-    price: 8999,
+    price: 899900,
     images: [
       'https://images.unsplash.com/photo-1598554747436-c9293d6a588f',
       'https://images.unsplash.com/photo-1598554747436-c9293d6a588f',

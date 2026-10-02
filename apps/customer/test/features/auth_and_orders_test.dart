@@ -143,7 +143,7 @@ void main() {
         size: 'M',
         colorName: 'Midnight Plum',
         colorHex: '#2B1E3F',
-        price: 4999,
+        price: 499900,
       );
 
       const sampleProduct = Product(
@@ -153,8 +153,8 @@ void main() {
         brand: 'Clothsy Studio',
         category: 'Dresses',
         description: 'Luxury pure mulberry silk slip dress.',
-        originalPrice: 7999,
-        price: 4999,
+        originalPrice: 799900,
+        price: 499900,
         images: [
           'https://images.unsplash.com/photo-1595777457583-95e059d581b8',
         ],
@@ -181,15 +181,15 @@ void main() {
           pinCode: '110024',
         ),
         paymentMethod: 'UPI (Paytm)',
-        subtotal: 4999,
-        discount: 500,
+        subtotal: 499900,
+        discount: 50000,
         shippingFee: 0,
-        total: 4499,
+        total: 449900,
       );
 
       expect(newOrder.orderNumber, startsWith('CLY-'));
       expect(newOrder.status, equals(OrderStatus.placed));
-      expect(newOrder.total, equals(4499));
+      expect(newOrder.total, equals(449900));
 
       final cancelled = await repo.cancelOrder(
         newOrder.id,

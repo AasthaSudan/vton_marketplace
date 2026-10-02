@@ -5,8 +5,8 @@ import '../../../core/utils/currency_formatter.dart';
 import '../badges/discount_badge.dart';
 
 class PriceRow extends StatelessWidget {
-  final num price;
-  final num? originalPrice;
+  final int price;
+  final int? originalPrice;
   final String? discountText;
   final double currentPriceFontSize;
   final bool showDiscountBadge;

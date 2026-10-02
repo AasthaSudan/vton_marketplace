@@ -59,8 +59,8 @@ void main() {
       title: 'Test Satin Dress',
       brand: 'Clothsy',
       description: 'Test description',
-      price: 3000,
-      originalPrice: 4000,
+      price: 300000,
+      originalPrice: 400000,
       images: ['https://example.com/image.jpg'],
       availableSizes: ['S', 'M'],
       variants: const [
@@ -70,7 +70,7 @@ void main() {
           size: 'S',
           colorName: 'Plum',
           colorHex: '0xFF2B1E3F',
-          price: 3000,
+          price: 300000,
         ),
       ],
       category: 'Dresses',
@@ -90,10 +90,10 @@ void main() {
       final cart = container.read(cartProvider);
       expect(cart.items.length, 1);
       expect(cart.totalCount, 2);
-      expect(cart.subtotal, 6000);
-      // Express shipping threshold is 1999, so shipping is free
+      expect(cart.subtotal, 600000);
+      // Free-shipping threshold is ₹1,999 (199900 paise), so shipping is free
       expect(cart.shippingFee, 0);
-      expect(cart.total, 6000);
+      expect(cart.total, 600000);
     });
 
     test('applyCoupon applies 10% discount for CLOTHSY10', () {
@@ -109,8 +109,8 @@ void main() {
 
       final cart = container.read(cartProvider);
       expect(cart.couponCode, 'CLOTHSY10');
-      expect(cart.discountAmount, 300); // 10% of 3000
-      expect(cart.total, 2700);
+      expect(cart.discountAmount, 30000); // 10% of ₹3,000, in paise
+      expect(cart.total, 270000);
     });
 
     test('removeFromCart deletes item', () {
@@ -140,7 +140,7 @@ void main() {
       title: 'Wishlist Dress',
       brand: 'Clothsy Atelier',
       description: 'Description',
-      price: 5000,
+      price: 500000,
       images: const ['https://example.com/image.jpg'],
       availableSizes: const ['M'],
       variants: const [],

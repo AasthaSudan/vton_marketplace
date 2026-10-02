@@ -9,10 +9,10 @@ abstract class OrderRepository {
     required List<CartLineItem> items,
     required Address address,
     required String paymentMethod,
-    required num subtotal,
-    required num discount,
-    required num shippingFee,
-    required num total,
+    required int subtotal,
+    required int discount,
+    required int shippingFee,
+    required int total,
   });
   Future<Order> cancelOrder(String orderId, String reason);
 }

@@ -4,8 +4,8 @@ class ProductVariant {
   final String size;
   final String colorName;
   final String colorHex;
-  final num price;
-  final num? originalPrice;
+  final int price;
+  final int? originalPrice;
   final int inventoryQuantity;
   final String? imageUrl;
 
@@ -30,8 +30,8 @@ class Product {
   final String title;
   final String brand;
   final String description;
-  final num price;
-  final num? originalPrice;
+  final int price;
+  final int? originalPrice;
   final List<String> images;
   final List<String> availableSizes;
   final List<ProductVariant> variants;

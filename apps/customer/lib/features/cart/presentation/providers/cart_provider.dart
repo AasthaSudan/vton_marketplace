@@ -93,9 +93,9 @@ class CartNotifier extends Notifier<CartSummary> {
   }
 
   void _updateState({required List<CartLineItem> items}) {
-    num discount = 0;
+    int discount = 0;
     if (state.couponCode != null) {
-      final sub = items.fold<num>(0, (sum, item) => sum + item.lineTotal);
+      final sub = items.fold<int>(0, (sum, item) => sum + item.lineTotal);
       if (state.couponCode == 'CLOTHSY10' || state.couponCode == 'WELCOME10') {
         discount = (sub * 0.10).round();
       } else if (state.couponCode == 'LUXURY20') {
