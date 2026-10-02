@@ -3,6 +3,7 @@ import 'package:clothsy_core/features/address/domain/entities/address.dart';
 import 'package:clothsy_core/features/cart/domain/entities/cart_item.dart';
 import 'package:clothsy_core/features/catalog/domain/entities/product.dart';
 import 'package:clothsy_core/features/orders/domain/entities/order.dart';
+import 'package:clothsy_core/features/orders/domain/repositories/order_repository.dart';
 import 'package:clothsy_core/features/payments/domain/payment_gateway.dart';
 import 'package:clothsy_shop/features/orders/data/repositories/mock_order_repository.dart';
 import 'package:clothsy_shop/features/orders/presentation/providers/order_providers.dart';
@@ -205,6 +206,76 @@ void main() {
       final result = await place(PaymentMethod.upi, cart: const CartSummary());
       expect(result, isA<OrderRejected>());
       expect(gateway.requests, isEmpty);
+    });
+  });
+
+  group('Order rules shared with the backend', () {
+    Future<Order> create(
+      List<CartLineItem> items, {
+      String? key,
+      int? expectedTotal,
+      PaymentMethod method = PaymentMethod.cashOnDelivery,
+    }) {
+      return repo.createOrder(
+        items: items,
+        address: address,
+        method: method,
+        paymentLabel: method.label,
+        discount: 0,
+        idempotencyKey: key,
+        expectedTotal: expectedTotal,
+      );
+    }
+
+    test('the same idempotency key returns the same order', () async {
+      final first = await create(twoBrandBag.items, key: 'key-1');
+      final retry = await create(twoBrandBag.items, key: 'key-1');
+      expect(retry.id, first.id);
+      final other = await create(twoBrandBag.items, key: 'key-2');
+      expect(other.id, isNot(first.id));
+    });
+
+    test('a changed total is refused before anything is held', () async {
+      await expectLater(
+        create(twoBrandBag.items, expectedTotal: 1),
+        throwsA(
+          isA<OrderException>().having((e) => e.code, 'code', 'PRICE_CHANGED'),
+        ),
+      );
+    });
+
+    test('stock is held per order and released on cancellation', () async {
+      // Mock variants have 10 units: 6 + 6 cannot both be held.
+      final six = line(
+        'tee',
+        'sel_rao',
+        'Studio Rao',
+        99900,
+      ).copyWith(quantity: 6);
+      final first = await create([six]);
+      await expectLater(
+        create([six]),
+        throwsA(
+          isA<OrderException>().having((e) => e.code, 'code', 'OUT_OF_STOCK'),
+        ),
+      );
+
+      await repo.cancelOrder(first.id, 'Changed my mind');
+      final again = await create([six]);
+      expect(again.status, OrderStatus.placed);
+    });
+
+    test('a failed payment gives its stock back', () async {
+      final six = line(
+        'tee',
+        'sel_rao',
+        'Studio Rao',
+        99900,
+      ).copyWith(quantity: 6);
+      final pending = await create([six], method: PaymentMethod.upi);
+      expect(pending.paymentIntent?.gatewayOrderId, startsWith('order_mock_'));
+      await repo.failPayment(pending.id, 'Declined');
+      expect((await create([six])).status, OrderStatus.placed);
     });
   });
 

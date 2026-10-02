@@ -27,6 +27,13 @@ class MockOrderRepository implements OrderRepository {
 
   late final List<Order> _orders = _seedOrders();
 
+  /// Orders already placed for an idempotency key, so a retried checkout
+  /// returns the same order instead of placing a second one.
+  final Map<String, String> _orderIdByIdempotencyKey = {};
+
+  /// Units held by orders that are placed or awaiting payment, per variant.
+  final Map<String, int> _held = {};
+
   static CartLineItem _item({
     required String id,
     required String productId,
@@ -242,10 +249,32 @@ class MockOrderRepository implements OrderRepository {
     required PaymentMethod method,
     required String paymentLabel,
     required int discount,
+    String? couponCode,
+    String? idempotencyKey,
+    int? expectedTotal,
   }) async {
     await Future.delayed(const Duration(milliseconds: 400));
+    final replayId = _orderIdByIdempotencyKey[idempotencyKey];
+    if (replayId != null) return _require(replayId);
     if (items.isEmpty) {
-      throw const OrderException('Your bag is empty.');
+      throw const OrderException('Your bag is empty.', code: 'EMPTY_BAG');
+    }
+
+    // The whole bag must be in stock, or nothing is held.
+    final wanted = <String, int>{};
+    for (final item in items) {
+      wanted[item.variant.id] = (wanted[item.variant.id] ?? 0) + item.quantity;
+    }
+    for (final item in items) {
+      final available =
+          item.variant.inventoryQuantity - (_held[item.variant.id] ?? 0);
+      if (wanted[item.variant.id]! > available) {
+        throw OrderException(
+          '${item.product.title} in size ${item.variant.size} just sold out. '
+          'Remove it or pick another size.',
+          code: 'OUT_OF_STOCK',
+        );
+      }
     }
 
     final id = 'ord_${DateTime.now().microsecondsSinceEpoch}';
@@ -263,6 +292,13 @@ class MockOrderRepository implements OrderRepository {
       paymentStatus: prepaid
           ? PaymentStatus.pending
           : PaymentStatus.cashOnDelivery,
+      paymentIntent: prepaid
+          ? PaymentIntent(
+              provider: 'mock',
+              keyId: 'rzp_test_mock',
+              gatewayOrderId: 'order_mock_$id',
+            )
+          : null,
       sellerOrders: OrderSplitter.split(
         orderId: id,
         orderNumber: orderNumber,
@@ -274,14 +310,40 @@ class MockOrderRepository implements OrderRepository {
         placedAt: now,
       ),
     );
+    if (expectedTotal != null && order.total != expectedTotal) {
+      throw const OrderException(
+        'Prices in your bag changed. Review your bag and place the order '
+        'again.',
+        code: 'PRICE_CHANGED',
+      );
+    }
+
+    wanted.forEach((variantId, quantity) {
+      _held[variantId] = (_held[variantId] ?? 0) + quantity;
+    });
+    if (idempotencyKey != null) _orderIdByIdempotencyKey[idempotencyKey] = id;
     _orders.insert(0, order);
     return order;
+  }
+
+  /// Gives a cancelled or unpaid seller order's units back to stock.
+  void _release(SellerOrder so) {
+    for (final item in so.items) {
+      final held = (_held[item.variant.id] ?? 0) - item.quantity;
+      if (held > 0) {
+        _held[item.variant.id] = held;
+      } else {
+        _held.remove(item.variant.id);
+      }
+    }
   }
 
   @override
   Future<Order> confirmPayment(
     String orderId, {
     required String paymentRef,
+    String? signature,
+    String? gatewayOrderId,
   }) async {
     await Future.delayed(const Duration(milliseconds: 200));
     final order = _require(orderId);
@@ -292,6 +354,7 @@ class MockOrderRepository implements OrderRepository {
     if (order.paymentStatus != PaymentStatus.pending) {
       throw const OrderException(
         'This order is no longer waiting for payment.',
+        code: 'NOT_PENDING',
       );
     }
 
@@ -324,6 +387,7 @@ class MockOrderRepository implements OrderRepository {
       return order;
     }
 
+    order.sellerOrders.forEach(_release);
     final failed = order.copyWith(
       paymentStatus: PaymentStatus.failed,
       sellerOrders: [
@@ -347,6 +411,7 @@ class MockOrderRepository implements OrderRepository {
   }
 
   SellerOrder _cancelled(Order order, SellerOrder so, String reason) {
+    _release(so);
     final String note;
     if (order.paymentStatus == PaymentStatus.paid) {
       note =
@@ -396,6 +461,7 @@ class MockOrderRepository implements OrderRepository {
     if (!order.canBeCancelled) {
       throw const OrderException(
         'This order has already shipped, so it can no longer be cancelled.',
+        code: 'NOT_CANCELLABLE',
       );
     }
     final updated = [
@@ -421,6 +487,7 @@ class MockOrderRepository implements OrderRepository {
       throw OrderException(
         '${target.sellerName} has already shipped this part of your order, '
         'so it can no longer be cancelled.',
+        code: 'NOT_CANCELLABLE',
       );
     }
     final updated = [

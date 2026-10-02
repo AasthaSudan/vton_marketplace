@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:uuid/uuid.dart';
 import 'package:clothsy_core/core/constants/clothsy_copy.dart';
 import 'package:clothsy_core/features/address/domain/entities/address.dart';
 import 'package:clothsy_core/features/cart/domain/entities/cart_item.dart';
@@ -11,6 +12,13 @@ import '../../../payments/presentation/providers/payment_providers.dart';
 final orderRepositoryProvider = Provider<OrderRepository>((ref) {
   return MockOrderRepository();
 });
+
+/// How long to keep checking for a payment the gateway approved but our
+/// confirmation call could not record — the payment webhook usually lands
+/// within seconds. Overridden to zero in tests.
+final paymentConfirmationGraceProvider = Provider<Duration>(
+  (ref) => const Duration(seconds: 20),
+);
 
 /// Result of trying to place an order from the bag.
 sealed class PlaceOrderResult {
@@ -34,7 +42,10 @@ class PaymentNotCompleted extends PlaceOrderResult {
 /// The order could not be created at all (e.g. an item sold out).
 class OrderRejected extends PlaceOrderResult {
   final String message;
-  const OrderRejected(this.message);
+
+  /// Why, e.g. `OUT_OF_STOCK` or `PRICE_CHANGED`.
+  final String? code;
+  const OrderRejected(this.message, {this.code});
 }
 
 class OrdersNotifier extends Notifier<List<Order>> {
@@ -82,9 +93,13 @@ class OrdersNotifier extends Notifier<List<Order>> {
         method: method,
         paymentLabel: label,
         discount: cart.discountAmount,
+        couponCode: cart.couponCode,
+        // One key per attempt: a retried request returns the same order.
+        idempotencyKey: const Uuid().v4(),
+        expectedTotal: cart.total,
       );
     } on OrderException catch (e) {
-      return OrderRejected(e.message);
+      return OrderRejected(e.message, code: e.code);
     }
 
     if (!method.isPrepaid) {
@@ -101,24 +116,31 @@ class OrdersNotifier extends Notifier<List<Order>> {
         customerName: customerName,
         customerPhone: customerPhone,
         upiApp: upiApp,
+        intent: created.paymentIntent,
       ),
     );
 
     switch (result) {
-      case PaymentSuccess(:final paymentRef):
+      case PaymentSuccess(:final paymentRef, :final signature):
+        Order? confirmed;
         try {
-          final confirmed = await repo.confirmPayment(
+          confirmed = await repo.confirmPayment(
             created.id,
             paymentRef: paymentRef,
+            signature: signature,
+            gatewayOrderId: created.paymentIntent?.gatewayOrderId,
           );
-          if (!ref.mounted) return OrderPlaced(confirmed);
-          state = [confirmed, ...state];
-          return OrderPlaced(confirmed);
         } on OrderException {
           // The gateway said yes but we could not confirm it. Never claim the
-          // order is paid; the webhook / refund process settles the money.
-          return const PaymentNotCompleted(ClothsyCopy.paymentFailed);
+          // order is paid: wait for the payment webhook, and if it does not
+          // arrive the server refunds any amount that was debited.
+          confirmed = await _awaitWebhookConfirmation(created.id);
         }
+        if (confirmed == null) {
+          return const PaymentNotCompleted(ClothsyCopy.paymentConfirming);
+        }
+        if (ref.mounted) state = [confirmed, ...state];
+        return OrderPlaced(confirmed);
       case PaymentFailure():
         await repo.failPayment(created.id, 'Payment failed');
         return const PaymentNotCompleted(ClothsyCopy.paymentFailed);
@@ -128,6 +150,21 @@ class OrdersNotifier extends Notifier<List<Order>> {
           ClothsyCopy.paymentCancelled,
           cancelledByCustomer: true,
         );
+    }
+  }
+
+  /// Polls the order for up to [paymentConfirmationGraceProvider] until the
+  /// payment webhook marks it paid. Returns null if it never does.
+  Future<Order?> _awaitWebhookConfirmation(String orderId) async {
+    final repo = ref.read(orderRepositoryProvider);
+    final deadline = DateTime.now().add(
+      ref.read(paymentConfirmationGraceProvider),
+    );
+    while (true) {
+      final order = await repo.getOrderById(orderId);
+      if (order?.paymentStatus == PaymentStatus.paid) return order;
+      if (!DateTime.now().isBefore(deadline) || !ref.mounted) return null;
+      await Future.delayed(const Duration(seconds: 2));
     }
   }
 
