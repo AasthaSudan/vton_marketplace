@@ -1,66 +1,99 @@
 # Clothsy Marketplace
 
-**See it on you.** A discovery-led, multi-brand fashion marketplace for India,
-with Clothsy AI Try-On built into every product page.
-
-This repo is a Dart/Flutter **workspace** containing every Clothsy surface:
-
-```
-apps/
-├── customer/      # Customer app — Android, iOS & web (Flutter)
-├── seller_web/    # Seller / Brand Panel (Flutter web)
-└── admin_web/     # Admin & Operations Panel (Flutter web)
-packages/
-└── clothsy_core/  # Shared domain entities, money, theme tokens & widgets
-supabase/          # Backend: migrations, Edge Functions, seed, tests
-docker-compose.yml # Local backend (Postgres, Auth, REST, Storage, Functions)
-docs/              # ROADMAP.md (status) and backend.md (local backend)
-```
-
-Where things stand and what is next: **[docs/ROADMAP.md](docs/ROADMAP.md)**.
+> **See it on you.** A discovery-led, multi-brand fashion marketplace with AI Virtual Try-On built into every product page.
 
 ---
 
-## Getting started
+## Architecture
 
-```bash
-git clone https://github.com/AasthaSudan/vton_marketplace.git
-cd vton_marketplace
-flutter pub get          # resolves the whole workspace
+```
+                         ┌────────────────────────────────────────────────────────┐
+                         │                    Clothsy Clients                     │
+                         │ Customer App (iOS/Android/Web) · Seller Web · Admin Web│
+                         └───────────────────────────┬────────────────────────────┘
+                                                     │
+                                    Shared Core (`packages/clothsy_core`)
+                                   Domain · Money · Theme Tokens · Widgets
+                                                     │
+                         ┌───────────────────────────┴────────────────────────────┐
+                         │               Supabase Gateway (:54321)                │
+                         └──────┬──────────────┬──────────────┬────────────┬──────┘
+                                │              │              │            │
+                          /auth/v1       /rest/v1      /storage/v1   /functions/v1
+                                │              │              │            │
+                         ┌──────▼──────┐┌──────▼──────┐┌──────▼──────┐┌────▼─────────────┐
+                         │ Auth/GoTrue ││  PostgREST  ││   Storage   ││  Edge Functions  │
+                         │ (Phone OTP) ││  (Data API) ││   (Files)   ││  (Deno Runtime)  │
+                         └──────┬──────┘└──────┬──────┘└──────┬──────┘└────┬─────────────┘
+                                │              │              │            │
+                                └──────────────┼──────────────┼────────────┘
+                                               ▼              ▼
+                         ┌────────────────────────────────────────────────────────┐
+                         │              PostgreSQL 17 Database (:54322)           │
+                         │   Row Level Security (RLS) · Real-time Stock Ledger    │
+                         │   Money Pricing Parity (SQL & Dart) · pg_cron Jobs     │
+                         └─────────────────────────────┬──────────────────────────┘
+                                                       │
+                                         External / Mock Providers
+                                  Razorpay (Payments) · FabricVTON (Try-On)
 ```
 
-### Customer app
+---
+
+## Workspace Layout
+
+```
+apps/
+├── customer/      # Customer mobile & web app (Flutter)
+├── seller_web/    # Seller & Brand Management Portal (Flutter web)
+└── admin_web/     # Operations & Moderation Panel (Flutter web)
+packages/
+└── clothsy_core/  # Shared domain entities, theme tokens, money & reusable widgets
+supabase/          # Backend: migrations, Edge Functions, seed data & pgTAP tests
+scripts/           # Automation scripts (backend launcher, test runners, e2e suite)
+docker-compose.yml # Self-hosted local backend stack
+```
+
+---
+
+## Core Conventions
+
+- **Design System:** Clothsy Violet (`#5C25FC`), Deep Ink, Soft Lilac; Try-On Coral (`#FF4F7B`) reserved exclusively for Clothsy AI features. Powered by Poppins typography and design tokens (`context.colors`, `AppTypography`).
+- **Currency & Money:** Always handled as integer **paise** (`₹1 = 100`) across both frontend (Dart) and backend (Postgres SQL) to prevent rounding discrepancies. Formatted exclusively at the UI edge with `CurrencyFormatter.format(paise)`.
+- **Clean Architecture:** Feature-first modular architecture; presentation layers depend on abstract repository interfaces in `clothsy_core`. Implementations are easily swapped between in-memory mock repositories and real Supabase backends via Riverpod.
+
+---
+
+## Getting Started
+
+### 1. Prerequisites & Dependencies
+
+```bash
+git clone git@github.com:fabricVTON/vton_marketplace.git
+cd vton_marketplace
+flutter pub get          # Resolves dependencies across the entire workspace
+```
+
+### 2. Running Customer App
 
 ```bash
 cd apps/customer
-flutter run                         # mock flavor — no backend or keys needed
+
+# Option A: Zero-config Mock Mode (In-memory repositories, no keys or backend required)
+flutter run
+
+# Option B: Connected to Local or Remote Backend
 flutter run -t lib/main_dev.dart --dart-define-from-file=config/dev.json
 ```
 
-| Flavor | Entry point | Backend |
+| Flavor | Entrypoint | Backend Behavior |
 |---|---|---|
-| mock | `lib/main_mock.dart` (default `main.dart`) | In-memory mock repositories |
-| dev | `lib/main_dev.dart` | Supabase dev (falls back to mock without a config) |
-| staging | `lib/main_staging.dart` | Supabase staging — config required |
-| prod | `lib/main_prod.dart` | Supabase prod — config required |
+| **mock** | `lib/main.dart` / `lib/main_mock.dart` | In-memory mock repositories; runs anywhere instantly |
+| **dev** | `lib/main_dev.dart` | Supabase dev (falls back to mock if unconfigured) |
+| **staging**| `lib/main_staging.dart` | Supabase staging environment |
+| **prod** | `lib/main_prod.dart` | Production environment |
 
-Copy `apps/customer/config/example.json` to `config/<flavor>.json` and fill in
-the public client values. Real config files are git-ignored; secrets live only
-in Supabase Edge Functions.
-
-### Local backend (Docker)
-
-```bash
-scripts/backend.sh up       # Postgres, Auth, REST, Storage, Functions on :54321
-cd apps/customer
-flutter run -d chrome -t lib/main_dev.dart --dart-define-from-file=config/dev.json
-```
-
-Sign in with **99999 00001**, code **123456** (test numbers, no SMS sent).
-Payments and Try-On use local mock providers until real keys are added.
-Details: [docs/backend.md](docs/backend.md).
-
-### Seller & Admin panels
+### 3. Running Seller & Admin Panels
 
 ```bash
 cd apps/seller_web && flutter run -d chrome
@@ -69,44 +102,50 @@ cd apps/admin_web  && flutter run -d chrome
 
 ---
 
-## Conventions
+## Local Backend (Docker)
 
-- **Brand:** Clothsy Violet `#5C25FC`, Deep Ink, Soft Lilac; Try-On Coral
-  `#FF4F7B` is reserved for Clothsy AI. Poppins type scale. Use theme tokens
-  (`context.colors`, `AppTypography`) — never raw hex in screens.
-- **Money:** always integer **paise** (`₹1 = 100`). Format only at the UI edge
-  with `CurrencyFormatter.format(paise)` → `₹1,499`.
-- **Copy:** key microcopy (try-on consent, disclaimers, empty states) lives in
-  `ClothsyCopy` so every app speaks with one voice.
-- **Product images:** portrait 3:4 — size grids with `ProductCardGridDelegate`.
-- **Architecture:** feature-first clean architecture; screens depend on
-  repository interfaces in `clothsy_core`, implementations are swapped in
-  Riverpod providers (mock ↔ Supabase).
+Clothsy provides a self-hosted Supabase environment (Postgres, GoTrue Auth, PostgREST, Storage, and Edge Functions) via Docker Compose.
+
+```bash
+scripts/backend.sh up       # Starts stack on :54321, runs migrations & writes dev.json
+scripts/backend.sh test     # Runs pgTAP database tests & Deno function tests
+scripts/backend.sh e2e      # End-to-end integration check (auth, try-on, orders, refunds)
+scripts/backend.sh down     # Stops containers
+```
+
+### Local Test Credentials
+
+Phone OTP operates locally without third-party SMS providers:
+
+| Phone Number | Verification Code |
+|---|---|
+| `99999 00001` | `123456` |
+| `99999 00002` | `123456` |
+| `99999 00003` | `123456` |
+
+Payments and Try-On automatically fall back to local mock providers when production API keys are absent.
 
 ---
 
-## Tests
+## Verification & Testing
 
 ```bash
+# Code Analysis
 flutter analyze apps packages
+
+# Unit & Widget Tests
 (cd packages/clothsy_core && flutter test)
-(cd apps/customer && flutter test)      # incl. 320px → 430px responsiveness matrix
+(cd apps/customer && flutter test)
 (cd apps/seller_web && flutter test)
 (cd apps/admin_web && flutter test)
-```
 
-```bash
-scripts/backend.sh test                 # database (pgTAP) + Edge Functions (Deno), in Docker
-scripts/backend.sh reset && scripts/backend.sh e2e   # Phase 1 flow end to end against the stack
+# Backend Integration Suite
+scripts/backend.sh test
+scripts/backend.sh reset && scripts/backend.sh e2e
 ```
-
-CI (`.github/workflows/ci.yml`) runs formatting, analysis and all Flutter
-tests, then builds the customer APK and both web panels;
-`.github/workflows/backend.yml` runs the backend tests and the end-to-end
-check in the same Docker stack.
 
 ---
 
 ## License
 
-MIT © 2024 Aastha Sudan
+MIT © 2024–2026 Aastha Sudan

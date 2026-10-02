@@ -48,6 +48,7 @@ app.*.map.json
 .idea/
 *.iml
 .vscode/
+.claude/
 
 # Build artifacts
 build/

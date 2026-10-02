@@ -1,7 +1,7 @@
 # Clothsy backend (Supabase)
 
 Postgres, Auth, Storage and Edge Functions for the marketplace. Locally it
-all runs in Docker Compose — see [docs/backend.md](../docs/backend.md).
+all runs in Docker Compose via `scripts/backend.sh`.
 
 | Folder | Contents |
 |---|---|
