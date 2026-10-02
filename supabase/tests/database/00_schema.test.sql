@@ -32,9 +32,11 @@ select is(
   array[
     'advance_seller_order', 'cancel_order', 'cancel_seller_order',
     'check_pin_serviceability', 'delete_my_tryon_data', 'delete_tryon_photo',
-    'fail_payment', 'get_tryon_status', 'place_order', 'search_products',
-    'set_default_address', 'set_tryon_consent', 'validate_coupon'],
-  'shoppers can only call the shopper functions'
+    'fail_payment', 'get_seller_bank_account', 'get_tryon_status', 'my_sellers',
+    'place_order', 'register_seller', 'review_seller_application', 'search_products',
+    'set_default_address', 'set_seller_bank_account', 'set_tryon_consent',
+    'submit_seller_application', 'validate_coupon', 'verify_seller_bank_account'],
+  'signed-in users can only call the shopper, brand and staff functions (each checks the caller)'
 );
 
 select ok(
@@ -51,6 +53,10 @@ select ok(
   not has_function_privilege('authenticated',
     'public.start_tryon_job(uuid, uuid, uuid, uuid, uuid, boolean)', 'execute'),
   'only the try-on service can start jobs and spend credits'
+);
+select ok(
+  not has_table_privilege('authenticated', 'private.seller_bank_accounts', 'select'),
+  'bank account numbers are not readable through the API'
 );
 
 -- Append-only history.

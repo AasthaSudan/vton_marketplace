@@ -100,4 +100,40 @@ begin
     (draft, seller, 'tst_draft', 'Black / M', 'M', 299900, 5);
 end $$;
 
+-- A Clothsy staff member holding [p_roles].
+create or replace function tests.create_staff(p_phone text, p_roles text[])
+returns uuid language plpgsql security definer set search_path = '' as $$
+declare
+  uid uuid := tests.create_user(p_phone);
+begin
+  insert into public.staff_roles (user_id, role)
+  select uid, r::public.app_role from unnest(p_roles) r;
+  return uid;
+end $$;
+
+-- A new user who owns the store [p_handle].
+create or replace function tests.seller_owner(p_phone text, p_handle text)
+returns uuid language plpgsql security definer set search_path = '' as $$
+declare
+  uid uuid := tests.create_user(p_phone);
+begin
+  insert into public.seller_members (seller_id, user_id, role)
+  select id, uid, 'owner' from public.sellers where handle = p_handle;
+  return uid;
+end $$;
+
+-- Runs [p_sql] as the current role and returns the error's detail as JSON
+-- (null when it does not fail), e.g. to see exactly what is missing.
+create or replace function tests.error_detail(p_sql text)
+returns jsonb language plpgsql as $$
+declare
+  d text;
+begin
+  execute p_sql;
+  return null;
+exception when others then
+  get stacked diagnostics d = pg_exception_detail;
+  return nullif(d, '')::jsonb;
+end $$;
+
 grant execute on all functions in schema tests to anon, authenticated, service_role;
