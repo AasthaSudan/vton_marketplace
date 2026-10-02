@@ -60,17 +60,22 @@ class SecondaryButton extends StatelessWidget {
                   valueColor: AlwaysStoppedAnimation<Color>(fgColor),
                 ),
               )
-            : Row(
-                mainAxisSize: isFullWidth ? MainAxisSize.max : MainAxisSize.min,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  if (icon != null) ...[icon!, const SizedBox(width: 8)],
-                  Text(text, style: AppTypography.button(color: fgColor)),
-                  if (trailingIcon != null) ...[
-                    const SizedBox(width: 8),
-                    trailingIcon!,
+            // Like PrimaryButton: long labels shrink to fit instead of
+            // overflowing on narrow phones or with large text.
+            : FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    if (icon != null) ...[icon!, const SizedBox(width: 8)],
+                    Text(text, style: AppTypography.button(color: fgColor)),
+                    if (trailingIcon != null) ...[
+                      const SizedBox(width: 8),
+                      trailingIcon!,
+                    ],
                   ],
-                ],
+                ),
               ),
       ),
     );

@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:clothsy_core/core/constants/app_constants.dart';
 import 'package:clothsy_core/core/constants/clothsy_copy.dart';
+import 'package:clothsy_core/features/address/domain/entities/pin_serviceability.dart';
+import 'package:clothsy_core/features/cart/domain/entities/cart_item.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import '../../catalog/presentation/providers/catalog_providers.dart';
 import 'package:clothsy_core/core/theme/app_colors.dart';
 import 'package:clothsy_core/core/theme/app_radius.dart';
 import 'package:clothsy_core/core/theme/app_typography.dart';
@@ -74,6 +79,34 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     }
 
     final cart = ref.read(cartProvider);
+    PinServiceability? pin;
+    try {
+      pin = await ref.read(pinServiceabilityProvider(address.pinCode).future);
+    } catch (_) {
+      pin = null; // The order service checks the PIN again anyway.
+    }
+    if (!mounted) return;
+    if (pin != null && !pin.serviceable) {
+      ClothsySnackbar.show(
+        context,
+        message:
+            "We don't deliver to ${address.pinCode} yet. "
+            'Please choose another address.',
+        type: SnackbarType.error,
+      );
+      return;
+    }
+    final codReason = _selectedPaymentMethod == 'COD'
+        ? _codBlockedReason(cart.total, pin)
+        : null;
+    if (codReason != null) {
+      ClothsySnackbar.show(
+        context,
+        message: '$codReason Please pick another way to pay.',
+        type: SnackbarType.error,
+      );
+      return;
+    }
     if (cart.isEmpty) {
       ClothsySnackbar.show(
         context,
@@ -140,6 +173,13 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     final colors = context.colors;
     final cart = ref.watch(cartProvider);
     final selectedAddress = ref.watch(selectedAddressProvider);
+    final pin = selectedAddress == null
+        ? null
+        : ref
+              .watch(pinServiceabilityProvider(selectedAddress.pinCode))
+              .asData
+              ?.value;
+    final codBlockedReason = _codBlockedReason(cart.total, pin);
 
     return Scaffold(
       backgroundColor: colors.background,
@@ -185,10 +225,12 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                         ? Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Text(
-                                'No address selected',
-                                style: AppTypography.body(
-                                  color: colors.textSecondary,
+                              Expanded(
+                                child: Text(
+                                  'No address selected',
+                                  style: AppTypography.body(
+                                    color: colors.textSecondary,
+                                  ),
                                 ),
                               ),
                               TextButton(
@@ -217,21 +259,27 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
                                 children: [
-                                  Row(
-                                    children: [
-                                      Icon(
-                                        Icons.location_on_outlined,
-                                        size: 18,
-                                        color: colors.primary,
-                                      ),
-                                      const SizedBox(width: 6),
-                                      Text(
-                                        selectedAddress.name,
-                                        style: AppTypography.bodyMedium(
-                                          weight: FontWeight.w700,
+                                  Expanded(
+                                    child: Row(
+                                      children: [
+                                        Icon(
+                                          Icons.location_on_outlined,
+                                          size: 18,
+                                          color: colors.primary,
                                         ),
-                                      ),
-                                    ],
+                                        const SizedBox(width: 6),
+                                        Flexible(
+                                          child: Text(
+                                            selectedAddress.name,
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: AppTypography.bodyMedium(
+                                              weight: FontWeight.w700,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
                                   ),
                                   PressableScale(
                                     onTap: () {
@@ -277,179 +325,155 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                   ),
                   const SizedBox(height: 24),
 
-                  // Step 2: Delivery Option
-                  _buildSectionTitle('2. Delivery Option'),
+                  // Step 2: one shipment per brand (Blueprint fig. 17).
+                  _buildSectionTitle('2. Delivery'),
                   const SizedBox(height: 10),
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: colors.surface,
-                      borderRadius: AppRadius.cardRadius,
-                      border: Border.all(color: colors.border.withOpacity(0.8)),
+                  if (pin != null && !pin.serviceable)
+                    Container(
+                      margin: const EdgeInsets.only(bottom: 10),
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        color: colors.warning.withOpacity(0.1),
+                        borderRadius: AppRadius.cardRadius,
+                        border: Border.all(color: colors.warning),
+                      ),
+                      child: Text(
+                        "We don't deliver to ${pin.pinCode} yet. Choose "
+                        'another address to place this order.',
+                        style: AppTypography.body(color: colors.textPrimary),
+                      ),
                     ),
-                    child: Row(
-                      children: [
-                        Container(
-                          width: 40,
-                          height: 40,
-                          decoration: BoxDecoration(
-                            color: colors.accentSoft,
-                            shape: BoxShape.circle,
-                          ),
-                          child: Icon(
-                            Icons.rocket_launch_outlined,
-                            color: colors.primary,
-                            size: 20,
-                          ),
-                        ),
-                        const SizedBox(width: 14),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                cart.shipmentCount > 1
-                                    ? 'Delivered in ${cart.shipmentCount} shipments'
-                                    : 'Delivered by your brand',
-                                style: AppTypography.bodyMedium(
-                                  weight: FontWeight.w600,
-                                ).copyWith(fontSize: 14),
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                'Each brand packs and ships its own items. '
-                                "You'll get tracking for every shipment.",
-                                style: AppTypography.caption(
-                                  color: colors.textSecondary,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Text(
-                          cart.shippingFee == 0
-                              ? 'FREE'
-                              : CurrencyFormatter.format(cart.shippingFee),
-                          style: AppTypography.label(
-                            color: cart.shippingFee == 0
-                                ? colors.success
-                                : colors.textPrimary,
-                            weight: FontWeight.w700,
-                          ).copyWith(fontSize: 12),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 24),
+                  for (final group in cart.sellerGroups)
+                    _ShipmentCard(group: group, pin: pin),
+                  const SizedBox(height: 14),
 
                   // Step 3: Payment Method
                   _buildSectionTitle('3. Payment Method'),
                   const SizedBox(height: 10),
                   ..._paymentOptions.map((opt) {
                     final isSelected = _selectedPaymentMethod == opt['id'];
+                    final blockedReason = opt['id'] == 'COD'
+                        ? codBlockedReason
+                        : null;
 
                     return Padding(
                       padding: const EdgeInsets.only(bottom: 10),
-                      child: PressableScale(
-                        onTap: () => setState(
-                          () => _selectedPaymentMethod = opt['id'] as String,
-                        ),
-                        child: Container(
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            color: colors.surface,
-                            borderRadius: AppRadius.cardRadius,
-                            border: Border.all(
-                              color: isSelected
-                                  ? colors.primary
-                                  : colors.border.withOpacity(0.6),
-                              width: isSelected ? 1.8 : 1.0,
+                      child: Opacity(
+                        opacity: blockedReason == null ? 1 : 0.5,
+                        child: PressableScale(
+                          onTap: blockedReason != null
+                              ? () => ClothsySnackbar.show(
+                                  context,
+                                  message: blockedReason,
+                                )
+                              : () => setState(
+                                  () => _selectedPaymentMethod =
+                                      opt['id'] as String,
+                                ),
+                          child: Container(
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: colors.surface,
+                              borderRadius: AppRadius.cardRadius,
+                              border: Border.all(
+                                color: isSelected
+                                    ? colors.primary
+                                    : colors.border.withOpacity(0.6),
+                                width: isSelected ? 1.8 : 1.0,
+                              ),
                             ),
-                          ),
-                          child: Column(
-                            children: [
-                              Row(
-                                children: [
-                                  Icon(
-                                    opt['icon'] as IconData,
-                                    color: colors.primary,
-                                    size: 22,
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          opt['title'] as String,
-                                          style: AppTypography.bodyMedium(
-                                            weight: FontWeight.w600,
-                                          ),
-                                        ),
-                                        Text(
-                                          opt['subtitle'] as String,
-                                          style: AppTypography.caption(
-                                            color: colors.textSecondary,
-                                          ).copyWith(fontSize: 11),
-                                        ),
-                                      ],
+                            child: Column(
+                              children: [
+                                Row(
+                                  children: [
+                                    Icon(
+                                      opt['icon'] as IconData,
+                                      color: colors.primary,
+                                      size: 22,
                                     ),
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            opt['title'] as String,
+                                            style: AppTypography.bodyMedium(
+                                              weight: FontWeight.w600,
+                                            ),
+                                          ),
+                                          Text(
+                                            blockedReason ??
+                                                opt['subtitle'] as String,
+                                            style: AppTypography.caption(
+                                              color: colors.textSecondary,
+                                            ).copyWith(fontSize: 11),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    Icon(
+                                      isSelected
+                                          ? Icons.check_circle_rounded
+                                          : Icons.radio_button_off,
+                                      color: isSelected
+                                          ? colors.primary
+                                          : colors.textSecondary.withOpacity(
+                                              0.4,
+                                            ),
+                                      size: 20,
+                                    ),
+                                  ],
+                                ),
+                                if (isSelected && opt['id'] == 'UPI') ...[
+                                  const SizedBox(height: 12),
+                                  Divider(
+                                    color: colors.border.withOpacity(0.5),
                                   ),
-                                  Icon(
-                                    isSelected
-                                        ? Icons.check_circle_rounded
-                                        : Icons.radio_button_off,
-                                    color: isSelected
-                                        ? colors.primary
-                                        : colors.textSecondary.withOpacity(0.4),
-                                    size: 20,
+                                  const SizedBox(height: 8),
+                                  Wrap(
+                                    spacing: 8,
+                                    runSpacing: 8,
+                                    alignment: WrapAlignment.center,
+                                    children: ['Google Pay', 'PhonePe', 'Paytm']
+                                        .map((app) {
+                                          final isAppSelected =
+                                              _selectedUpiApp == app;
+                                          return PressableScale(
+                                            onTap: () => setState(
+                                              () => _selectedUpiApp = app,
+                                            ),
+                                            child: Container(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                    horizontal: 14,
+                                                    vertical: 6,
+                                                  ),
+                                              decoration: BoxDecoration(
+                                                color: isAppSelected
+                                                    ? colors.primary
+                                                    : colors.surfaceMuted,
+                                                borderRadius:
+                                                    BorderRadius.circular(100),
+                                              ),
+                                              child: Text(
+                                                app,
+                                                style: AppTypography.caption(
+                                                  color: isAppSelected
+                                                      ? colors.onPrimary
+                                                      : colors.textPrimary,
+                                                  weight: FontWeight.w600,
+                                                ).copyWith(fontSize: 11),
+                                              ),
+                                            ),
+                                          );
+                                        })
+                                        .toList(),
                                   ),
                                 ],
-                              ),
-                              if (isSelected && opt['id'] == 'UPI') ...[
-                                const SizedBox(height: 12),
-                                Divider(color: colors.border.withOpacity(0.5)),
-                                const SizedBox(height: 8),
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceAround,
-                                  children: ['Google Pay', 'PhonePe', 'Paytm']
-                                      .map((app) {
-                                        final isAppSelected =
-                                            _selectedUpiApp == app;
-                                        return PressableScale(
-                                          onTap: () => setState(
-                                            () => _selectedUpiApp = app,
-                                          ),
-                                          child: Container(
-                                            padding: const EdgeInsets.symmetric(
-                                              horizontal: 14,
-                                              vertical: 6,
-                                            ),
-                                            decoration: BoxDecoration(
-                                              color: isAppSelected
-                                                  ? colors.primary
-                                                  : colors.surfaceMuted,
-                                              borderRadius:
-                                                  BorderRadius.circular(100),
-                                            ),
-                                            child: Text(
-                                              app,
-                                              style: AppTypography.caption(
-                                                color: isAppSelected
-                                                    ? colors.onPrimary
-                                                    : colors.textPrimary,
-                                                weight: FontWeight.w600,
-                                              ).copyWith(fontSize: 11),
-                                            ),
-                                          ),
-                                        );
-                                      })
-                                      .toList(),
-                                ),
                               ],
-                            ],
+                            ),
                           ),
                         ),
                       ),
@@ -512,10 +536,12 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text(
-                              'Grand Total',
-                              style: AppTypography.h3(
-                                color: colors.textPrimary,
+                            Expanded(
+                              child: Text(
+                                'Grand Total',
+                                style: AppTypography.h3(
+                                  color: colors.textPrimary,
+                                ),
                               ),
                             ),
                             Text(
@@ -562,6 +588,18 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     );
   }
 
+  /// Why cash on delivery cannot be used for this order, if it cannot.
+  String? _codBlockedReason(int total, PinServiceability? pin) {
+    if (pin != null && pin.serviceable && !pin.codAvailable) {
+      return 'Cash on delivery is not available for this PIN code.';
+    }
+    if (total > AppConstants.codMaxOrderValue) {
+      return 'Cash on delivery is available on orders up to '
+          '${CurrencyFormatter.format(AppConstants.codMaxOrderValue)}.';
+    }
+    return null;
+  }
+
   Widget _buildSectionTitle(String title) {
     return Text(
       title,
@@ -580,12 +618,15 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(
-          label,
-          style: AppTypography.caption(
-            color: isHighlight ? colors.success : colors.textSecondary,
+        Expanded(
+          child: Text(
+            label,
+            style: AppTypography.caption(
+              color: isHighlight ? colors.success : colors.textSecondary,
+            ),
           ),
         ),
+        const SizedBox(width: 8),
         Text(
           value,
           style: AppTypography.bodyMedium(
@@ -594,6 +635,138 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
           ),
         ),
       ],
+    );
+  }
+}
+
+/// One brand's shipment: its pieces, delivery charge and expected date.
+class _ShipmentCard extends ConsumerWidget {
+  final SellerBagGroup group;
+  final PinServiceability? pin;
+
+  const _ShipmentCard({required this.group, required this.pin});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final colors = context.colors;
+    final seller = ref.watch(sellerProvider(group.sellerId)).asData?.value;
+    final pin = this.pin;
+    final arrives = pin != null && pin.serviceable
+        ? 'Arrives by ${arrivesByLabel(dispatchDays: seller?.dispatchDays ?? 2, transitDays: pin.etaDays)}'
+        : 'Ships in ${seller?.dispatchDays ?? 2} working days';
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: colors.surface,
+        borderRadius: AppRadius.cardRadius,
+        border: Border.all(color: colors.border.withOpacity(0.8)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.storefront_outlined, size: 16, color: colors.primary),
+              const SizedBox(width: 6),
+              Expanded(
+                child: Text(
+                  group.sellerName,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTypography.bodyMedium(
+                    color: colors.textPrimary,
+                    weight: FontWeight.w700,
+                  ),
+                ),
+              ),
+              Text(
+                group.shippingFee == 0
+                    ? 'Free delivery'
+                    : CurrencyFormatter.format(group.shippingFee),
+                style: AppTypography.caption(
+                  color: group.shippingFee == 0
+                      ? colors.success
+                      : colors.textPrimary,
+                  weight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          SizedBox(
+            height: 56,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              itemCount: group.items.length,
+              separatorBuilder: (_, _) => const SizedBox(width: 8),
+              itemBuilder: (context, index) {
+                final item = group.items[index];
+                return ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: Stack(
+                    children: [
+                      SizedBox(
+                        width: 42,
+                        height: 56,
+                        child: CachedNetworkImage(
+                          imageUrl:
+                              item.variant.imageUrl ??
+                              item.product.primaryImage,
+                          fit: BoxFit.cover,
+                          errorWidget: (context, _, _) =>
+                              ColoredBox(color: colors.surfaceMuted),
+                        ),
+                      ),
+                      if (item.quantity > 1)
+                        Positioned(
+                          right: 2,
+                          bottom: 2,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 4,
+                              vertical: 1,
+                            ),
+                            decoration: BoxDecoration(
+                              color: colors.surface,
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Text(
+                              '×${item.quantity}',
+                              style: AppTypography.caption(
+                                color: colors.textPrimary,
+                                weight: FontWeight.w700,
+                              ).copyWith(fontSize: 10),
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              Icon(
+                Icons.local_shipping_outlined,
+                size: 16,
+                color: colors.textSecondary,
+              ),
+              const SizedBox(width: 6),
+              Expanded(
+                child: Text(
+                  '$arrives • ${group.itemCount} '
+                  '${group.itemCount == 1 ? 'item' : 'items'}',
+                  style: AppTypography.caption(color: colors.textSecondary),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }

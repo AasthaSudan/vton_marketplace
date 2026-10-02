@@ -11,6 +11,9 @@ import 'package:clothsy_shop/features/catalog/presentation/catalog_screen.dart';
 import 'package:clothsy_shop/features/catalog/presentation/product_detail_screen.dart';
 import 'package:clothsy_shop/features/search/presentation/search_screen.dart';
 import 'package:clothsy_shop/features/home/presentation/home_screen.dart';
+import 'package:clothsy_shop/features/address/presentation/providers/address_providers.dart';
+import 'package:clothsy_shop/features/checkout/presentation/checkout_screen.dart';
+import 'package:clothsy_shop/features/checkout/presentation/order_success_screen.dart';
 import 'package:clothsy_shop/features/onboarding/presentation/onboarding_screen.dart';
 import 'package:clothsy_shop/features/onboarding/presentation/style_onboarding_screen.dart';
 import 'package:clothsy_shop/features/tryon/presentation/tryon_screen.dart';
@@ -241,6 +244,62 @@ void main() {
             scrollable: find.byType(Scrollable).first,
           );
           expect(tester.takeException(), isNull);
+        },
+      );
+
+      testWidgets(
+        'Checkout shows one shipment per brand on ${size.width}x${size.height} with zero overflow',
+        (tester) async {
+          await tester.binding.setSurfaceSize(size);
+          final container = ProviderContainer();
+          addTearDown(container.dispose);
+          final catalog = MockCatalogRepository();
+          final blazer = (await tester.runAsync(
+            () => catalog.getProductById('p_lavender_blazer'),
+          ))!;
+          final shirt = (await tester.runAsync(
+            () => catalog.getProductById('p_minimal_overshirt'),
+          ))!;
+          container.read(cartProvider.notifier)
+            ..addToCart(blazer, blazer.variants.first)
+            ..addToCart(shirt, shirt.variants.first);
+          // Load the saved addresses so one is selected.
+          container.read(addressesProvider);
+
+          await tester.pumpWidget(
+            UncontrolledProviderScope(
+              container: container,
+              child: MaterialApp(
+                home: MediaQuery(
+                  data: MediaQueryData(size: size),
+                  child: const CheckoutScreen(),
+                ),
+              ),
+            ),
+          );
+          await tester.pump(const Duration(milliseconds: 500));
+          await tester.pump(const Duration(milliseconds: 500));
+
+          expect(tester.takeException(), isNull);
+          expect(find.text('2. Delivery'), findsOneWidget);
+          expect(find.text('Noor Atelier'), findsOneWidget);
+          expect(find.textContaining('Arrives by'), findsWidgets);
+        },
+      );
+
+      testWidgets(
+        'OrderSuccessScreen lists each shipment on ${size.width}x${size.height} with zero overflow',
+        (tester) async {
+          await tester.binding.setSurfaceSize(size);
+          await tester.pumpWidget(
+            wrapWithScope(const OrderSuccessScreen(orderId: 'ord_103'), size),
+          );
+          await tester.pump(const Duration(milliseconds: 500));
+          await tester.pump(const Duration(milliseconds: 500));
+
+          expect(tester.takeException(), isNull);
+          expect(find.text('Noor Atelier'), findsOneWidget);
+          expect(find.text('Studio Rao'), findsOneWidget);
         },
       );
 

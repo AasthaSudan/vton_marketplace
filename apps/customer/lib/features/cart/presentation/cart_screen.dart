@@ -423,6 +423,7 @@ class _CartScreenState extends ConsumerState<CartScreen> {
                       final stepper = QuantityStepper(
                         height: 32,
                         value: item.quantity,
+                        max: maxQuantityFor(item.variant),
                         onChanged: (newQty) {
                           ref
                               .read(cartProvider.notifier)

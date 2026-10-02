@@ -10,6 +10,14 @@ class AppConstants {
   static const String defaultCurrencySymbol = '₹';
   static const int defaultPageSize = 20;
 
+  /// Largest order (paise) that may be paid cash on delivery. PLACEHOLDER
+  /// (₹10,000) until the COD policy is decided — Blueprint: "COD limits" to
+  /// manage refused deliveries. The server applies its own limit too.
+  static const int codMaxOrderValue = 1000000;
+
+  /// Most units of one piece in a single order (the server enforces it too).
+  static const int maxQuantityPerLine = 10;
+
   static const Duration defaultAnimationDuration = Duration(milliseconds: 250);
   static const Duration debounceDuration = Duration(milliseconds: 400);
 

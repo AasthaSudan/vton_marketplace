@@ -1,4 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
+import 'package:clothsy_core/features/address/domain/entities/pin_serviceability.dart';
 import '../../data/repositories/mock_address_repository.dart';
 import 'package:clothsy_core/features/address/domain/entities/address.dart';
 import 'package:clothsy_core/features/address/domain/repositories/address_repository.dart';
@@ -6,6 +8,24 @@ import 'package:clothsy_core/features/address/domain/repositories/address_reposi
 final addressRepositoryProvider = Provider<AddressRepository>((ref) {
   return MockAddressRepository();
 });
+
+/// Delivery, COD and transit time for a PIN code (cached per PIN).
+final pinServiceabilityProvider =
+    FutureProvider.family<PinServiceability, String>((ref, pinCode) {
+      return ref
+          .watch(addressRepositoryProvider)
+          .checkPinServiceability(pinCode);
+    });
+
+/// "Tue, 8 Oct": when an order shipped after [dispatchDays] and in transit
+/// for [transitDays] working days should arrive.
+String arrivesByLabel({required int dispatchDays, required int transitDays}) {
+  final date = estimateDeliveryDate(
+    from: DateTime.now(),
+    workingDays: dispatchDays + transitDays,
+  );
+  return DateFormat('EEE, d MMM').format(date);
+}
 
 class AddressesNotifier extends Notifier<List<Address>> {
   @override
