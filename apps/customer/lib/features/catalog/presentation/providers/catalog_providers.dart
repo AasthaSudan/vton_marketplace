@@ -1,5 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../data/repositories/catalog_repository_impl.dart';
+import '../../data/repositories/mock_catalog_repository.dart';
 import 'package:clothsy_core/features/catalog/domain/entities/banner.dart';
 import 'package:clothsy_core/features/catalog/domain/entities/collection.dart';
 import 'package:clothsy_core/features/catalog/domain/entities/product.dart';
@@ -7,7 +7,7 @@ import 'package:clothsy_core/features/catalog/domain/entities/seller.dart';
 import 'package:clothsy_core/features/catalog/domain/repositories/catalog_repository.dart';
 
 final catalogRepositoryProvider = Provider<CatalogRepository>((ref) {
-  return CatalogRepositoryImpl();
+  return MockCatalogRepository();
 });
 
 final featuredBannersProvider = FutureProvider<List<PromoBannerItem>>((

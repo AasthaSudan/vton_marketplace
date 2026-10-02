@@ -4,7 +4,7 @@ import 'package:clothsy_core/features/cart/domain/entities/cart_item.dart';
 import 'package:clothsy_core/features/catalog/domain/entities/product.dart';
 import 'package:clothsy_core/features/orders/domain/entities/order.dart';
 import 'package:clothsy_core/features/payments/domain/payment_gateway.dart';
-import 'package:clothsy_shop/features/orders/data/repositories/order_repository_impl.dart';
+import 'package:clothsy_shop/features/orders/data/repositories/mock_order_repository.dart';
 import 'package:clothsy_shop/features/orders/presentation/providers/order_providers.dart';
 import 'package:clothsy_shop/features/payments/data/mock_payment_gateway.dart';
 import 'package:clothsy_shop/features/payments/presentation/providers/payment_providers.dart';
@@ -58,7 +58,7 @@ final twoBrandBag = CartSummary(
 );
 
 void main() {
-  late OrderRepositoryImpl repo;
+  late MockOrderRepository repo;
   late MockPaymentGateway gateway;
   late ProviderContainer container;
 
@@ -93,7 +93,7 @@ void main() {
   }
 
   setUp(() {
-    repo = OrderRepositoryImpl();
+    repo = MockOrderRepository();
     gateway = MockPaymentGateway(delay: Duration.zero);
     container = containerWith(gateway);
   });

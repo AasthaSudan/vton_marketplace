@@ -12,7 +12,7 @@ import 'package:clothsy_core/features/payments/domain/payment_gateway.dart';
 /// In-memory orders for the mock flavor and tests. Mirrors what the backend
 /// does: split into seller orders, hold payment until confirmed, and refund
 /// cancelled parts.
-class OrderRepositoryImpl implements OrderRepository {
+class MockOrderRepository implements OrderRepository {
   static const _sampleAddress = Address(
     id: 'addr_sample',
     name: 'Aastha Sudan',

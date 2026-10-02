@@ -1,10 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../data/repositories/address_repository_impl.dart';
+import '../../data/repositories/mock_address_repository.dart';
 import 'package:clothsy_core/features/address/domain/entities/address.dart';
 import 'package:clothsy_core/features/address/domain/repositories/address_repository.dart';
 
 final addressRepositoryProvider = Provider<AddressRepository>((ref) {
-  return AddressRepositoryImpl();
+  return MockAddressRepository();
 });
 
 class AddressesNotifier extends Notifier<List<Address>> {

@@ -1,12 +1,12 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:clothsy_core/features/catalog/domain/entities/product.dart';
-import '../../data/repositories/tryon_repository_impl.dart';
+import '../../data/repositories/mock_tryon_repository.dart';
 import 'package:clothsy_core/features/tryon/domain/entities/tryon_photo.dart';
 import 'package:clothsy_core/features/tryon/domain/entities/tryon_session.dart';
 import 'package:clothsy_core/features/tryon/domain/repositories/tryon_repository.dart';
 
 final tryOnRepositoryProvider = Provider<TryOnRepository>((ref) {
-  return TryOnRepositoryImpl();
+  return MockTryOnRepository();
 });
 
 final tryOnPresetsProvider = FutureProvider<List<TryOnPhoto>>((ref) async {

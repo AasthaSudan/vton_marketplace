@@ -5,7 +5,7 @@ import 'package:clothsy_core/features/tryon/domain/entities/tryon_photo.dart';
 import 'package:clothsy_core/features/tryon/domain/entities/tryon_session.dart';
 import 'package:clothsy_core/features/tryon/domain/repositories/tryon_repository.dart';
 
-class TryOnRepositoryImpl implements TryOnRepository {
+class MockTryOnRepository implements TryOnRepository {
   static const String _keyConsent = 'clothsy_tryon_consent_v1';
   static const String _keyCredits = 'clothsy_tryon_credits_v1';
 
@@ -44,7 +44,7 @@ class TryOnRepositoryImpl implements TryOnRepository {
   final Map<String, TryOnResult> _cache = {};
   final List<TryOnResult> _history = [];
 
-  TryOnRepositoryImpl() {
+  MockTryOnRepository() {
     // Seed initial demo history
     _seedInitialHistory();
   }

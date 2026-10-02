@@ -5,11 +5,11 @@ import 'package:clothsy_core/features/cart/domain/entities/cart_item.dart';
 import 'package:clothsy_core/features/orders/domain/entities/order.dart';
 import 'package:clothsy_core/features/orders/domain/repositories/order_repository.dart';
 import 'package:clothsy_core/features/payments/domain/payment_gateway.dart';
-import 'package:clothsy_shop/features/orders/data/repositories/order_repository_impl.dart';
+import 'package:clothsy_shop/features/orders/data/repositories/mock_order_repository.dart';
 import '../../../payments/presentation/providers/payment_providers.dart';
 
 final orderRepositoryProvider = Provider<OrderRepository>((ref) {
-  return OrderRepositoryImpl();
+  return MockOrderRepository();
 });
 
 /// Result of trying to place an order from the bag.

@@ -1,5 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../data/repositories/auth_repository_impl.dart';
+import '../../data/repositories/mock_auth_repository.dart';
 import 'package:clothsy_core/features/auth/domain/entities/user.dart';
 import 'package:clothsy_core/features/auth/domain/repositories/auth_repository.dart';
 
@@ -32,7 +32,7 @@ String _friendly(Object error) => error is AuthFailure
     : 'Something went wrong signing you in. Please try again.';
 
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
-  return AuthRepositoryImpl();
+  return MockAuthRepository();
 });
 
 class AuthNotifier extends Notifier<AuthState> {

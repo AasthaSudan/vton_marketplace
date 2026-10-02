@@ -6,7 +6,7 @@ import 'package:clothsy_shop/features/brands/presentation/brand_directory_screen
 import 'package:clothsy_shop/features/brands/presentation/brand_storefront_screen.dart';
 import 'package:clothsy_shop/features/cart/presentation/cart_screen.dart';
 import 'package:clothsy_shop/features/cart/presentation/providers/cart_provider.dart';
-import 'package:clothsy_shop/features/catalog/data/repositories/catalog_repository_impl.dart';
+import 'package:clothsy_shop/features/catalog/data/repositories/mock_catalog_repository.dart';
 import 'package:clothsy_shop/features/catalog/presentation/product_detail_screen.dart';
 import 'package:clothsy_shop/features/home/presentation/home_screen.dart';
 import 'package:clothsy_shop/features/onboarding/presentation/onboarding_screen.dart';
@@ -136,7 +136,7 @@ void main() {
           final container = ProviderContainer();
           addTearDown(container.dispose);
 
-          final catalog = CatalogRepositoryImpl();
+          final catalog = MockCatalogRepository();
           // The mock repository uses real timers, so resolve it outside the
           // widget tester's fake clock.
           final blazer = (await tester.runAsync(

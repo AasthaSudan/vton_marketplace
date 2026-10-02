@@ -2,7 +2,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:clothsy_core/features/auth/domain/entities/user.dart';
 import 'package:clothsy_core/features/auth/domain/repositories/auth_repository.dart';
 
-class AuthRepositoryImpl implements AuthRepository {
+class MockAuthRepository implements AuthRepository {
   static const String _keyUserId = 'auth_user_id';
   static const String _keyUserName = 'auth_user_name';
   static const String _keyUserEmail = 'auth_user_email';

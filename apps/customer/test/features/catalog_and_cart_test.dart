@@ -1,16 +1,16 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:clothsy_shop/features/cart/presentation/providers/cart_provider.dart';
-import 'package:clothsy_shop/features/catalog/data/repositories/catalog_repository_impl.dart';
+import 'package:clothsy_shop/features/catalog/data/repositories/mock_catalog_repository.dart';
 import 'package:clothsy_core/features/catalog/domain/entities/product.dart';
 import 'package:clothsy_shop/features/wishlist/presentation/providers/wishlist_provider.dart';
 
 void main() {
-  group('CatalogRepositoryImpl', () {
-    late CatalogRepositoryImpl repository;
+  group('MockCatalogRepository', () {
+    late MockCatalogRepository repository;
 
     setUp(() {
-      repository = CatalogRepositoryImpl();
+      repository = MockCatalogRepository();
     });
 
     test('getProducts returns all products when category is All', () async {

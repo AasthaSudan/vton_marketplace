@@ -3,7 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:clothsy_core/features/catalog/domain/entities/product.dart';
-import 'package:clothsy_shop/features/tryon/data/repositories/tryon_repository_impl.dart';
+import 'package:clothsy_shop/features/tryon/data/repositories/mock_tryon_repository.dart';
 import 'package:clothsy_core/features/tryon/domain/entities/tryon_photo.dart';
 import 'package:clothsy_core/features/tryon/domain/entities/tryon_session.dart';
 import 'package:clothsy_shop/features/tryon/presentation/providers/tryon_provider.dart';
@@ -42,11 +42,11 @@ void main() {
     variants: [sampleVariant],
   );
 
-  group('Phase 4 - TryOnRepositoryImpl', () {
-    late TryOnRepositoryImpl repo;
+  group('Phase 4 - MockTryOnRepository', () {
+    late MockTryOnRepository repo;
 
     setUp(() {
-      repo = TryOnRepositoryImpl();
+      repo = MockTryOnRepository();
     });
 
     test('getPresetPhotos returns curated editorial models', () async {

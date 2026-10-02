@@ -5,7 +5,7 @@ import 'package:clothsy_core/features/catalog/domain/entities/product.dart';
 import 'package:clothsy_core/features/catalog/domain/entities/seller.dart';
 import 'package:clothsy_core/features/catalog/domain/repositories/catalog_repository.dart';
 
-class CatalogRepositoryImpl implements CatalogRepository {
+class MockCatalogRepository implements CatalogRepository {
   // Demo brands. The marketplace blueprint launches with curated independent
   // labels; one of them is deliberately not yet verified.
   final List<Seller> _sellers = const [

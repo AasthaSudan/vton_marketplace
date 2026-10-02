@@ -1,7 +1,7 @@
 import 'package:clothsy_core/features/address/domain/entities/address.dart';
 import 'package:clothsy_core/features/address/domain/repositories/address_repository.dart';
 
-class AddressRepositoryImpl implements AddressRepository {
+class MockAddressRepository implements AddressRepository {
   final List<Address> _addresses = [
     const Address(
       id: 'addr_1',

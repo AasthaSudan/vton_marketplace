@@ -4,9 +4,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:clothsy_shop/features/auth/presentation/providers/auth_provider.dart';
 import 'package:clothsy_core/features/address/domain/entities/address.dart';
-import 'package:clothsy_shop/features/address/data/repositories/address_repository_impl.dart';
+import 'package:clothsy_shop/features/address/data/repositories/mock_address_repository.dart';
 import 'package:clothsy_shop/features/address/presentation/providers/address_providers.dart';
-import 'package:clothsy_shop/features/orders/data/repositories/order_repository_impl.dart';
+import 'package:clothsy_shop/features/orders/data/repositories/mock_order_repository.dart';
 import 'package:clothsy_core/features/orders/domain/entities/order.dart';
 import 'package:clothsy_core/features/cart/domain/entities/cart_item.dart';
 import 'package:clothsy_core/features/catalog/domain/entities/product.dart';
@@ -82,7 +82,7 @@ void main() {
   });
 
   group('Phase 3 - Address Repository & PIN Code Serviceability', () {
-    final repo = AddressRepositoryImpl();
+    final repo = MockAddressRepository();
 
     test('PIN code lookup resolves city and state correctly', () async {
       final delhi = await repo.lookupPinCode('110001');
@@ -136,7 +136,7 @@ void main() {
 
   group('Phase 3 - Orders and Checkout', () {
     test('OrderRepository creates and cancels order', () async {
-      final repo = OrderRepositoryImpl();
+      final repo = MockOrderRepository();
 
       const sampleVariant = ProductVariant(
         id: 'var_test',
