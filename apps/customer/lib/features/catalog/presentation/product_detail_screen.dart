@@ -7,6 +7,7 @@ import 'package:clothsy_core/features/catalog/domain/entities/product.dart';
 import 'package:clothsy_core/core/theme/app_colors.dart';
 import 'package:clothsy_core/core/theme/app_radius.dart';
 import 'package:clothsy_core/core/theme/app_typography.dart';
+import 'package:clothsy_core/shared/widgets/badges/seller_badge.dart';
 import 'package:clothsy_core/shared/widgets/buttons/clothsy_icon_button.dart';
 import 'package:clothsy_core/shared/widgets/buttons/pressable_scale.dart';
 import 'package:clothsy_core/shared/widgets/cards/product_card.dart';
@@ -323,6 +324,18 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                                     fontSize: 24,
                                     fontWeight: FontWeight.w700,
                                   ),
+                            ),
+                            const SizedBox(height: 8),
+
+                            // Who sells it — opens the brand storefront
+                            SellerChip(
+                              seller: ref
+                                  .watch(sellerProvider(product.sellerId))
+                                  .asData
+                                  ?.value,
+                              fallbackName: product.brand,
+                              onTap: () =>
+                                  context.push('/brand/${product.sellerId}'),
                             ),
                             const SizedBox(height: 12),
 

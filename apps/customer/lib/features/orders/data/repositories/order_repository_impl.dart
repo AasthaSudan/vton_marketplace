@@ -37,7 +37,8 @@ class OrderRepositoryImpl implements OrderRepository {
             id: 'p2',
             handle: 'linen-tailored-blazer',
             title: 'Linen Tailored Blazer',
-            brand: 'Clothsy Studio',
+            sellerId: 'sel_rao',
+            brand: 'Studio Rao',
             description: 'Structured Normandy flax linen blazer.',
             price: 649900,
             images: [
@@ -122,7 +123,8 @@ class OrderRepositoryImpl implements OrderRepository {
             id: 'p1',
             handle: 'silk-satin-maxi-dress',
             title: 'Silk Satin Maxi Dress',
-            brand: 'Clothsy Atelier',
+            sellerId: 'sel_noor',
+            brand: 'Noor Atelier',
             description: '22-momme Mulberry silk satin cowl neck maxi dress.',
             price: 499900,
             images: [

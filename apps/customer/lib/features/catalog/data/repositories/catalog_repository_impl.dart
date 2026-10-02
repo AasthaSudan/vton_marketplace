@@ -2,16 +2,89 @@ import 'package:flutter/material.dart';
 import 'package:clothsy_core/features/catalog/domain/entities/banner.dart';
 import 'package:clothsy_core/features/catalog/domain/entities/collection.dart';
 import 'package:clothsy_core/features/catalog/domain/entities/product.dart';
+import 'package:clothsy_core/features/catalog/domain/entities/seller.dart';
 import 'package:clothsy_core/features/catalog/domain/repositories/catalog_repository.dart';
 
 class CatalogRepositoryImpl implements CatalogRepository {
+  // Demo brands. The marketplace blueprint launches with curated independent
+  // labels; one of them is deliberately not yet verified.
+  final List<Seller> _sellers = const [
+    Seller(
+      id: 'sel_noor',
+      handle: 'noor-atelier',
+      name: 'Noor Atelier',
+      tagline: 'Hand-finished occasion & workwear',
+      story:
+          'Noor Atelier started in a Jaipur studio with two tailors and a love '
+          'for hand-block prints. Every piece is cut in small batches, finished '
+          'by hand and made to be worn again and again.',
+      bannerUrl:
+          'https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=1200&auto=format&fit=crop&q=80',
+      city: 'Jaipur',
+      isVerified: true,
+      followerCount: 48200,
+      rating: 4.8,
+      dispatchDays: 2,
+      returnWindowDays: 10,
+    ),
+    Seller(
+      id: 'sel_rao',
+      handle: 'studio-rao',
+      name: 'Studio Rao',
+      tagline: 'Sharp, modern tailoring for him',
+      story:
+          'Studio Rao makes the shirt, blazer and trouser you reach for every '
+          'week. Clean lines, breathable fabrics and a fit that works from '
+          'office to dinner.',
+      bannerUrl:
+          'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=1200&auto=format&fit=crop&q=80',
+      city: 'Mumbai',
+      isVerified: true,
+      followerCount: 31400,
+      rating: 4.7,
+      dispatchDays: 3,
+    ),
+    Seller(
+      id: 'sel_lilac',
+      handle: 'the-lilac-edit',
+      name: 'The Lilac Edit',
+      tagline: 'Soft colour, easy silhouettes',
+      story:
+          'A small Bengaluru label for people who like their wardrobe calm: soft '
+          'colours, relaxed shapes and fabrics that feel good all day.',
+      bannerUrl:
+          'https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?w=1200&auto=format&fit=crop&q=80',
+      city: 'Bengaluru',
+      isVerified: true,
+      followerCount: 12900,
+      rating: 4.6,
+    ),
+    Seller(
+      id: 'sel_mehr',
+      handle: 'mehr-essentials',
+      name: 'Mehr Essentials',
+      tagline: 'Everyday basics in honest fabrics',
+      story:
+          'Mehr Essentials is new to Clothsy: simple, well-made everyday pieces '
+          'at fair prices.',
+      bannerUrl:
+          'https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=1200&auto=format&fit=crop&q=80',
+      city: 'New Delhi',
+      followerCount: 2300,
+      rating: 4.4,
+      dispatchDays: 4,
+      returnWindowDays: 7,
+    ),
+  ];
+
   // Rich catalog dataset reflecting the Clothsy luxury fashion collection
   final List<Product> _products = [
     Product(
       id: 'p_lavender_blazer',
       handle: 'lavender-blazer',
       title: 'Lavender Blazer',
-      brand: 'Clothsy Atelier',
+      sellerId: 'sel_noor',
+      brand: 'Noor Atelier',
       description:
           'Tailored to perfection, this blazer adds a touch of elegance to any outfit. Crafted from premium breathable stretch twill with structured notch lapels, flap pockets, and a graceful tailored silhouette. Perfect for both casual and formal occasions.',
       price: 799900,
@@ -75,7 +148,8 @@ class CatalogRepositoryImpl implements CatalogRepository {
       id: 'p_minimal_overshirt',
       handle: 'minimal-overshirt',
       title: 'Minimal Overshirt',
-      brand: 'Clothsy Studio',
+      sellerId: 'sel_rao',
+      brand: 'Studio Rao',
       description:
           'Clean-cut contemporary overshirt made with premium structured cotton twill. Features natural horn buttons, tailored collar, and clean dual utility chest pockets.',
       price: 499900,
@@ -115,7 +189,8 @@ class CatalogRepositoryImpl implements CatalogRepository {
       id: 'p_lavender_hoodie',
       handle: 'lavender-hoodie',
       title: 'Lavender Hoodie',
-      brand: 'Clothsy Edit',
+      sellerId: 'sel_lilac',
+      brand: 'The Lilac Edit',
       description:
           'Ultra-soft heavyweight brushed organic cotton fleece hoodie with relaxed dropped shoulders, double-layered hood, and ribbed trims.',
       price: 399900,
@@ -157,7 +232,8 @@ class CatalogRepositoryImpl implements CatalogRepository {
       id: 'p1',
       handle: 'silk-satin-maxi-dress',
       title: 'Silk Satin Maxi Dress',
-      brand: 'Clothsy Atelier',
+      sellerId: 'sel_noor',
+      brand: 'Noor Atelier',
       description:
           'Cut on the bias for an effortless, figure-skimming drape. Crafted from premium 22-momme Mulberry silk satin with adjustable delicate straps and a subtle cowl neckline. Perfect for evenings and celebrations.',
       price: 499900,
@@ -213,7 +289,8 @@ class CatalogRepositoryImpl implements CatalogRepository {
       id: 'p2',
       handle: 'linen-tailored-blazer',
       title: 'Linen Tailored Blazer',
-      brand: 'Clothsy Studio',
+      sellerId: 'sel_rao',
+      brand: 'Studio Rao',
       description:
           'Structured yet lightweight, crafted from pure Normandy flax linen. Features structured lapels, tortoiseshell buttons, and a relaxed tailored fit that pairs effortlessly with tailored trousers or slip skirts.',
       price: 649900,
@@ -255,7 +332,8 @@ class CatalogRepositoryImpl implements CatalogRepository {
       id: 'p3',
       handle: 'pleated-slip-midi-gown',
       title: 'Pleated Slip Midi Gown',
-      brand: 'Clothsy Edit',
+      sellerId: 'sel_lilac',
+      brand: 'The Lilac Edit',
       description:
           'Delicate micro-accordion pleats enhance every movement. Finished with a subtle asymmetric hemline and graceful silhouette.',
       price: 529900,
@@ -288,7 +366,8 @@ class CatalogRepositoryImpl implements CatalogRepository {
       id: 'p4',
       handle: 'cashmere-blend-knit-top',
       title: 'Cashmere Blend Knit Top',
-      brand: 'Clothsy Essentials',
+      sellerId: 'sel_mehr',
+      brand: 'Mehr Essentials',
       description:
           'Supremely soft Mongolian cashmere spun with organic cotton. A timeless mock-neck silhouette designed for transitional season layering.',
       price: 349900,
@@ -320,7 +399,8 @@ class CatalogRepositoryImpl implements CatalogRepository {
       id: 'p5',
       handle: 'sculpted-leather-tote',
       title: 'Sculpted Leather Tote',
-      brand: 'Clothsy Atelier',
+      sellerId: 'sel_noor',
+      brand: 'Noor Atelier',
       description:
           'Full-grain Italian calfskin leather handcrafted with architectural curved handles and gold-tone custom hardware.',
       price: 849900,
@@ -352,7 +432,8 @@ class CatalogRepositoryImpl implements CatalogRepository {
       id: 'p6',
       handle: 'minimalist-ankle-strap-heels',
       title: 'Minimalist Ankle Strap Heels',
-      brand: 'Clothsy Studio',
+      sellerId: 'sel_rao',
+      brand: 'Studio Rao',
       description:
           '75mm sculptural stiletto heel with delicate ankle strap and cushioned memory foam insole for all-evening comfort.',
       price: 549900,
@@ -529,5 +610,28 @@ class CatalogRepositoryImpl implements CatalogRepository {
   Future<List<Product>> getRecommendations(String productId) async {
     await Future.delayed(const Duration(milliseconds: 200));
     return _products.where((p) => p.id != productId).take(3).toList();
+  }
+
+  @override
+  Future<List<Seller>> getSellers() async {
+    await Future.delayed(const Duration(milliseconds: 150));
+    final sellers = List<Seller>.from(_sellers);
+    sellers.sort((a, b) => b.followerCount.compareTo(a.followerCount));
+    return sellers;
+  }
+
+  @override
+  Future<Seller?> getSellerById(String id) async {
+    await Future.delayed(const Duration(milliseconds: 100));
+    for (final seller in _sellers) {
+      if (seller.id == id || seller.handle == id) return seller;
+    }
+    return null;
+  }
+
+  @override
+  Future<List<Product>> getProductsBySeller(String sellerId) async {
+    await Future.delayed(const Duration(milliseconds: 150));
+    return _products.where((p) => p.sellerId == sellerId).toList();
   }
 }

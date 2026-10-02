@@ -12,6 +12,7 @@ import 'package:clothsy_core/shared/widgets/feedback/clothsy_snackbar.dart';
 import 'package:clothsy_core/shared/widgets/feedback/skeleton_loader.dart';
 import 'package:clothsy_core/shared/widgets/selectors/category_chip.dart';
 import 'package:clothsy_core/shared/widgets/typography/section_header.dart';
+import '../../brands/presentation/widgets/brand_strip.dart';
 import '../../cart/presentation/providers/cart_provider.dart';
 import '../../catalog/presentation/providers/catalog_providers.dart';
 import '../../tryon/presentation/providers/tryon_provider.dart';
@@ -196,6 +197,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               },
             ),
             const SizedBox(height: 16),
+
+            // Shop by brand — discovery of independent labels
+            const BrandStrip(),
 
             // Best Picks Section Header
             Padding(

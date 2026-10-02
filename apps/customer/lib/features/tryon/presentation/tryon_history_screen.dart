@@ -52,7 +52,7 @@ class TryOnHistoryScreen extends ConsumerWidget {
               child: EmptyStateView(
                 title: 'No Try-On Looks Yet',
                 message:
-                    'Try on luxury pieces from Clothsy Atelier to see yourself styled in seconds.',
+                    'Try on pieces from your favourite brands to see yourself styled in seconds.',
                 icon: Icons.auto_awesome,
                 actionText: 'Open Try-On Studio',
                 onActionPressed: () => Navigator.pop(context),

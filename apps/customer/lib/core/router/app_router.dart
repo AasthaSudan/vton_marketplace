@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 import '../../features/address/presentation/address_list_screen.dart';
 import '../../features/auth/presentation/login_screen.dart';
 import '../../features/auth/presentation/otp_verification_screen.dart';
+import '../../features/brands/presentation/brand_directory_screen.dart';
+import '../../features/brands/presentation/brand_storefront_screen.dart';
 import '../../features/cart/presentation/cart_screen.dart';
 import '../../features/catalog/presentation/catalog_screen.dart';
 import '../../features/catalog/presentation/product_detail_screen.dart';
@@ -147,6 +149,17 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
       // Legacy deep links (e.g. notifications) — the bag is now a tab.
       GoRoute(path: '/cart', redirect: (context, state) => '/bag'),
+      GoRoute(
+        path: '/brands',
+        parentNavigatorKey: rootNavigatorKey,
+        builder: (context, state) => const BrandDirectoryScreen(),
+      ),
+      GoRoute(
+        path: '/brand/:id',
+        parentNavigatorKey: rootNavigatorKey,
+        builder: (context, state) =>
+            BrandStorefrontScreen(sellerId: state.pathParameters['id'] ?? ''),
+      ),
       GoRoute(
         path: '/wishlist',
         parentNavigatorKey: rootNavigatorKey,

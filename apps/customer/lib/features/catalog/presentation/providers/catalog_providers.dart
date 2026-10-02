@@ -3,6 +3,7 @@ import '../../data/repositories/catalog_repository_impl.dart';
 import 'package:clothsy_core/features/catalog/domain/entities/banner.dart';
 import 'package:clothsy_core/features/catalog/domain/entities/collection.dart';
 import 'package:clothsy_core/features/catalog/domain/entities/product.dart';
+import 'package:clothsy_core/features/catalog/domain/entities/seller.dart';
 import 'package:clothsy_core/features/catalog/domain/repositories/catalog_repository.dart';
 
 final catalogRepositoryProvider = Provider<CatalogRepository>((ref) {
@@ -89,4 +90,26 @@ final searchResultsProvider = FutureProvider<List<Product>>((ref) async {
   if (query.trim().isEmpty) return [];
   final repo = ref.watch(catalogRepositoryProvider);
   return repo.searchProducts(query);
+});
+
+/// Every approved brand, for the directory and the Home "Shop by brand" strip.
+final sellersProvider = FutureProvider<List<Seller>>((ref) async {
+  final repo = ref.watch(catalogRepositoryProvider);
+  return repo.getSellers();
+});
+
+final sellerProvider = FutureProvider.family<Seller?, String>((
+  ref,
+  sellerId,
+) async {
+  final repo = ref.watch(catalogRepositoryProvider);
+  return repo.getSellerById(sellerId);
+});
+
+final sellerProductsProvider = FutureProvider.family<List<Product>, String>((
+  ref,
+  sellerId,
+) async {
+  final repo = ref.watch(catalogRepositoryProvider);
+  return repo.getProductsBySeller(sellerId);
 });

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:clothsy_core/core/constants/app_constants.dart';
+import 'package:clothsy_shop/features/brands/presentation/brand_directory_screen.dart';
+import 'package:clothsy_shop/features/brands/presentation/brand_storefront_screen.dart';
 import 'package:clothsy_shop/features/catalog/presentation/product_detail_screen.dart';
 import 'package:clothsy_shop/features/home/presentation/home_screen.dart';
 import 'package:clothsy_shop/features/onboarding/presentation/onboarding_screen.dart';
@@ -68,7 +70,59 @@ void main() {
 
           expect(tester.takeException(), isNull);
           expect(find.text('Clothsy'), findsOneWidget);
+          expect(find.text('Shop by brand'), findsOneWidget);
+
+          // Best Picks sits below the brand strip on small phones: scroll to it.
+          await tester.scrollUntilVisible(
+            find.text('Best Picks'),
+            200,
+            scrollable: find.byType(Scrollable).first,
+          );
+          await tester.pump(const Duration(milliseconds: 400));
+          expect(tester.takeException(), isNull);
           expect(find.text('Best Picks'), findsOneWidget);
+        },
+      );
+
+      testWidgets(
+        'BrandDirectoryScreen lists every brand on ${size.width}x${size.height} with zero overflow',
+        (tester) async {
+          await tester.binding.setSurfaceSize(size);
+          await tester.pumpWidget(
+            wrapWithScope(const BrandDirectoryScreen(), size),
+          );
+          await tester.pump();
+          await tester.pump(const Duration(milliseconds: 500));
+
+          expect(tester.takeException(), isNull);
+          expect(find.text('Brands'), findsOneWidget);
+          expect(find.text('Noor Atelier'), findsOneWidget);
+          expect(find.text('Studio Rao'), findsOneWidget);
+        },
+      );
+
+      testWidgets(
+        'BrandStorefrontScreen renders on ${size.width}x${size.height} with zero overflow',
+        (tester) async {
+          await tester.binding.setSurfaceSize(size);
+          await tester.pumpWidget(
+            wrapWithScope(
+              const BrandStorefrontScreen(sellerId: 'sel_noor'),
+              size,
+            ),
+          );
+          await tester.pump();
+          // First the seller loads, then the storefront starts loading its
+          // products: let both mock delays finish.
+          await tester.pump(const Duration(milliseconds: 500));
+          await tester.pump(const Duration(milliseconds: 500));
+
+          expect(tester.takeException(), isNull);
+          expect(find.text('About'), findsOneWidget);
+          expect(
+            find.text('Hand-finished occasion & workwear'),
+            findsOneWidget,
+          );
         },
       );
 
