@@ -1,0 +1,251 @@
+# Clothsy local backend: a lean self-hosted Supabase (Postgres, Auth, REST,
+# Storage, Edge Functions) behind one gateway on http://127.0.0.1:54321.
+#
+#   scripts/backend.sh up      # start (creates supabase/.env on first run)
+#   scripts/backend.sh test    # pgTAP + Deno tests
+#   scripts/backend.sh down    # stop (add -v via `reset` to wipe data)
+#
+# Image tags follow supabase/supabase docker/docker-compose.yml (Sep 2026).
+# Studio, Realtime, analytics, imgproxy, Supavisor and meta are left out to
+# keep memory and disk use small.
+
+name: clothsy
+
+x-db-env: &db-env
+  PGHOST: db
+  PGPORT: ${POSTGRES_PORT}
+  PGUSER: postgres
+  PGPASSWORD: ${POSTGRES_PASSWORD}
+  PGDATABASE: ${POSTGRES_DB}
+
+services:
+  db:
+    image: supabase/postgres:17.6.1.136
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:54322:5432"
+    volumes:
+      - ./supabase/docker/db/roles.sql:/docker-entrypoint-initdb.d/init-scripts/99-roles.sql:ro
+      - ./supabase/docker/db/jwt.sql:/docker-entrypoint-initdb.d/init-scripts/99-jwt.sql:ro
+      - db-data:/var/lib/postgresql/data
+      - db-config:/etc/postgresql-custom
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres", "-h", "localhost"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    environment:
+      POSTGRES_HOST: /var/run/postgresql
+      PGPORT: ${POSTGRES_PORT}
+      POSTGRES_PORT: ${POSTGRES_PORT}
+      PGPASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      PGDATABASE: ${POSTGRES_DB}
+      POSTGRES_DB: ${POSTGRES_DB}
+      JWT_EXP: ${JWT_EXPIRY}
+    command:
+      - postgres
+      - -c
+      - config_file=/etc/postgresql/postgresql.conf
+      - -c
+      - log_min_messages=fatal
+
+  auth:
+    image: supabase/gotrue:v2.196.0
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:9999/health"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    environment:
+      GOTRUE_API_HOST: 0.0.0.0
+      GOTRUE_API_PORT: 9999
+      API_EXTERNAL_URL: ${API_EXTERNAL_URL}
+      GOTRUE_DB_DRIVER: postgres
+      GOTRUE_DB_DATABASE_URL: postgres://supabase_auth_admin:${POSTGRES_PASSWORD}@db:${POSTGRES_PORT}/${POSTGRES_DB}
+      GOTRUE_SITE_URL: ${SITE_URL}
+      GOTRUE_URI_ALLOW_LIST: "*"
+      GOTRUE_DISABLE_SIGNUP: "false"
+      GOTRUE_JWT_ADMIN_ROLES: service_role
+      GOTRUE_JWT_AUD: authenticated
+      GOTRUE_JWT_DEFAULT_GROUP_NAME: authenticated
+      GOTRUE_JWT_EXP: ${JWT_EXPIRY}
+      GOTRUE_JWT_SECRET: ${JWT_SECRET}
+      GOTRUE_JWT_ISSUER: ${API_EXTERNAL_URL}
+      GOTRUE_EXTERNAL_EMAIL_ENABLED: "true"
+      GOTRUE_MAILER_AUTOCONFIRM: "true"
+      GOTRUE_EXTERNAL_ANONYMOUS_USERS_ENABLED: "false"
+      # Phone OTP sign-in. Test numbers in SMS_TEST_OTP never reach the SMS
+      # provider, so the dummy Twilio values below are never used.
+      GOTRUE_EXTERNAL_PHONE_ENABLED: "true"
+      GOTRUE_SMS_AUTOCONFIRM: "false"
+      GOTRUE_SMS_OTP_LENGTH: 6
+      GOTRUE_SMS_OTP_EXP: 600
+      GOTRUE_SMS_TEST_OTP: ${SMS_TEST_OTP}
+      GOTRUE_SMS_TEST_OTP_VALID_UNTIL: "2030-01-01T00:00:00Z"
+      GOTRUE_SMS_PROVIDER: twilio
+      GOTRUE_SMS_TWILIO_ACCOUNT_SID: ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+      GOTRUE_SMS_TWILIO_AUTH_TOKEN: local-dummy-token
+      GOTRUE_SMS_TWILIO_MESSAGE_SERVICE_SID: MGxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+      GOTRUE_SMS_TEMPLATE: "Your Clothsy code is {{ .Code }}"
+
+  rest:
+    image: postgrest/postgrest:v14.17
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      PGRST_DB_URI: postgres://authenticator:${POSTGRES_PASSWORD}@db:${POSTGRES_PORT}/${POSTGRES_DB}
+      PGRST_DB_SCHEMAS: public
+      PGRST_DB_MAX_ROWS: 200
+      PGRST_DB_EXTRA_SEARCH_PATH: public,extensions
+      PGRST_DB_ANON_ROLE: anon
+      PGRST_JWT_SECRET: ${JWT_SECRET}
+      PGRST_DB_USE_LEGACY_GUCS: "false"
+      PGRST_APP_SETTINGS_JWT_SECRET: ${JWT_SECRET}
+      PGRST_APP_SETTINGS_JWT_EXP: ${JWT_EXPIRY}
+    command: ["postgrest"]
+
+  storage:
+    image: supabase/storage-api:v1.74.0
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+      rest:
+        condition: service_started
+    # 127.0.0.1, not localhost: inside these images localhost is IPv6 first.
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:5000/status"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    environment:
+      ANON_KEY: ${ANON_KEY}
+      SERVICE_KEY: ${SERVICE_ROLE_KEY}
+      POSTGREST_URL: http://rest:3000
+      AUTH_JWT_SECRET: ${JWT_SECRET}
+      DATABASE_URL: postgres://supabase_storage_admin:${POSTGRES_PASSWORD}@db:${POSTGRES_PORT}/${POSTGRES_DB}
+      STORAGE_PUBLIC_URL: ${API_EXTERNAL_URL}
+      REQUEST_ALLOW_X_FORWARDED_PATH: "true"
+      FILE_SIZE_LIMIT: 10485760
+      STORAGE_BACKEND: file
+      FILE_STORAGE_BACKEND_PATH: /var/lib/storage
+      GLOBAL_S3_BUCKET: clothsy-local
+      TENANT_ID: clothsy
+      REGION: local
+      ENABLE_IMAGE_TRANSFORMATION: "false"
+    volumes:
+      - storage-data:/var/lib/storage
+
+  functions:
+    image: supabase/edge-runtime:v1.76.2
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./supabase/functions:/home/deno/functions:ro
+      - deno-cache:/root/.cache/deno
+    environment:
+      JWT_SECRET: ${JWT_SECRET}
+      # Functions reach the other services directly on the compose network.
+      SUPABASE_URL: http://gateway:8000
+      SUPABASE_ANON_KEY: ${ANON_KEY}
+      SUPABASE_SERVICE_ROLE_KEY: ${SERVICE_ROLE_KEY}
+      SUPABASE_DB_URL: postgresql://postgres:${POSTGRES_PASSWORD}@db:${POSTGRES_PORT}/${POSTGRES_DB}
+      ALLOW_MOCK_PROVIDERS: ${ALLOW_MOCK_PROVIDERS}
+      MOCK_WEBHOOK_SECRET: ${MOCK_WEBHOOK_SECRET}
+      RAZORPAY_KEY_ID: ${RAZORPAY_KEY_ID}
+      RAZORPAY_KEY_SECRET: ${RAZORPAY_KEY_SECRET}
+      RAZORPAY_WEBHOOK_SECRET: ${RAZORPAY_WEBHOOK_SECRET}
+      FABRICVTON_API_URL: ${FABRICVTON_API_URL}
+      FABRICVTON_API_KEY: ${FABRICVTON_API_KEY}
+      MOCK_TRYON_PENDING_POLLS: ${MOCK_TRYON_PENDING_POLLS}
+    command:
+      - start
+      - --main-service
+      - /home/deno/functions/main
+      - --user-worker-request-idle-timeout
+      - "150000"
+
+  gateway:
+    image: nginx:1.29-alpine
+    restart: unless-stopped
+    depends_on:
+      - auth
+      - rest
+      - storage
+      - functions
+    ports:
+      - "127.0.0.1:54321:8000"
+    volumes:
+      - ./supabase/docker/gateway/nginx.conf:/etc/nginx/nginx.conf:ro
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:8000/health"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # One-shot: applies supabase/migrations in order (recorded in
+  # supabase_migrations.schema_migrations, like the Supabase CLI) and seeds an
+  # empty database. Waits for Auth and Storage, which create their schemas.
+  migrate:
+    image: supabase/postgres:17.6.1.136
+    depends_on:
+      db:
+        condition: service_healthy
+      auth:
+        condition: service_healthy
+      storage:
+        condition: service_healthy
+    environment:
+      <<: *db-env
+      # Lets pg_cron jobs call the Edge Functions on the compose network.
+      FUNCTIONS_URL: http://functions:9000
+      SERVICE_ROLE_KEY: ${SERVICE_ROLE_KEY}
+    volumes:
+      - ./supabase:/supabase:ro
+    entrypoint: ["bash", "/supabase/docker/migrate.sh"]
+    restart: "no"
+
+  # pgTAP tests: scripts/backend.sh test (profile "test").
+  db-test:
+    image: supabase/postgres:17.6.1.136
+    profiles: ["test"]
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      <<: *db-env
+    volumes:
+      - ./supabase:/supabase:ro
+    entrypoint: ["bash", "/supabase/docker/db-test.sh"]
+    restart: "no"
+
+  # Deno fmt / lint / type-check / unit tests for the Edge Functions.
+  deno:
+    image: denoland/deno:2.5.6
+    profiles: ["test"]
+    working_dir: /functions
+    volumes:
+      - ./supabase/functions:/functions
+      - deno-test-cache:/deno-dir
+    environment:
+      DENO_DIR: /deno-dir
+    entrypoint: ["deno", "task"]
+    command: ["ci"]
+    restart: "no"
+
+volumes:
+  db-data:
+  db-config:
+  storage-data:
+  deno-cache:
+  deno-test-cache:

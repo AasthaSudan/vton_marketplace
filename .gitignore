@@ -56,3 +56,7 @@ build/
 # Per-environment client config (copy apps/customer/config/example.json)
 apps/*/config/*.json
 !apps/*/config/example.json
+
+# Local backend secrets (copy supabase/.env.example)
+supabase/.env
+supabase/functions/.env
