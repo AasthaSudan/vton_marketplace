@@ -3,11 +3,22 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'app.dart';
+import 'core/config/app_config_provider.dart';
+import 'package:clothsy_core/core/constants/app_config.dart';
 import 'package:clothsy_core/core/constants/app_constants.dart';
 
 Future<void> bootstrap({required AppFlavor flavor}) async {
   WidgetsFlutterBinding.ensureInitialized();
   AppConstants.currentFlavor = flavor;
+
+  final config = AppConfig.fromEnvironment(flavor);
+  if (config.missingKeys.isNotEmpty) {
+    throw StateError(
+      'Missing ${config.missingKeys.join(', ')} for the ${flavor.name} flavor. '
+      'Run with --dart-define-from-file=config/${flavor.name}.json '
+      '(copy config/example.json to get started).',
+    );
+  }
 
   // Set system UI style
   SystemChrome.setSystemUIOverlayStyle(
@@ -25,5 +36,10 @@ Future<void> bootstrap({required AppFlavor flavor}) async {
     DeviceOrientation.portraitDown,
   ]);
 
-  runApp(const ProviderScope(child: ClothsyShopApp()));
+  runApp(
+    ProviderScope(
+      overrides: [appConfigProvider.overrideWithValue(config)],
+      child: const ClothsyShopApp(),
+    ),
+  );
 }

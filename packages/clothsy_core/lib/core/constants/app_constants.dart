@@ -1,4 +1,6 @@
-enum AppFlavor { dev, staging, prod }
+/// Build flavors. `mock` runs entirely on in-memory mock repositories (no
+/// backend, no keys) — used for UI work, demos and tests.
+enum AppFlavor { mock, dev, staging, prod }
 
 class AppConstants {
   AppConstants._();
@@ -14,6 +16,7 @@ class AppConstants {
   // Active flavor configuration
   static AppFlavor currentFlavor = AppFlavor.dev;
 
+  static bool get isMock => currentFlavor == AppFlavor.mock;
   static bool get isDev => currentFlavor == AppFlavor.dev;
   static bool get isStaging => currentFlavor == AppFlavor.staging;
   static bool get isProd => currentFlavor == AppFlavor.prod;
