@@ -45,11 +45,17 @@ class CategoryChip extends StatelessWidget {
             decoration: BoxDecoration(
               color: circleBgColor,
               shape: BoxShape.circle,
+              border: Border.all(
+                color: isSelected
+                    ? colors.primary
+                    : colors.border.withOpacity(0.6),
+                width: 1.2,
+              ),
               boxShadow: isSelected
                   ? [
                       BoxShadow(
-                        color: colors.primary.withOpacity(0.24),
-                        blurRadius: 12,
+                        color: colors.primary.withOpacity(0.28),
+                        blurRadius: 10,
                         offset: const Offset(0, 4),
                       ),
                     ]
