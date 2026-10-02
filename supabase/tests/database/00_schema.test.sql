@@ -31,9 +31,9 @@ select is(
      and has_function_privilege('authenticated', p.oid, 'execute')),
   array[
     'adjust_stock', 'advance_seller_order', 'bulk_set_stock', 'cancel_order',
-    'cancel_seller_order', 'check_pin_serviceability', 'delete_my_tryon_data',
-    'delete_tryon_photo', 'fail_payment', 'get_seller_bank_account', 'get_tryon_status',
-    'moderate_product', 'my_sellers', 'place_order', 'register_seller',
+    'cancel_seller_order', 'check_pin_serviceability', 'create_payouts',
+    'delete_my_tryon_data', 'delete_tryon_photo', 'fail_payment', 'get_seller_bank_account',
+    'get_tryon_status', 'moderate_product', 'my_sellers', 'place_order', 'register_seller',
     'review_seller_application', 'search_products', 'seller_accept_order',
     'seller_cancel_order', 'seller_order_invoice', 'seller_pack_order', 'seller_ship_order',
     'set_default_address', 'set_product_listed', 'set_seller_bank_account',
@@ -56,6 +56,11 @@ select ok(
   not has_function_privilege('authenticated',
     'public.start_tryon_job(uuid, uuid, uuid, uuid, uuid, boolean)', 'execute'),
   'only the try-on service can start jobs and spend credits'
+);
+select ok(
+  not has_function_privilege('authenticated', 'public.claim_payout(uuid)', 'execute')
+  and not has_function_privilege('authenticated', 'public.complete_payout(uuid, text, text, text)', 'execute'),
+  'only the payout service sees bank account numbers and completes payouts'
 );
 select ok(
   not has_table_privilege('authenticated', 'private.seller_bank_accounts', 'select'),
