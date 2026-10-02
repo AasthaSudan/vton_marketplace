@@ -8,9 +8,13 @@ import 'package:clothsy_core/features/orders/domain/repositories/order_repositor
 import 'package:clothsy_core/features/payments/domain/payment_gateway.dart';
 import 'package:clothsy_shop/features/orders/data/repositories/mock_order_repository.dart';
 import '../../../payments/presentation/providers/payment_providers.dart';
+import '../../../../core/config/app_config_provider.dart';
+import '../../../../core/supabase/supabase_providers.dart';
+import '../../data/repositories/supabase_order_repository.dart';
 
 final orderRepositoryProvider = Provider<OrderRepository>((ref) {
-  return MockOrderRepository();
+  if (ref.watch(appConfigProvider).useMockBackend) return MockOrderRepository();
+  return SupabaseOrderRepository(ref.watch(supabaseClientProvider));
 });
 
 /// How long to keep checking for a payment the gateway approved but our
