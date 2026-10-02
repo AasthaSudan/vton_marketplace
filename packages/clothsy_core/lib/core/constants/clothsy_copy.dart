@@ -20,6 +20,14 @@ class ClothsyCopy {
   static const String tryOnDisclaimer =
       'AI preview — an estimate of the look, not a guarantee of fit.';
   static const String tryOnResultLabel = 'AI preview';
+  static const String tryOnNeedsConsent =
+      'Please agree to how we use your photo before trying on with it.';
+  static const String tryOnNoCredits =
+      "You've used all your AI previews for now. Size help and reviews can "
+      'still guide you.';
+  static const String tryOnFailed =
+      "We couldn't create this preview. Try another photo, or try again in a "
+      'moment.';
   static const String tryOnUnsupported =
       "Try-On isn't available for this piece yet — "
       'size help and reviews can still guide you.';

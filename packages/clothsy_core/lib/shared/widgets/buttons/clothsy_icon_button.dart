@@ -10,6 +10,9 @@ class ClothsyIconButton extends StatelessWidget {
   final double size;
   final bool hasShadow;
 
+  /// What the button does, for screen readers and long-press hints.
+  final String? tooltip;
+
   const ClothsyIconButton({
     super.key,
     required this.icon,
@@ -18,13 +21,14 @@ class ClothsyIconButton extends StatelessWidget {
     this.borderColor,
     this.size = 44.0,
     this.hasShadow = false,
+    this.tooltip,
   });
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
 
-    return PressableScale(
+    final button = PressableScale(
       onTap: onPressed,
       child: Container(
         width: size,
@@ -49,6 +53,11 @@ class ClothsyIconButton extends StatelessWidget {
         alignment: Alignment.center,
         child: icon,
       ),
+    );
+    if (tooltip == null) return button;
+    return Tooltip(
+      message: tooltip!,
+      child: Semantics(button: true, label: tooltip, child: button),
     );
   }
 }
