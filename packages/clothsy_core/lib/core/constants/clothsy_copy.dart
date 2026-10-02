@@ -41,6 +41,20 @@ class ClothsyCopy {
       "Payment didn't go through. If any amount was debited, it will be "
       'refunded automatically. Try again or pick another method.';
 
+  static const String paymentCancelled =
+      "Payment cancelled. Your bag is saved — try again whenever you're ready.";
+
+  /// "Refund of ₹1,299 started. It reaches your UPI in 3–5 working days."
+  static String refundStarted({
+    required String amount,
+    required String destination,
+  }) =>
+      'Refund of $amount started. '
+      'It reaches your $destination in 3–5 working days.';
+
+  static const String noPaymentTaken =
+      'No payment was taken for this order, so there is nothing to refund.';
+
   /// "You earned 45 Clothsy Coins on this order. Use them on your next find."
   static String coinsEarned(int coins) =>
       'You earned $coins Clothsy Coins on this order. '
