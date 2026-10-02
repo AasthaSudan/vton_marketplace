@@ -260,6 +260,18 @@ void main() {
       expect(AccountMappers.e164India('919876543210'), '+919876543210');
     });
 
+    test('a shopper keeps their sign-in phone and an empty name', () {
+      final user = AccountMappers.user(
+        id: 'u-1',
+        // What the new-user trigger stores: Auth's digits-only phone.
+        profile: {'full_name': '', 'phone': '919999900001'},
+        phone: '+919999900001',
+      );
+      expect(user.phone, '+919999900001');
+      expect(user.name, '');
+      expect(user.memberTier, 'Clothsy Member');
+    });
+
     test('addresses round-trip through rows', () {
       final address = AccountMappers.address({
         'id': 'a-1',

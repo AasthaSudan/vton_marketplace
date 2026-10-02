@@ -16,7 +16,8 @@ class AccountMappers {
       id: id,
       name: profile?['full_name'] as String? ?? '',
       email: profile?['email'] as String? ?? email ?? '',
-      phone: profile?['phone'] as String? ?? phone ?? '',
+      // The sign-in phone (E.164) wins: profiles keep Auth's digits-only copy.
+      phone: phone ?? profile?['phone'] as String? ?? '',
       avatarUrl: profile?['avatar_url'] as String?,
       memberTier: profile?['member_tier'] as String? ?? 'Clothsy Member',
     );

@@ -10,6 +10,7 @@ import 'package:clothsy_core/shared/widgets/buttons/primary_button.dart';
 import 'package:clothsy_core/shared/widgets/feedback/clothsy_snackbar.dart';
 import 'package:clothsy_core/shared/widgets/inputs/clothsy_text_field.dart';
 import 'package:clothsy_core/features/address/domain/entities/address.dart';
+import '../../auth/presentation/providers/auth_provider.dart';
 import 'providers/address_providers.dart';
 
 class AddEditAddressScreen extends ConsumerStatefulWidget {
@@ -40,10 +41,11 @@ class _AddEditAddressScreenState extends ConsumerState<AddEditAddressScreen> {
   void initState() {
     super.initState();
     final addr = widget.initialAddress;
-    _nameController = TextEditingController(text: addr?.name ?? 'Aastha Sudan');
-    _phoneController = TextEditingController(
-      text: addr?.phone ?? '+91 98765 43210',
-    );
+    // A new address starts with the shopper's own name and number.
+    final user = ref.read(currentUserProvider);
+    final self = user == null || user.isGuest ? null : user;
+    _nameController = TextEditingController(text: addr?.name ?? self?.name);
+    _phoneController = TextEditingController(text: addr?.phone ?? self?.phone);
     _pinController = TextEditingController(text: addr?.pinCode ?? '');
     _streetController = TextEditingController(text: addr?.street ?? '');
     _aptController = TextEditingController(text: addr?.apartment ?? '');

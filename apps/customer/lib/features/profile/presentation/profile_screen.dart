@@ -19,15 +19,9 @@ class ProfileScreen extends ConsumerWidget {
 
   void _openEditProfileSheet(BuildContext context, WidgetRef ref) {
     final user = ref.read(currentUserProvider);
-    final nameController = TextEditingController(
-      text: user?.name ?? 'Aastha Sudan',
-    );
-    final emailController = TextEditingController(
-      text: user?.email ?? 'aastha@example.com',
-    );
-    final phoneController = TextEditingController(
-      text: user?.phone ?? '+91 98765 43210',
-    );
+    final nameController = TextEditingController(text: user?.name ?? '');
+    final emailController = TextEditingController(text: user?.email ?? '');
+    final phoneController = TextEditingController(text: user?.phone ?? '');
 
     ClothsyBottomSheet.show(
       context: context,
