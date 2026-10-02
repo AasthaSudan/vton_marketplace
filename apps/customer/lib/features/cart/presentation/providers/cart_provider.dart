@@ -7,10 +7,15 @@ import 'package:clothsy_core/features/cart/domain/repositories/coupon_repository
 import '../../../../core/config/app_config_provider.dart';
 import '../../../catalog/presentation/providers/catalog_providers.dart';
 import '../../data/cart_storage.dart';
+import '../../../../core/supabase/supabase_providers.dart';
 import '../../data/mock_coupon_repository.dart';
+import '../../data/supabase_coupon_repository.dart';
 
 final couponRepositoryProvider = Provider<CouponRepository>((ref) {
-  return MockCouponRepository();
+  if (ref.watch(appConfigProvider).useMockBackend) {
+    return MockCouponRepository();
+  }
+  return SupabaseCouponRepository(ref.watch(supabaseClientProvider));
 });
 
 /// Where the bag is kept between launches, one bag per backend.

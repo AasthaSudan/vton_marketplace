@@ -1,5 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/config/app_config_provider.dart';
+import '../../../../core/supabase/supabase_providers.dart';
 import '../../data/repositories/mock_catalog_repository.dart';
+import '../../data/repositories/supabase_catalog_repository.dart';
 import 'package:clothsy_core/features/catalog/domain/entities/banner.dart';
 import 'package:clothsy_core/features/catalog/domain/entities/collection.dart';
 import 'package:clothsy_core/features/catalog/domain/entities/product.dart';
@@ -8,7 +11,10 @@ import 'package:clothsy_core/features/catalog/domain/entities/seller.dart';
 import 'package:clothsy_core/features/catalog/domain/repositories/catalog_repository.dart';
 
 final catalogRepositoryProvider = Provider<CatalogRepository>((ref) {
-  return MockCatalogRepository();
+  if (ref.watch(appConfigProvider).useMockBackend) {
+    return MockCatalogRepository();
+  }
+  return SupabaseCatalogRepository(ref.watch(supabaseClientProvider));
 });
 
 final featuredBannersProvider = FutureProvider<List<PromoBannerItem>>((
