@@ -1,4 +1,5 @@
 import 'package:clothsy_core/features/address/domain/entities/address.dart';
+import 'package:clothsy_core/features/address/domain/entities/pin_serviceability.dart';
 import 'package:clothsy_core/features/address/domain/repositories/address_repository.dart';
 
 class MockAddressRepository implements AddressRepository {
@@ -111,9 +112,22 @@ class MockAddressRepository implements AddressRepository {
     return null;
   }
 
+  /// Launch cities: known PINs ship in 2 days, others in 4; one PIN has no
+  /// cash on delivery so the COD path can be tried out.
   @override
-  Future<bool> checkPinServiceability(String pinCode) async {
+  Future<PinServiceability> checkPinServiceability(String pinCode) async {
     await Future.delayed(const Duration(milliseconds: 150));
-    return pinCode.length == 6 && int.tryParse(pinCode) != null;
+    if (!RegExp(r'^[1-9][0-9]{5}$').hasMatch(pinCode)) {
+      return PinServiceability.unavailable(pinCode);
+    }
+    final known = _pinDatabase[pinCode];
+    return PinServiceability(
+      pinCode: pinCode,
+      serviceable: true,
+      codAvailable: pinCode != '700001',
+      etaDays: known != null ? 2 : 4,
+      city: known?['city'],
+      state: known?['state'],
+    );
   }
 }

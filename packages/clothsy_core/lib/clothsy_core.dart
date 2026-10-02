@@ -14,6 +14,7 @@ export 'core/theme/app_typography.dart';
 export 'core/utils/currency_formatter.dart';
 export 'core/utils/money_split.dart';
 export 'features/address/domain/entities/address.dart';
+export 'features/address/domain/entities/pin_serviceability.dart';
 export 'features/address/domain/repositories/address_repository.dart';
 export 'features/auth/domain/entities/user.dart';
 export 'features/auth/domain/repositories/auth_repository.dart';

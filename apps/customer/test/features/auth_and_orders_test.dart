@@ -102,7 +102,9 @@ void main() {
     });
 
     test('PIN code serviceability returns boolean status', () async {
-      final isServiceable = await repo.checkPinServiceability('110001');
+      final isServiceable = (await repo.checkPinServiceability(
+        '110001',
+      )).serviceable;
       expect(isServiceable, isTrue);
     });
 

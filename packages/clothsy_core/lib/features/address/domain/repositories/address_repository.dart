@@ -1,4 +1,5 @@
 import '../entities/address.dart';
+import '../entities/pin_serviceability.dart';
 
 abstract class AddressRepository {
   Future<List<Address>> getAddresses();
@@ -7,5 +8,7 @@ abstract class AddressRepository {
   Future<void> deleteAddress(String id);
   Future<void> setDefaultAddress(String id);
   Future<Map<String, String>?> lookupPinCode(String pinCode);
-  Future<bool> checkPinServiceability(String pinCode);
+
+  /// Delivery, cash-on-delivery and transit time for [pinCode].
+  Future<PinServiceability> checkPinServiceability(String pinCode);
 }

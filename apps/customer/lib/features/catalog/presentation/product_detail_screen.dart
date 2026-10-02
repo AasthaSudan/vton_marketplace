@@ -5,13 +5,13 @@ import 'package:go_router/go_router.dart';
 import 'package:clothsy_core/core/constants/clothsy_copy.dart';
 import 'package:clothsy_core/features/catalog/domain/entities/product.dart';
 import 'package:clothsy_core/core/theme/app_colors.dart';
-import 'package:clothsy_core/core/theme/app_radius.dart';
 import 'package:clothsy_core/core/theme/app_typography.dart';
 import 'package:clothsy_core/shared/widgets/badges/seller_badge.dart';
+import 'widgets/delivery_check_card.dart';
+import 'widgets/size_chart.dart';
 import 'package:clothsy_core/shared/widgets/buttons/clothsy_icon_button.dart';
 import 'package:clothsy_core/shared/widgets/buttons/pressable_scale.dart';
 import 'package:clothsy_core/shared/widgets/cards/product_card.dart';
-import 'package:clothsy_core/shared/widgets/feedback/clothsy_bottom_sheet.dart';
 import 'package:clothsy_core/shared/widgets/feedback/clothsy_snackbar.dart';
 import 'package:clothsy_core/shared/widgets/feedback/skeleton_loader.dart';
 import 'package:clothsy_core/shared/widgets/selectors/color_swatch_selector.dart';
@@ -81,6 +81,8 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                 : v.size == activeSize,
             orElse: () => product.variants.first,
           );
+
+          final sizeChart = SizeChart.forProduct(product);
 
           final swatches = product.variants.map((v) {
             final hex =
@@ -364,25 +366,35 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                                     color: colors.textPrimary,
                                   ),
                                 ),
-                                PressableScale(
-                                  onTap: () => _openSizeGuideSheet(context),
-                                  child: Text(
-                                    'Size Guide',
-                                    style:
-                                        AppTypography.caption(
-                                          color: colors.primary,
-                                          weight: FontWeight.w600,
-                                        ).copyWith(
-                                          decoration: TextDecoration.underline,
-                                        ),
+                                if (sizeChart != null)
+                                  PressableScale(
+                                    onTap: () => sizeChart.show(context),
+                                    child: Text(
+                                      'Size guide',
+                                      style:
+                                          AppTypography.caption(
+                                            color: colors.primary,
+                                            weight: FontWeight.w600,
+                                          ).copyWith(
+                                            decoration:
+                                                TextDecoration.underline,
+                                          ),
+                                    ),
                                   ),
-                                ),
                               ],
                             ),
                             const SizedBox(height: 10),
                             SizeSelector(
                               sizes: product.availableSizes,
                               selectedSize: activeSize,
+                              // Sizes with no variant in stock are greyed out.
+                              unavailableSizes: [
+                                for (final size in product.availableSizes)
+                                  if (!product.variants.any(
+                                    (v) => v.size == size && v.isAvailable,
+                                  ))
+                                    size,
+                              ],
                               onSizeSelected: (size) {
                                 setState(() {
                                   _selectedSize = size;
@@ -475,34 +487,13 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                             ),
                             const SizedBox(height: 24),
 
-                            // Complimentary Perks Card
-                            Container(
-                              padding: const EdgeInsets.all(16),
-                              decoration: BoxDecoration(
-                                color: colors.surfaceMuted,
-                                borderRadius: AppRadius.cardRadius,
-                                border: Border.all(
-                                  color: colors.border.withOpacity(0.5),
-                                ),
-                              ),
-                              child: Column(
-                                children: [
-                                  _buildPerkRow(
-                                    icon: Icons.local_shipping_outlined,
-                                    title: 'Complimentary Express Delivery',
-                                    desc:
-                                        'Estimated arrival in 2–4 business days.',
-                                  ),
-                                  const SizedBox(height: 12),
-                                  _buildPerkRow(
-                                    icon: Icons.assignment_return_outlined,
-                                    title:
-                                        'Effortless 7-Day Returns & Exchanges',
-                                    desc:
-                                        'Doorstep pickup at zero cost to you.',
-                                  ),
-                                ],
-                              ),
+                            // Delivery date by PIN, COD and the seller's
+                            // own return window (Blueprint section 26).
+                            DeliveryCheckCard(
+                              seller: ref
+                                  .watch(sellerProvider(product.sellerId))
+                                  .asData
+                                  ?.value,
                             ),
                             const SizedBox(height: 28),
 
@@ -579,7 +570,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                                   ref
                                       .read(cartProvider.notifier)
                                       .addToCart(product, activeVariant);
-                                  context.go('/bag');
+                                  context.push('/checkout');
                                 },
                               ),
                             ),
@@ -600,41 +591,6 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
       context,
       message: '${product.title} is in your bag.',
       type: SnackbarType.success,
-    );
-  }
-
-  Widget _buildPerkRow({
-    required IconData icon,
-    required String title,
-    required String desc,
-  }) {
-    final colors = context.colors;
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Icon(icon, color: colors.primary, size: 20),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                style: AppTypography.bodyMedium(
-                  weight: FontWeight.w600,
-                ).copyWith(fontSize: 13),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                desc,
-                style: AppTypography.caption(
-                  color: colors.textSecondary,
-                ).copyWith(fontSize: 11),
-              ),
-            ],
-          ),
-        ),
-      ],
     );
   }
 
@@ -698,287 +654,6 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
           },
         ),
       ],
-    );
-  }
-
-  void _openSizeGuideSheet(BuildContext context) {
-    final colors = context.colors;
-    ClothsyBottomSheet.show(
-      context: context,
-      title: 'Size Guide',
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Body Measurements (Inches)',
-            style: AppTypography.h3(color: colors.textPrimary),
-          ),
-          const SizedBox(height: 14),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(12),
-            child: Table(
-              border: TableBorder.all(
-                color: colors.border.withOpacity(0.5),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              children: [
-                TableRow(
-                  decoration: BoxDecoration(color: colors.surfaceMuted),
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                        vertical: 10,
-                        horizontal: 8,
-                      ),
-                      child: Text(
-                        'Size',
-                        style: AppTypography.caption(
-                          weight: FontWeight.w700,
-                          color: colors.textPrimary,
-                        ),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                        vertical: 10,
-                        horizontal: 8,
-                      ),
-                      child: Text(
-                        'Bust',
-                        style: AppTypography.caption(
-                          weight: FontWeight.w700,
-                          color: colors.textPrimary,
-                        ),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                        vertical: 10,
-                        horizontal: 8,
-                      ),
-                      child: Text(
-                        'Waist',
-                        style: AppTypography.caption(
-                          weight: FontWeight.w700,
-                          color: colors.textPrimary,
-                        ),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                        vertical: 10,
-                        horizontal: 8,
-                      ),
-                      child: Text(
-                        'Hips',
-                        style: AppTypography.caption(
-                          weight: FontWeight.w700,
-                          color: colors.textPrimary,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                TableRow(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.all(10.0),
-                      child: Text(
-                        'XS',
-                        style: AppTypography.caption(weight: FontWeight.w600),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(10.0),
-                      child: Text(
-                        '32',
-                        style: AppTypography.caption(
-                          color: colors.textSecondary,
-                        ),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(10.0),
-                      child: Text(
-                        '25',
-                        style: AppTypography.caption(
-                          color: colors.textSecondary,
-                        ),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(10.0),
-                      child: Text(
-                        '35',
-                        style: AppTypography.caption(
-                          color: colors.textSecondary,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                TableRow(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.all(10.0),
-                      child: Text(
-                        'S',
-                        style: AppTypography.caption(weight: FontWeight.w600),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(10.0),
-                      child: Text(
-                        '34',
-                        style: AppTypography.caption(
-                          color: colors.textSecondary,
-                        ),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(10.0),
-                      child: Text(
-                        '27',
-                        style: AppTypography.caption(
-                          color: colors.textSecondary,
-                        ),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(10.0),
-                      child: Text(
-                        '37',
-                        style: AppTypography.caption(
-                          color: colors.textSecondary,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                TableRow(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.all(10.0),
-                      child: Text(
-                        'M',
-                        style: AppTypography.caption(weight: FontWeight.w600),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(10.0),
-                      child: Text(
-                        '36',
-                        style: AppTypography.caption(
-                          color: colors.textSecondary,
-                        ),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(10.0),
-                      child: Text(
-                        '29',
-                        style: AppTypography.caption(
-                          color: colors.textSecondary,
-                        ),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(10.0),
-                      child: Text(
-                        '39',
-                        style: AppTypography.caption(
-                          color: colors.textSecondary,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                TableRow(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.all(10.0),
-                      child: Text(
-                        'L',
-                        style: AppTypography.caption(weight: FontWeight.w600),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(10.0),
-                      child: Text(
-                        '38',
-                        style: AppTypography.caption(
-                          color: colors.textSecondary,
-                        ),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(10.0),
-                      child: Text(
-                        '31',
-                        style: AppTypography.caption(
-                          color: colors.textSecondary,
-                        ),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(10.0),
-                      child: Text(
-                        '41',
-                        style: AppTypography.caption(
-                          color: colors.textSecondary,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                TableRow(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.all(10.0),
-                      child: Text(
-                        'XL',
-                        style: AppTypography.caption(weight: FontWeight.w600),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(10.0),
-                      child: Text(
-                        '40',
-                        style: AppTypography.caption(
-                          color: colors.textSecondary,
-                        ),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(10.0),
-                      child: Text(
-                        '33',
-                        style: AppTypography.caption(
-                          color: colors.textSecondary,
-                        ),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(10.0),
-                      child: Text(
-                        '43',
-                        style: AppTypography.caption(
-                          color: colors.textSecondary,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 20),
-          Text(
-            'Between sizes? Check the seller\'s fit notes and reviews, or pick the size you usually wear.',
-            style: AppTypography.caption(color: colors.textSecondary),
-          ),
-        ],
-      ),
     );
   }
 }
