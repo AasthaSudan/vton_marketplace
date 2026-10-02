@@ -6,6 +6,10 @@ import 'package:clothsy_core/core/theme/app_typography.dart';
 class BeforeAfterSlider extends StatefulWidget {
   final String beforeImageUrl;
   final String afterImageUrl;
+
+  /// Shown instead of [beforeImageUrl] when given (e.g. a photo that only
+  /// exists on this device).
+  final Widget? beforeImage;
   final double initialSplit;
   final String beforeLabel;
   final String afterLabel;
@@ -14,6 +18,7 @@ class BeforeAfterSlider extends StatefulWidget {
     super.key,
     required this.beforeImageUrl,
     required this.afterImageUrl,
+    this.beforeImage,
     this.initialSplit = 0.5,
     this.beforeLabel = 'Original',
     this.afterLabel = 'Clothsy AI Result',
@@ -72,16 +77,21 @@ class _BeforeAfterSliderState extends State<BeforeAfterSlider> {
               // 2. Before Image (Clipped by the split slider)
               ClipRect(
                 clipper: _HorizontalSplitClipper(splitFactor: _splitPercent),
-                child: CachedNetworkImage(
-                  imageUrl: widget.beforeImageUrl,
-                  fit: BoxFit.cover,
-                  placeholder: (context, url) =>
-                      Container(color: colors.surfaceMuted),
-                  errorWidget: (context, url, error) => Container(
-                    color: colors.surfaceMuted,
-                    child: const Icon(Icons.broken_image_outlined, size: 40),
-                  ),
-                ),
+                child:
+                    widget.beforeImage ??
+                    CachedNetworkImage(
+                      imageUrl: widget.beforeImageUrl,
+                      fit: BoxFit.cover,
+                      placeholder: (context, url) =>
+                          Container(color: colors.surfaceMuted),
+                      errorWidget: (context, url, error) => Container(
+                        color: colors.surfaceMuted,
+                        child: const Icon(
+                          Icons.broken_image_outlined,
+                          size: 40,
+                        ),
+                      ),
+                    ),
               ),
 
               // 3. Before Tag (Top Left)

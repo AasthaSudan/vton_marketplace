@@ -1,4 +1,7 @@
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
+import 'package:clothsy_core/core/constants/clothsy_copy.dart';
+import 'package:clothsy_core/features/tryon/domain/repositories/tryon_repository.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -107,19 +110,117 @@ void main() {
       },
     );
 
-    test('saveUserPhoto and deleteUserPhoto manage custom photos', () async {
-      final newPhoto = await repo.saveUserPhoto(
-        'https://images.unsplash.com/photo-custom',
-        'Home Mirror',
+    test('own photos need consent, expire and can be deleted', () async {
+      final bytes = Uint8List.fromList([1, 2, 3]);
+      await expectLater(
+        repo.uploadUserPhoto(bytes, contentType: 'image/jpeg'),
+        throwsA(
+          isA<TryOnException>().having((e) => e.code, 'code', 'NO_CONSENT'),
+        ),
       );
-      expect(newPhoto.label, equals('Home Mirror'));
 
-      final users = await repo.getUserPhotos();
-      expect(users.any((p) => p.id == newPhoto.id), isTrue);
+      await repo.setUserConsent(true);
+      final photo = await repo.uploadUserPhoto(
+        bytes,
+        contentType: 'image/jpeg',
+        label: 'Home mirror',
+      );
+      expect(photo.label, 'Home mirror');
+      expect(photo.isPreset, isFalse);
+      expect(photo.bytes, bytes);
+      expect(
+        photo.expiresAt!.difference(photo.createdAt),
+        MockTryOnRepository.retention,
+      );
+      expect((await repo.getUserPhotos()).single.id, photo.id);
 
-      await repo.deleteUserPhoto(newPhoto.id);
-      final usersAfter = await repo.getUserPhotos();
-      expect(usersAfter.any((p) => p.id == newPhoto.id), isFalse);
+      await repo.deleteUserPhoto(photo.id);
+      expect(await repo.getUserPhotos(), isEmpty);
+    });
+
+    test('withdrawing consent deletes photos and their previews', () async {
+      await repo.setUserConsent(true);
+      final photo = await repo.uploadUserPhoto(
+        Uint8List.fromList([9]),
+        contentType: 'image/png',
+      );
+      await repo.runTryOn(
+        photo: photo,
+        product: sampleProduct,
+        variant: sampleVariant,
+      );
+      expect(
+        (await repo.getHistory()).any((h) => h.photo.id == photo.id),
+        isTrue,
+      );
+
+      await repo.setUserConsent(false);
+      expect(await repo.getUserPhotos(), isEmpty);
+      expect((await repo.getHistory()).any((h) => !h.photo.isPreset), isFalse);
+    });
+
+    test('each new preview uses a credit; cached ones do not', () async {
+      final preset = (await repo.getPresetPhotos()).first;
+      final before = await repo.getRemainingCredits();
+      await repo.runTryOn(
+        photo: preset,
+        product: sampleProduct,
+        variant: sampleVariant,
+      );
+      await repo.runTryOn(
+        photo: preset,
+        product: sampleProduct,
+        variant: sampleVariant,
+      );
+      expect(await repo.getRemainingCredits(), before - 1);
+
+      // Regenerating asks for a fresh preview and uses another credit.
+      await repo.runTryOn(
+        photo: preset,
+        product: sampleProduct,
+        variant: sampleVariant,
+        forceRefresh: true,
+      );
+      expect(await repo.getRemainingCredits(), before - 2);
+    });
+
+    test('runs out of credits gracefully', () async {
+      SharedPreferences.setMockInitialValues({'clothsy_tryon_credits_v1': 0});
+      final preset = (await repo.getPresetPhotos()).first;
+      await expectLater(
+        repo.runTryOn(
+          photo: preset,
+          product: sampleProduct,
+          variant: sampleVariant,
+        ),
+        throwsA(
+          isA<TryOnException>().having((e) => e.code, 'code', 'NO_CREDITS'),
+        ),
+      );
+    });
+
+    test('unsupported pieces are explained, not attempted', () async {
+      final preset = (await repo.getPresetPhotos()).first;
+      const tote = Product(
+        id: 'p_tote',
+        handle: 'tote',
+        title: 'Leather Tote',
+        sellerId: 'sel_mehr',
+        brand: 'Mehr Essentials',
+        description: '',
+        price: 499900,
+        images: [],
+        availableSizes: ['One size'],
+        variants: [sampleVariant],
+        category: 'Bags',
+        isTryonEligible: false,
+      );
+      await expectLater(
+        repo.runTryOn(photo: preset, product: tote, variant: sampleVariant),
+        throwsA(
+          isA<TryOnException>().having((e) => e.code, 'code', 'NOT_ELIGIBLE'),
+        ),
+      );
     });
 
     test('history management stores and deletes try-on results', () async {
@@ -199,16 +300,52 @@ void main() {
         final triedIds = container.read(triedOnProductIdsProvider);
         expect(triedIds.contains(sampleProduct.id), isTrue);
 
-        // Rate result
-        notifier.rateResult(5, 'Stunning drape');
-        final ratedState = container.read(tryOnNotifierProvider);
-        expect(ratedState.currentResult?.rating, equals(5));
-        expect(
-          ratedState.currentResult?.feedbackNote,
-          equals('Stunning drape'),
-        );
+        // Save the look
+        notifier.saveLook();
+        final saved = container.read(tryOnNotifierProvider);
+        expect(saved.currentResult?.rating, equals(5));
       },
     );
+
+    test('cancelling throws the late result away', () async {
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+      await Future<void>.delayed(const Duration(milliseconds: 100));
+      final notifier = container.read(tryOnNotifierProvider.notifier);
+      notifier.selectPhoto(
+        (await container.read(tryOnPresetsProvider.future)).first,
+      );
+      notifier.selectGarment(sampleProduct, sampleVariant);
+
+      final pending = notifier.generateTryOn();
+      notifier.cancel();
+      expect(await pending, isNull);
+
+      final state = container.read(tryOnNotifierProvider);
+      expect(state.status, TryOnJobStatus.idle);
+      expect(state.currentResult, isNull);
+      expect(
+        container.read(triedOnProductIdsProvider).contains(sampleProduct.id),
+        isFalse,
+      );
+    });
+
+    test('errors reach the screen as friendly messages', () async {
+      SharedPreferences.setMockInitialValues({'clothsy_tryon_credits_v1': 0});
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+      await Future<void>.delayed(const Duration(milliseconds: 100));
+      final notifier = container.read(tryOnNotifierProvider.notifier);
+      notifier.selectPhoto(
+        (await container.read(tryOnPresetsProvider.future)).first,
+      );
+      notifier.selectGarment(sampleProduct, sampleVariant);
+
+      expect(await notifier.generateTryOn(), isNull);
+      final state = container.read(tryOnNotifierProvider);
+      expect(state.status, TryOnJobStatus.failed);
+      expect(state.errorMessage, ClothsyCopy.tryOnNoCredits);
+    });
   });
 
   group('Phase 4 - BeforeAfterSlider Widget', () {

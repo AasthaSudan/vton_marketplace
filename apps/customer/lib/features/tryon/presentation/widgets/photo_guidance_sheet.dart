@@ -5,7 +5,11 @@ import 'package:clothsy_core/core/theme/app_radius.dart';
 import 'package:clothsy_core/core/theme/app_typography.dart';
 import 'package:clothsy_core/shared/widgets/buttons/primary_button.dart';
 
+/// Photo tips and the consent notice shown before a shopper uses their own
+/// photo (Blueprint fig. 27). Model photos need no consent; the shopper's
+/// own camera or gallery photo does, and the box starts unticked.
 class PhotoGuidanceSheet extends StatefulWidget {
+  final bool alreadyConsented;
   final VoidCallback onConsentGranted;
   final VoidCallback onCameraSelected;
   final VoidCallback onGallerySelected;
@@ -13,6 +17,7 @@ class PhotoGuidanceSheet extends StatefulWidget {
 
   const PhotoGuidanceSheet({
     super.key,
+    this.alreadyConsented = false,
     required this.onConsentGranted,
     required this.onCameraSelected,
     required this.onGallerySelected,
@@ -21,6 +26,7 @@ class PhotoGuidanceSheet extends StatefulWidget {
 
   static Future<void> show(
     BuildContext context, {
+    bool alreadyConsented = false,
     required VoidCallback onConsentGranted,
     required VoidCallback onCameraSelected,
     required VoidCallback onGallerySelected,
@@ -31,6 +37,7 @@ class PhotoGuidanceSheet extends StatefulWidget {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (_) => PhotoGuidanceSheet(
+        alreadyConsented: alreadyConsented,
         onConsentGranted: onConsentGranted,
         onCameraSelected: onCameraSelected,
         onGallerySelected: onGallerySelected,
@@ -44,7 +51,7 @@ class PhotoGuidanceSheet extends StatefulWidget {
 }
 
 class _PhotoGuidanceSheetState extends State<PhotoGuidanceSheet> {
-  bool _agreedToPrivacy = true;
+  late bool _agreedToPrivacy = widget.alreadyConsented;
 
   @override
   Widget build(BuildContext context) {
@@ -99,12 +106,12 @@ class _PhotoGuidanceSheetState extends State<PhotoGuidanceSheet> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'AI Virtual Dressing Room',
+                      'Try it on with your photo',
                       style: AppTypography.h3(color: colors.textPrimary),
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      'Best practices for studio-quality drape',
+                      'A few tips for a great preview',
                       style: AppTypography.caption(color: colors.textSecondary),
                     ),
                   ],
@@ -118,7 +125,7 @@ class _PhotoGuidanceSheetState extends State<PhotoGuidanceSheet> {
           _buildGuidanceItem(
             context,
             icon: Icons.person_outline,
-            title: 'Full or Upper Body Silhouette',
+            title: 'Full or upper body in view',
             description:
                 'Stand naturally facing the camera with arms relaxed at your sides.',
           ),
@@ -126,7 +133,7 @@ class _PhotoGuidanceSheetState extends State<PhotoGuidanceSheet> {
           _buildGuidanceItem(
             context,
             icon: Icons.wb_sunny_outlined,
-            title: 'Soft, Even Daylight',
+            title: 'Soft, even light',
             description:
                 'Avoid strong backlighting or heavy shadows across your clothes.',
           ),
@@ -134,9 +141,9 @@ class _PhotoGuidanceSheetState extends State<PhotoGuidanceSheet> {
           _buildGuidanceItem(
             context,
             icon: Icons.wallpaper_outlined,
-            title: 'Neutral Background',
+            title: 'Plain background',
             description:
-                'A plain wall or uncluttered space gives the most realistic garment drape.',
+                'A plain wall or uncluttered space gives the most realistic preview.',
           ),
           const SizedBox(height: 20),
 
@@ -162,7 +169,7 @@ class _PhotoGuidanceSheetState extends State<PhotoGuidanceSheet> {
                     ),
                     onChanged: (val) {
                       setState(() {
-                        _agreedToPrivacy = val ?? true;
+                        _agreedToPrivacy = val ?? false;
                       });
                     },
                   ),
@@ -173,7 +180,7 @@ class _PhotoGuidanceSheetState extends State<PhotoGuidanceSheet> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Secure & Private Virtual Try-On',
+                        'I agree to how my photo is used',
                         style: AppTypography.bodyMedium(
                           weight: FontWeight.w600,
                           color: colors.textPrimary,
@@ -196,7 +203,7 @@ class _PhotoGuidanceSheetState extends State<PhotoGuidanceSheet> {
 
           // Actions
           PrimaryButton(
-            text: 'Take Studio Photo',
+            text: 'Take a photo',
             icon: const Icon(
               Icons.camera_alt_outlined,
               color: Colors.white,
@@ -235,7 +242,7 @@ class _PhotoGuidanceSheetState extends State<PhotoGuidanceSheet> {
                     color: colors.textPrimary,
                   ),
                   label: Text(
-                    'Upload Gallery',
+                    'From gallery',
                     style: AppTypography.bodyMedium(
                       weight: FontWeight.w600,
                       color: colors.textPrimary,
@@ -246,13 +253,10 @@ class _PhotoGuidanceSheetState extends State<PhotoGuidanceSheet> {
               const SizedBox(width: 10),
               Expanded(
                 child: OutlinedButton.icon(
-                  onPressed: _agreedToPrivacy
-                      ? () {
-                          Navigator.pop(context);
-                          widget.onConsentGranted();
-                          widget.onPresetSelected();
-                        }
-                      : null,
+                  onPressed: () {
+                    Navigator.pop(context);
+                    widget.onPresetSelected();
+                  },
                   style: OutlinedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     side: BorderSide(color: colors.border),
@@ -266,7 +270,7 @@ class _PhotoGuidanceSheetState extends State<PhotoGuidanceSheet> {
                     color: colors.textPrimary,
                   ),
                   label: Text(
-                    'Pick Model',
+                    'Use a model',
                     style: AppTypography.bodyMedium(
                       weight: FontWeight.w600,
                       color: colors.textPrimary,

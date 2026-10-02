@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'dart:typed_data';
+import 'package:clothsy_core/core/constants/clothsy_copy.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:clothsy_core/features/catalog/domain/entities/product.dart';
 import 'package:clothsy_core/features/tryon/domain/entities/tryon_photo.dart';
@@ -8,6 +10,12 @@ import 'package:clothsy_core/features/tryon/domain/repositories/tryon_repository
 class MockTryOnRepository implements TryOnRepository {
   static const String _keyConsent = 'clothsy_tryon_consent_v1';
   static const String _keyCredits = 'clothsy_tryon_credits_v1';
+
+  /// AI previews a new shopper starts with (the server uses the same).
+  static const int startingCredits = 15;
+
+  /// Shopper photos are deleted automatically after this long.
+  static const Duration retention = Duration(days: 30);
 
   final List<TryOnPhoto> _presets = [
     TryOnPhoto(
@@ -105,13 +113,22 @@ class MockTryOnRepository implements TryOnRepository {
   }
 
   @override
-  Future<TryOnPhoto> saveUserPhoto(String imageUrl, String label) async {
+  Future<TryOnPhoto> uploadUserPhoto(
+    Uint8List bytes, {
+    required String contentType,
+    String label = 'My photo',
+  }) async {
+    if (!await hasUserConsented()) {
+      throw const TryOnException('NO_CONSENT', ClothsyCopy.tryOnNeedsConsent);
+    }
+    final now = DateTime.now();
     final photo = TryOnPhoto(
-      id: 'user_photo_${DateTime.now().millisecondsSinceEpoch}',
-      label: label.isEmpty ? 'My Studio Photo' : label,
-      imageUrl: imageUrl,
-      isPreset: false,
-      createdAt: DateTime.now(),
+      id: 'user_photo_${now.microsecondsSinceEpoch}',
+      label: label.isEmpty ? 'My photo' : label,
+      imageUrl: '',
+      bytes: bytes,
+      createdAt: now,
+      expiresAt: now.add(retention),
     );
     _userPhotos.insert(0, photo);
     return photo;
@@ -121,6 +138,7 @@ class MockTryOnRepository implements TryOnRepository {
   Future<void> deleteUserPhoto(String id) async {
     _userPhotos.removeWhere((p) => p.id == id);
     _cache.removeWhere((key, _) => key.startsWith('${id}_'));
+    _history.removeWhere((h) => h.photo.id == id);
   }
 
   @override
@@ -128,12 +146,20 @@ class MockTryOnRepository implements TryOnRepository {
     required TryOnPhoto photo,
     required Product product,
     required ProductVariant variant,
+    bool forceRefresh = false,
     void Function(ProcessingStep step)? onProgress,
   }) async {
+    if (!product.isTryonEligible) {
+      throw const TryOnException('NOT_ELIGIBLE', ClothsyCopy.tryOnUnsupported);
+    }
+    if (!photo.isPreset && !await hasUserConsented()) {
+      throw const TryOnException('NO_CONSENT', ClothsyCopy.tryOnNeedsConsent);
+    }
+
     final cacheKey = '${photo.id}_${product.id}_${variant.id}';
 
-    // Instant return if cached
-    if (_cache.containsKey(cacheKey)) {
+    // The same photo + variant is answered instantly, without a credit.
+    if (!forceRefresh && _cache.containsKey(cacheKey)) {
       final cached = _cache[cacheKey]!;
       onProgress?.call(
         const ProcessingStep(
@@ -144,6 +170,12 @@ class MockTryOnRepository implements TryOnRepository {
       );
       return cached;
     }
+
+    final credits = await getRemainingCredits();
+    if (credits <= 0) {
+      throw const TryOnException('NO_CREDITS', ClothsyCopy.tryOnNoCredits);
+    }
+    await _setCredits(credits - 1);
 
     // Step 1: Geometry & Pose Analysis
     onProgress?.call(
@@ -248,11 +280,26 @@ class MockTryOnRepository implements TryOnRepository {
   Future<void> setUserConsent(bool consented) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_keyConsent, consented);
+    // Withdrawing consent removes the shopper's photos and previews.
+    if (!consented) await deleteAllTryOnData();
+  }
+
+  @override
+  Future<void> deleteAllTryOnData() async {
+    final ids = _userPhotos.map((p) => p.id).toSet();
+    _userPhotos.clear();
+    _history.removeWhere((h) => ids.contains(h.photo.id) || !h.photo.isPreset);
+    _cache.removeWhere((_, result) => !result.photo.isPreset);
   }
 
   @override
   Future<int> getRemainingCredits() async {
     final prefs = await SharedPreferences.getInstance();
-    return prefs.getInt(_keyCredits) ?? 15;
+    return prefs.getInt(_keyCredits) ?? startingCredits;
+  }
+
+  Future<void> _setCredits(int credits) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(_keyCredits, credits);
   }
 }

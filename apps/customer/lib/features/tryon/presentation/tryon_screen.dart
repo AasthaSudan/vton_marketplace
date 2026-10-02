@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:clothsy_core/core/constants/clothsy_copy.dart';
 import 'package:clothsy_core/core/theme/app_colors.dart';
 import 'package:clothsy_core/core/theme/app_typography.dart';
@@ -13,16 +14,21 @@ import 'package:clothsy_shop/features/catalog/presentation/providers/catalog_pro
 import 'package:clothsy_core/shared/widgets/buttons/clothsy_icon_button.dart';
 import 'package:clothsy_core/shared/widgets/buttons/pressable_scale.dart';
 import 'package:clothsy_core/shared/widgets/buttons/primary_button.dart';
+import 'package:clothsy_core/shared/widgets/buttons/secondary_button.dart';
 import 'package:clothsy_core/shared/widgets/feedback/clothsy_snackbar.dart';
-import 'package:clothsy_core/features/tryon/domain/entities/tryon_photo.dart';
+import 'package:clothsy_core/shared/widgets/selectors/color_swatch_selector.dart';
+import 'package:clothsy_core/shared/widgets/selectors/size_selector.dart';
 import 'package:clothsy_core/features/tryon/domain/entities/tryon_session.dart';
 import 'providers/tryon_provider.dart';
 import 'tryon_history_screen.dart';
 import 'widgets/before_after_slider.dart';
 import 'widgets/model_photo_picker_sheet.dart';
 import 'widgets/photo_guidance_sheet.dart';
+import 'widgets/tryon_photo_image.dart';
 import 'widgets/tryon_shimmer_loading.dart';
 
+/// Clothsy AI Try-On (Blueprint section 35, fig. 27): pick a photo, confirm
+/// the colour, see the AI preview, then choose a size and add to bag.
 class TryonScreen extends ConsumerStatefulWidget {
   final String? initialProductId;
 
@@ -47,96 +53,84 @@ class _TryonScreenState extends ConsumerState<TryonScreen> {
     if (_initializedProduct) return;
     _initializedProduct = true;
 
+    final notifier = ref.read(tryOnNotifierProvider.notifier);
     final repo = ref.read(catalogRepositoryProvider);
     if (widget.initialProductId != null) {
       final p = await repo.getProductById(widget.initialProductId!);
-      if (p != null && mounted) {
-        ref
-            .read(tryOnNotifierProvider.notifier)
-            .selectGarment(
-              p,
-              p.variants.isNotEmpty ? p.variants.first : _dummyVariant(p),
-            );
+      if (p != null && p.variants.isNotEmpty && mounted) {
+        // Even an unsupported piece is selected, so we can explain gently.
+        notifier.selectGarment(p);
         return;
       }
     }
 
-    // Default to first catalog item if none provided
+    if (ref.read(tryOnNotifierProvider).selectedProduct != null) return;
     final all = await repo.getProducts();
-    if (all.isNotEmpty && mounted) {
-      final p = all.first;
-      ref
-          .read(tryOnNotifierProvider.notifier)
-          .selectGarment(
-            p,
-            p.variants.isNotEmpty ? p.variants.first : _dummyVariant(p),
-          );
-    }
-  }
-
-  ProductVariant _dummyVariant(Product p) {
-    return ProductVariant(
-      id: 'default_${p.id}',
-      title: 'Standard Fit',
-      size: p.availableSizes.isNotEmpty ? p.availableSizes.first : 'M',
-      colorName: 'Classic',
-      colorHex: '0xFF14102B',
-      price: p.price,
+    final eligible = all.where(
+      (p) => p.isTryonEligible && p.variants.isNotEmpty,
     );
+    if (eligible.isNotEmpty && mounted) notifier.selectGarment(eligible.first);
   }
 
   void _openPhotoGuidance() {
     PhotoGuidanceSheet.show(
       context,
-      onConsentGranted: () {
-        ref.read(tryOnNotifierProvider.notifier).grantConsent();
-      },
-      onCameraSelected: () {
-        final customPhoto = TryOnPhoto(
-          id: 'camera_capture_${DateTime.now().millisecondsSinceEpoch}',
-          label: 'Live Studio Camera',
-          imageUrl:
-              'https://images.unsplash.com/photo-1534528741775-53994a69daeb',
-          isPreset: false,
-          createdAt: DateTime.now(),
-        );
-        ref.read(tryOnNotifierProvider.notifier).selectPhoto(customPhoto);
-        ClothsySnackbar.show(
-          context,
-          message: 'Photo captured & ready to style',
-        );
-      },
-      onGallerySelected: () {
-        final customPhoto = TryOnPhoto(
-          id: 'gallery_upload_${DateTime.now().millisecondsSinceEpoch}',
-          label: 'My Uploaded Photo',
-          imageUrl: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2',
-          isPreset: false,
-          createdAt: DateTime.now(),
-        );
-        ref.read(tryOnNotifierProvider.notifier).selectPhoto(customPhoto);
-        ClothsySnackbar.show(context, message: 'Photo selected from gallery');
-      },
-      onPresetSelected: () {
-        _openModelPicker();
-      },
+      alreadyConsented: ref.read(tryOnNotifierProvider).hasConsented,
+      onConsentGranted: () =>
+          ref.read(tryOnNotifierProvider.notifier).grantConsent(),
+      onCameraSelected: () => _pickOwnPhoto(ImageSource.camera),
+      onGallerySelected: () => _pickOwnPhoto(ImageSource.gallery),
+      onPresetSelected: _openModelPicker,
+    );
+  }
+
+  Future<void> _pickOwnPhoto(ImageSource source) async {
+    final XFile? file;
+    try {
+      file = await ImagePicker().pickImage(
+        source: source,
+        maxWidth: 1600,
+        imageQuality: 85,
+      );
+    } on PlatformException {
+      if (!mounted) return;
+      ClothsySnackbar.show(
+        context,
+        message:
+            "We couldn't open your ${source == ImageSource.camera ? 'camera' : 'photos'}. "
+            'Check the permission in your phone settings.',
+        type: SnackbarType.error,
+      );
+      return;
+    }
+    if (file == null) return; // Closed the picker.
+
+    final bytes = await file.readAsBytes();
+    final error = await ref
+        .read(tryOnNotifierProvider.notifier)
+        .useOwnPhoto(bytes, file.mimeType ?? 'image/jpeg');
+    if (!mounted) return;
+    ClothsySnackbar.show(
+      context,
+      message: error ?? 'Your photo is ready. Pick a piece and try it on.',
+      type: error == null ? SnackbarType.success : SnackbarType.error,
     );
   }
 
   void _openModelPicker() {
-    ModelPhotoPickerSheet.show(context, (photo) {
-      ref.read(tryOnNotifierProvider.notifier).selectPhoto(photo);
-      ClothsySnackbar.show(
-        context,
-        message: 'Active photo updated: ${photo.label}',
-      );
-    });
+    ModelPhotoPickerSheet.show(
+      context,
+      onSelectPhoto: (photo) =>
+          ref.read(tryOnNotifierProvider.notifier).selectPhoto(photo),
+      onUseOwnPhoto: _openPhotoGuidance,
+    );
   }
 
-  Future<void> _handleStartTryOn() async {
+  Future<void> _generate({bool regenerate = false}) async {
     final session = ref.read(tryOnNotifierProvider);
-
-    if (!session.hasConsented) {
+    final photo = session.selectedPhoto;
+    // The shopper's own photo needs consent; model photos do not.
+    if (photo != null && !photo.isPreset && !session.hasConsented) {
       _openPhotoGuidance();
       return;
     }
@@ -144,14 +138,25 @@ class _TryonScreenState extends ConsumerState<TryonScreen> {
     HapticFeedback.mediumImpact();
     final result = await ref
         .read(tryOnNotifierProvider.notifier)
-        .generateTryOn();
-    if (result != null && mounted) {
-      HapticFeedback.lightImpact();
-      ClothsySnackbar.show(
-        context,
-        message: 'Clothsy AI look generated successfully!',
-      );
-    }
+        .generateTryOn(regenerate: regenerate);
+    if (result != null && mounted) HapticFeedback.lightImpact();
+  }
+
+  Future<void> _chooseSizeAndAdd(TryOnSessionState session) async {
+    final product = session.selectedProduct;
+    final shown = session.selectedVariant;
+    if (product == null || shown == null) return;
+
+    final variant = await _SizeSheet.show(context, product, shown);
+    if (variant == null || !mounted) return;
+    ref.read(cartProvider.notifier).addToCart(product, variant);
+    HapticFeedback.lightImpact();
+    ClothsySnackbar.show(
+      context,
+      message: 'Added ${product.title} (${variant.size}) to your bag',
+      type: SnackbarType.success,
+    );
+    context.go('/bag');
   }
 
   @override
@@ -173,14 +178,10 @@ class _TryonScreenState extends ConsumerState<TryonScreen> {
               Container(
                 padding: const EdgeInsets.all(6),
                 decoration: BoxDecoration(
-                  color: colors.accentSoft,
+                  color: colors.tryOnSoft,
                   shape: BoxShape.circle,
                 ),
-                child: Icon(
-                  Icons.auto_awesome,
-                  color: colors.primary,
-                  size: 16,
-                ),
+                child: Icon(Icons.auto_awesome, color: colors.tryOn, size: 16),
               ),
               const SizedBox(width: 8),
               Text(
@@ -191,12 +192,11 @@ class _TryonScreenState extends ConsumerState<TryonScreen> {
           ),
         ),
         actions: [
-          // History action with counter badge
           Stack(
             children: [
               IconButton(
                 icon: const Icon(Icons.history_outlined, size: 22),
-                tooltip: 'Look History',
+                tooltip: 'Your looks',
                 onPressed: () {
                   Navigator.push(
                     context,
@@ -218,11 +218,10 @@ class _TryonScreenState extends ConsumerState<TryonScreen> {
                     ),
                     child: Text(
                       '${history.length}',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 9,
-                        fontWeight: FontWeight.bold,
-                      ),
+                      style: AppTypography.caption(
+                        color: colors.onPrimary,
+                        weight: FontWeight.w700,
+                      ).copyWith(fontSize: 9),
                     ),
                   ),
                 ),
@@ -230,39 +229,30 @@ class _TryonScreenState extends ConsumerState<TryonScreen> {
           ),
           IconButton(
             icon: const Icon(Icons.info_outline, size: 20),
-            tooltip: 'Styling Guide & Privacy',
+            tooltip: 'Photo tips & privacy',
             onPressed: _openPhotoGuidance,
           ),
         ],
       ),
       body: Column(
         children: [
-          // Top credit banner
+          // Credits and photo switcher
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             color: colors.surfaceMuted,
             child: Row(
               children: [
+                Icon(Icons.auto_awesome, size: 16, color: colors.tryOn),
+                const SizedBox(width: 6),
                 Expanded(
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.workspace_premium,
-                        size: 16,
-                        color: colors.accent,
-                      ),
-                      const SizedBox(width: 6),
-                      Expanded(
-                        child: Text(
-                          '${session.remainingCredits} AI previews left',
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: AppTypography.caption(
-                            color: colors.textPrimary,
-                          ).copyWith(fontWeight: FontWeight.w600, fontSize: 12),
-                        ),
-                      ),
-                    ],
+                  child: Text(
+                    '${session.remainingCredits} AI previews left',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTypography.caption(
+                      color: colors.textPrimary,
+                      weight: FontWeight.w600,
+                    ),
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -271,12 +261,12 @@ class _TryonScreenState extends ConsumerState<TryonScreen> {
                   child: Row(
                     children: [
                       Text(
-                        'Change Model',
+                        'Change photo',
                         style: AppTypography.caption(
                           color: colors.primary,
-                        ).copyWith(fontWeight: FontWeight.w600),
+                          weight: FontWeight.w600,
+                        ),
                       ),
-                      const SizedBox(width: 2),
                       Icon(
                         Icons.chevron_right,
                         size: 14,
@@ -289,7 +279,6 @@ class _TryonScreenState extends ConsumerState<TryonScreen> {
             ),
           ),
 
-          // Main Viewport
           Expanded(
             child: Padding(
               padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
@@ -297,10 +286,9 @@ class _TryonScreenState extends ConsumerState<TryonScreen> {
             ),
           ),
 
-          // Horizontal Garment Tray
-          _buildGarmentTray(context, session, catalogAsync),
+          if (session.currentResult == null)
+            _buildGarmentTray(context, session, catalogAsync),
 
-          // Bottom Action Bar
           _buildBottomActionBar(context, session),
         ],
       ),
@@ -309,27 +297,62 @@ class _TryonScreenState extends ConsumerState<TryonScreen> {
 
   Widget _buildMainStage(BuildContext context, TryOnSessionState session) {
     final colors = context.colors;
+    final product = session.selectedProduct;
 
-    // 1. Processing Shimmer State
-    if (session.isProcessing) {
-      return TryOnShimmerLoading(
-        currentStep: session.currentStep,
-        onCancel: () {
-          ref.read(tryOnNotifierProvider.notifier).resetSession();
-        },
+    // Never a dead end: unsupported pieces fall back to normal shopping.
+    if (product != null && !product.isTryonEligible) {
+      return _StageMessage(
+        icon: Icons.checkroom_outlined,
+        title: 'Not available for this piece',
+        message: ClothsyCopy.tryOnUnsupported,
+        primaryLabel: 'Back to the product',
+        onPrimary: () => context.push('/product/${product.id}'),
+        secondaryLabel: 'Try another piece',
+        onSecondary: () =>
+            ref.read(tryOnNotifierProvider.notifier).resetSession(),
       );
     }
 
-    // 2. Completed State: Before / After Slider
-    if (session.currentResult != null && session.selectedPhoto != null) {
-      final res = session.currentResult!;
+    if (session.status == TryOnJobStatus.validatingPhoto) {
+      return const _StageMessage(
+        icon: Icons.cloud_upload_outlined,
+        title: 'Saving your photo…',
+        message: 'Only you can see it, and you can delete it anytime.',
+        busy: true,
+      );
+    }
+
+    if (session.isProcessing) {
+      return TryOnShimmerLoading(
+        currentStep: session.currentStep,
+        onCancel: () => ref.read(tryOnNotifierProvider.notifier).cancel(),
+      );
+    }
+
+    if (session.status == TryOnJobStatus.failed &&
+        session.errorMessage != null) {
+      return _StageMessage(
+        icon: Icons.photo_camera_back_outlined,
+        title: "Let's try that again",
+        message: session.errorMessage!,
+        primaryLabel: 'Try again',
+        onPrimary: () => _generate(),
+        secondaryLabel: 'Use another photo',
+        onSecondary: _openModelPicker,
+      );
+    }
+
+    final photo = session.selectedPhoto;
+    final result = session.currentResult;
+    if (result != null && photo != null) {
       return Stack(
         fit: StackFit.expand,
         children: [
           BeforeAfterSlider(
-            beforeImageUrl: session.selectedPhoto!.imageUrl,
-            afterImageUrl: res.resultImageUrl,
-            beforeLabel: 'Your photo',
+            beforeImageUrl: photo.imageUrl,
+            beforeImage: TryOnPhotoImage(photo: photo),
+            afterImageUrl: result.resultImageUrl,
+            beforeLabel: photo.isPreset ? 'Model' : 'Your photo',
             afterLabel: ClothsyCopy.tryOnResultLabel,
           ),
           // Every result is labelled honestly (Blueprint section 35).
@@ -344,7 +367,7 @@ class _TryonScreenState extends ConsumerState<TryonScreen> {
                   vertical: 8,
                 ),
                 decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.55),
+                  color: AppColors.deepInk.withOpacity(0.6),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
@@ -359,92 +382,38 @@ class _TryonScreenState extends ConsumerState<TryonScreen> {
       );
     }
 
-    // 3. Ready State: Model Photo with Framing Overlay
-    final photo = session.selectedPhoto;
     if (photo != null) {
       return ClipRRect(
         borderRadius: BorderRadius.circular(20),
         child: Stack(
           fit: StackFit.expand,
           children: [
-            CachedNetworkImage(imageUrl: photo.imageUrl, fit: BoxFit.cover),
-            // Framing silhouette guide overlay
+            TryOnPhotoImage(photo: photo),
             CustomPaint(
               painter: _FramingOverlayPainter(
                 borderColor: Colors.white.withOpacity(0.5),
-                guideColor: colors.accent.withOpacity(0.3),
               ),
             ),
-            // Top Model Tag
             Positioned(
               top: 16,
               left: 16,
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 5,
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.6),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(Icons.person, color: Colors.white, size: 14),
-                    const SizedBox(width: 4),
-                    Text(
-                      photo.label,
-                      style: AppTypography.caption(
-                        color: Colors.white,
-                      ).copyWith(fontWeight: FontWeight.w600, fontSize: 11),
-                    ),
-                  ],
-                ),
+              child: _Pill(
+                icon: Icons.person,
+                label: photo.isPreset ? photo.label : 'Your photo',
               ),
             ),
-            // Floating "Switch Model" Button
             Positioned(
               top: 16,
               right: 16,
               child: PressableScale(
                 onTap: _openModelPicker,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 6,
-                  ),
-                  decoration: BoxDecoration(
-                    color: colors.surface.withOpacity(0.9),
-                    borderRadius: BorderRadius.circular(20),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.15),
-                        blurRadius: 6,
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.cameraswitch_outlined,
-                        size: 14,
-                        color: colors.textPrimary,
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        'Switch',
-                        style: AppTypography.caption(
-                          color: colors.textPrimary,
-                        ).copyWith(fontWeight: FontWeight.w600, fontSize: 11),
-                      ),
-                    ],
-                  ),
+                child: _Pill(
+                  icon: Icons.cameraswitch_outlined,
+                  label: 'Switch',
+                  light: true,
                 ),
               ),
             ),
-            // Bottom "Tap to Style" Hint
             Positioned(
               bottom: 16,
               left: 20,
@@ -455,19 +424,17 @@ class _TryonScreenState extends ConsumerState<TryonScreen> {
                   vertical: 10,
                 ),
                 decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.75),
+                  color: AppColors.deepInk.withOpacity(0.75),
                   borderRadius: BorderRadius.circular(14),
                 ),
                 child: Row(
                   children: [
-                    Icon(Icons.auto_awesome, color: colors.accent, size: 18),
+                    Icon(Icons.auto_awesome, color: colors.tryOn, size: 18),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        'Select a garment below and tap "Generate Try-On"',
-                        style: AppTypography.caption(
-                          color: Colors.white,
-                        ).copyWith(fontSize: 12),
+                        'Pick a piece and colour below, then tap "Try it on".',
+                        style: AppTypography.caption(color: Colors.white),
                       ),
                     ),
                   ],
@@ -479,51 +446,12 @@ class _TryonScreenState extends ConsumerState<TryonScreen> {
       );
     }
 
-    // 4. No photo selected yet
-    return Container(
-      decoration: BoxDecoration(
-        color: colors.surfaceMuted,
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Center(
-        child: FittedBox(
-          fit: BoxFit.scaleDown,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  Icons.add_a_photo_outlined,
-                  size: 48,
-                  color: colors.primary,
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  'No Model Photo Selected',
-                  style: AppTypography.h3(color: colors.textPrimary),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Choose a studio preset or take a photo',
-                  style: AppTypography.caption(color: colors.textSecondary),
-                ),
-                const SizedBox(height: 16),
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: colors.primary,
-                  ),
-                  onPressed: _openPhotoGuidance,
-                  child: const Text(
-                    'Select Photo',
-                    style: TextStyle(color: Colors.white),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
+    return _StageMessage(
+      icon: Icons.add_a_photo_outlined,
+      title: 'Choose a photo',
+      message: 'Use one of our models, or your own photo.',
+      primaryLabel: 'Choose a photo',
+      onPrimary: _openModelPicker,
     );
   }
 
@@ -533,6 +461,8 @@ class _TryonScreenState extends ConsumerState<TryonScreen> {
     AsyncValue<List<Product>> catalogAsync,
   ) {
     final colors = context.colors;
+    final product = session.selectedProduct;
+    final variant = session.selectedVariant;
 
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 8),
@@ -546,7 +476,6 @@ class _TryonScreenState extends ConsumerState<TryonScreen> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
                   'Pick a piece',
@@ -555,18 +484,18 @@ class _TryonScreenState extends ConsumerState<TryonScreen> {
                     color: colors.textPrimary,
                   ),
                 ),
-                if (session.selectedProduct != null)
+                if (product != null)
                   Expanded(
                     child: Padding(
-                      padding: const EdgeInsets.only(left: 8.0),
+                      padding: const EdgeInsets.only(left: 8),
                       child: Text(
-                        '${session.selectedProduct!.title} • ${session.selectedVariant?.size ?? 'M'}',
+                        product.title,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         textAlign: TextAlign.end,
                         style: AppTypography.caption(
                           color: colors.textSecondary,
-                        ).copyWith(fontSize: 11),
+                        ),
                       ),
                     ),
                   ),
@@ -574,39 +503,37 @@ class _TryonScreenState extends ConsumerState<TryonScreen> {
             ),
           ),
           SizedBox(
-            height: 86,
+            height: 76,
             child: catalogAsync.when(
               loading: () => const Center(
                 child: CircularProgressIndicator(strokeWidth: 2),
               ),
-              error: (err, stack) => Center(
+              error: (_, _) => Center(
                 child: Text(
-                  'Error: $err',
-                  style: AppTypography.caption(color: colors.error),
+                  "Couldn't load pieces. Pull down to retry.",
+                  style: AppTypography.caption(color: colors.textSecondary),
                 ),
               ),
               data: (products) {
+                final eligible = products
+                    .where((p) => p.isTryonEligible && p.variants.isNotEmpty)
+                    .toList();
                 return ListView.builder(
                   scrollDirection: Axis.horizontal,
                   padding: const EdgeInsets.symmetric(horizontal: 12),
-                  itemCount: products.length,
+                  itemCount: eligible.length,
                   itemBuilder: (context, index) {
-                    final product = products[index];
-                    final isSelected =
-                        session.selectedProduct?.id == product.id;
-
+                    final item = eligible[index];
+                    final isSelected = product?.id == item.id;
                     return PressableScale(
                       onTap: () {
                         HapticFeedback.selectionClick();
-                        final variant = product.variants.isNotEmpty
-                            ? product.variants.first
-                            : _dummyVariant(product);
                         ref
                             .read(tryOnNotifierProvider.notifier)
-                            .selectGarment(product, variant);
+                            .selectGarment(item);
                       },
                       child: Container(
-                        width: 72,
+                        width: 60,
                         margin: const EdgeInsets.symmetric(
                           horizontal: 4,
                           vertical: 2,
@@ -619,31 +546,11 @@ class _TryonScreenState extends ConsumerState<TryonScreen> {
                           ),
                         ),
                         clipBehavior: Clip.antiAlias,
-                        child: Stack(
-                          fit: StackFit.expand,
-                          children: [
-                            CachedNetworkImage(
-                              imageUrl: product.primaryImage,
-                              fit: BoxFit.cover,
-                            ),
-                            if (isSelected)
-                              Positioned(
-                                top: 4,
-                                right: 4,
-                                child: Container(
-                                  padding: const EdgeInsets.all(2),
-                                  decoration: BoxDecoration(
-                                    color: colors.primary,
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: const Icon(
-                                    Icons.check,
-                                    color: Colors.white,
-                                    size: 10,
-                                  ),
-                                ),
-                              ),
-                          ],
+                        child: CachedNetworkImage(
+                          imageUrl: item.primaryImage,
+                          fit: BoxFit.cover,
+                          errorWidget: (context, _, _) =>
+                              ColoredBox(color: colors.surfaceMuted),
                         ),
                       ),
                     );
@@ -652,6 +559,58 @@ class _TryonScreenState extends ConsumerState<TryonScreen> {
               },
             ),
           ),
+          // Confirm the colour being visualised (Blueprint fig. 27, step 4).
+          if (product != null && variant != null && product.isTryonEligible)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+              child: Row(
+                children: [
+                  Text(
+                    'Colour: ',
+                    style: AppTypography.caption(color: colors.textSecondary),
+                  ),
+                  Flexible(
+                    child: Text(
+                      variant.colorName,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTypography.caption(
+                        color: colors.textPrimary,
+                        weight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: ColorSwatchSelector(
+                        circleSize: 28,
+                        swatches: [
+                          for (final v in product.variants)
+                            ColorSwatchItem(
+                              id: v.id,
+                              name: v.colorName,
+                              color: Color(
+                                int.tryParse(v.colorHex) ??
+                                    colors.textPrimary.toARGB32(),
+                              ),
+                            ),
+                        ],
+                        selectedSwatchId: variant.id,
+                        onSwatchSelected: (item) => ref
+                            .read(tryOnNotifierProvider.notifier)
+                            .selectVariant(
+                              product.variants.firstWhere(
+                                (v) => v.id == item.id,
+                              ),
+                            ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
         ],
       ),
     );
@@ -662,7 +621,9 @@ class _TryonScreenState extends ConsumerState<TryonScreen> {
     TryOnSessionState session,
   ) {
     final colors = context.colors;
-    final isResultReady = session.currentResult != null;
+    final result = session.currentResult;
+    final product = session.selectedProduct;
+    final unsupported = product != null && !product.isTryonEligible;
 
     return Container(
       padding: EdgeInsets.only(
@@ -673,166 +634,302 @@ class _TryonScreenState extends ConsumerState<TryonScreen> {
       ),
       decoration: BoxDecoration(
         color: colors.surface,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.06),
-            blurRadius: 10,
-            offset: const Offset(0, -3),
-          ),
-        ],
+        border: Border(top: BorderSide(color: colors.border)),
       ),
-      child: isResultReady
+      child: result != null
           ? Row(
               children: [
-                // Share Action
                 ClothsyIconButton(
-                  icon: const Icon(Icons.share_outlined, size: 20),
-                  onPressed: () {
-                    ClothsySnackbar.show(
-                      context,
-                      message: 'Look link copied! Ready to share with friends.',
-                    );
-                  },
+                  tooltip: 'New preview',
+                  icon: Icon(
+                    Icons.refresh_rounded,
+                    size: 20,
+                    color: colors.textPrimary,
+                  ),
+                  onPressed: () => _generate(regenerate: true),
                 ),
                 const SizedBox(width: 8),
                 ClothsyIconButton(
+                  tooltip: 'Save look',
                   icon: Icon(
-                    session.currentResult?.rating != null
-                        ? Icons.star
-                        : Icons.star_border,
+                    result.rating != null
+                        ? Icons.bookmark_rounded
+                        : Icons.bookmark_border_rounded,
                     size: 20,
-                    color: session.currentResult?.rating != null
-                        ? context.colors.rating
+                    color: result.rating != null
+                        ? colors.primary
                         : colors.textPrimary,
                   ),
                   onPressed: () {
-                    ref.read(tryOnNotifierProvider.notifier).rateResult(5);
+                    ref.read(tryOnNotifierProvider.notifier).saveLook();
                     ClothsySnackbar.show(
                       context,
-                      message: 'Saved to your 5-star looks!',
+                      message: 'Saved to your looks',
                     );
                   },
                 ),
                 const SizedBox(width: 12),
-
-                // Direct Add to Cart Button
                 Expanded(
                   child: PrimaryButton(
                     text:
-                        'Add to Bag • ${CurrencyFormatter.format(session.selectedVariant?.price ?? session.selectedProduct?.price ?? 0)}',
-                    icon: const Icon(
-                      Icons.shopping_bag_outlined,
-                      color: Colors.white,
-                      size: 18,
-                    ),
-                    onPressed: () {
-                      if (session.selectedProduct != null &&
-                          session.selectedVariant != null) {
-                        ref
-                            .read(cartProvider.notifier)
-                            .addToCart(
-                              session.selectedProduct!,
-                              session.selectedVariant!,
-                            );
-                        HapticFeedback.lightImpact();
-                        ClothsySnackbar.show(
-                          context,
-                          message:
-                              'Added ${session.selectedProduct!.title} to bag',
-                        );
-                        context.go('/bag');
-                      }
-                    },
+                        'Select size • ${CurrencyFormatter.format(session.selectedVariant?.price ?? product?.price ?? 0)}',
+                    onPressed: () => _chooseSizeAndAdd(session),
                   ),
                 ),
               ],
             )
-          : Row(
-              children: [
-                Expanded(
-                  child: PrimaryButton(
-                    text: 'Generate Try-On',
-                    icon: const Icon(
-                      Icons.auto_awesome,
-                      color: Colors.white,
-                      size: 18,
-                    ),
-                    isLoading: session.isProcessing,
-                    onPressed: session.canGenerate ? _handleStartTryOn : null,
-                  ),
+          : PrimaryButton(
+              text: ClothsyCopy.tryOnButton,
+              backgroundColor: colors.tryOn,
+              icon: const Icon(
+                Icons.auto_awesome,
+                color: Colors.white,
+                size: 18,
+              ),
+              isLoading: session.isProcessing,
+              onPressed: session.canGenerate && !unsupported
+                  ? () => _generate()
+                  : null,
+            ),
+    );
+  }
+}
+
+/// A centred message in the stage area with up to two actions.
+class _StageMessage extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String message;
+  final String? primaryLabel;
+  final VoidCallback? onPrimary;
+  final String? secondaryLabel;
+  final VoidCallback? onSecondary;
+  final bool busy;
+
+  const _StageMessage({
+    required this.icon,
+    required this.title,
+    required this.message,
+    this.primaryLabel,
+    this.onPrimary,
+    this.secondaryLabel,
+    this.onSecondary,
+    this.busy = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: colors.surfaceMuted,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      padding: const EdgeInsets.all(20),
+      child: Center(
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              busy
+                  ? const CircularProgressIndicator(strokeWidth: 2)
+                  : Icon(icon, size: 40, color: colors.primary),
+              const SizedBox(height: 12),
+              Text(
+                title,
+                textAlign: TextAlign.center,
+                style: AppTypography.h3(color: colors.textPrimary),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                message,
+                textAlign: TextAlign.center,
+                style: AppTypography.body(color: colors.textSecondary),
+              ),
+              if (primaryLabel != null) ...[
+                const SizedBox(height: 16),
+                PrimaryButton(
+                  text: primaryLabel!,
+                  height: 44,
+                  onPressed: onPrimary,
                 ),
               ],
-            ),
+              if (secondaryLabel != null) ...[
+                const SizedBox(height: 8),
+                SecondaryButton(
+                  text: secondaryLabel!,
+                  height: 44,
+                  onPressed: onSecondary,
+                ),
+              ],
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _Pill extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final bool light;
+
+  const _Pill({required this.icon, required this.label, this.light = false});
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final fg = light ? colors.textPrimary : Colors.white;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+        color: light
+            ? colors.surface.withOpacity(0.9)
+            : AppColors.deepInk.withOpacity(0.6),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, color: fg, size: 14),
+          const SizedBox(width: 4),
+          Text(
+            label,
+            style: AppTypography.caption(color: fg, weight: FontWeight.w600),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// "Select size → Add to bag" straight from the preview (Blueprint: every
+/// result leads back to buying in one tap).
+class _SizeSheet extends StatefulWidget {
+  final Product product;
+  final ProductVariant shown;
+
+  const _SizeSheet({required this.product, required this.shown});
+
+  static Future<ProductVariant?> show(
+    BuildContext context,
+    Product product,
+    ProductVariant shown,
+  ) {
+    return showModalBottomSheet<ProductVariant>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (_) => _SizeSheet(product: product, shown: shown),
+    );
+  }
+
+  @override
+  State<_SizeSheet> createState() => _SizeSheetState();
+}
+
+class _SizeSheetState extends State<_SizeSheet> {
+  late String? _size = widget.shown.isAvailable ? widget.shown.size : null;
+
+  /// The variant to buy for [size]: the colour shown if it comes in that
+  /// size, otherwise any variant of that size.
+  ProductVariant? _variantFor(String size) {
+    final inSize = widget.product.variants.where(
+      (v) => v.size == size && v.isAvailable,
+    );
+    if (inSize.isEmpty) return null;
+    return inSize.firstWhere(
+      (v) => v.colorName == widget.shown.colorName,
+      orElse: () => inSize.first,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final sizes = widget.product.availableSizes;
+    final selected = _size == null ? null : _variantFor(_size!);
+
+    return Container(
+      decoration: BoxDecoration(
+        color: colors.surface,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+      ),
+      padding: EdgeInsets.fromLTRB(
+        20,
+        20,
+        20,
+        MediaQuery.of(context).padding.bottom + 20,
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Select size',
+            style: AppTypography.h3(color: colors.textPrimary),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            '${widget.product.title} • ${widget.shown.colorName}',
+            style: AppTypography.caption(color: colors.textSecondary),
+          ),
+          const SizedBox(height: 16),
+          SizeSelector(
+            sizes: sizes,
+            selectedSize: _size,
+            unavailableSizes: [
+              for (final s in sizes)
+                if (_variantFor(s) == null) s,
+            ],
+            onSizeSelected: (s) => setState(() => _size = s),
+          ),
+          const SizedBox(height: 20),
+          PrimaryButton(
+            text: selected == null
+                ? 'Choose a size'
+                : 'Add to bag • ${CurrencyFormatter.format(selected.price)}',
+            onPressed: selected == null
+                ? null
+                : () => Navigator.pop(context, selected),
+          ),
+        ],
+      ),
     );
   }
 }
 
 class _FramingOverlayPainter extends CustomPainter {
   final Color borderColor;
-  final Color guideColor;
 
-  _FramingOverlayPainter({required this.borderColor, required this.guideColor});
+  _FramingOverlayPainter({required this.borderColor});
 
   @override
   void paint(Canvas canvas, Size size) {
-    final borderPaint = Paint()
+    final paint = Paint()
       ..color = borderColor
       ..strokeWidth = 2.0
       ..style = PaintingStyle.stroke;
 
-    // Corner crosshairs
-    const cornerSize = 24.0;
-    const padding = 16.0;
+    const corner = 24.0;
+    const pad = 16.0;
+    final w = size.width;
+    final h = size.height;
 
-    // Top-Left
-    canvas.drawLine(
-      const Offset(padding, padding),
-      const Offset(padding + cornerSize, padding),
-      borderPaint,
-    );
-    canvas.drawLine(
-      const Offset(padding, padding),
-      const Offset(padding, padding + cornerSize),
-      borderPaint,
-    );
-
-    // Top-Right
-    canvas.drawLine(
-      Offset(size.width - padding, padding),
-      Offset(size.width - padding - cornerSize, padding),
-      borderPaint,
-    );
-    canvas.drawLine(
-      Offset(size.width - padding, padding),
-      Offset(size.width - padding, padding + cornerSize),
-      borderPaint,
-    );
-
-    // Bottom-Left
-    canvas.drawLine(
-      Offset(padding, size.height - padding),
-      Offset(padding + cornerSize, size.height - padding),
-      borderPaint,
-    );
-    canvas.drawLine(
-      Offset(padding, size.height - padding),
-      Offset(padding, size.height - padding - cornerSize),
-      borderPaint,
-    );
-
-    // Bottom-Right
-    canvas.drawLine(
-      Offset(size.width - padding, size.height - padding),
-      Offset(size.width - padding - cornerSize, size.height - padding),
-      borderPaint,
-    );
-    canvas.drawLine(
-      Offset(size.width - padding, size.height - padding),
-      Offset(size.width - padding, size.height - padding + cornerSize),
-      borderPaint,
-    );
+    // Corner brackets that frame the body.
+    for (final (x, y, dx, dy) in [
+      (pad, pad, 1.0, 1.0),
+      (w - pad, pad, -1.0, 1.0),
+      (pad, h - pad, 1.0, -1.0),
+      (w - pad, h - pad, -1.0, -1.0),
+    ]) {
+      canvas.drawLine(Offset(x, y), Offset(x + dx * corner, y), paint);
+      canvas.drawLine(Offset(x, y), Offset(x, y + dy * corner), paint);
+    }
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+  bool shouldRepaint(covariant _FramingOverlayPainter oldDelegate) =>
+      oldDelegate.borderColor != borderColor;
 }

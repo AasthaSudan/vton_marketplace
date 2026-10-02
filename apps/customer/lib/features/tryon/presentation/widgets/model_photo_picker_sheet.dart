@@ -7,20 +7,32 @@ import 'package:clothsy_core/shared/widgets/buttons/pressable_scale.dart';
 import 'package:clothsy_core/features/tryon/domain/entities/tryon_photo.dart';
 import '../providers/tryon_provider.dart';
 
+/// Model photos plus an entry point for the shopper's own photo.
 class ModelPhotoPickerSheet extends ConsumerWidget {
-  final Function(TryOnPhoto) onSelectPhoto;
+  final ValueChanged<TryOnPhoto> onSelectPhoto;
 
-  const ModelPhotoPickerSheet({super.key, required this.onSelectPhoto});
+  /// Opens the tips + consent sheet for the shopper's own photo.
+  final VoidCallback onUseOwnPhoto;
+
+  const ModelPhotoPickerSheet({
+    super.key,
+    required this.onSelectPhoto,
+    required this.onUseOwnPhoto,
+  });
 
   static Future<void> show(
-    BuildContext context,
-    Function(TryOnPhoto) onSelectPhoto,
-  ) {
+    BuildContext context, {
+    required ValueChanged<TryOnPhoto> onSelectPhoto,
+    required VoidCallback onUseOwnPhoto,
+  }) {
     return showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => ModelPhotoPickerSheet(onSelectPhoto: onSelectPhoto),
+      builder: (_) => ModelPhotoPickerSheet(
+        onSelectPhoto: onSelectPhoto,
+        onUseOwnPhoto: onUseOwnPhoto,
+      ),
     );
   }
 
@@ -61,7 +73,7 @@ class ModelPhotoPickerSheet extends ConsumerWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Choose Your Model Photo',
+                'Choose a photo',
                 style: AppTypography.h3(color: colors.textPrimary),
               ),
               IconButton(
@@ -71,7 +83,7 @@ class ModelPhotoPickerSheet extends ConsumerWidget {
             ],
           ),
           Text(
-            'Your photo stays active across all outfits until changed.',
+            'It stays selected for every piece you try until you change it.',
             style: AppTypography.caption(color: colors.textSecondary),
           ),
           const SizedBox(height: 16),
@@ -106,16 +118,7 @@ class ModelPhotoPickerSheet extends ConsumerWidget {
                     return PressableScale(
                       onTap: () {
                         Navigator.pop(context);
-                        // Mock upload custom user photo
-                        final customPhoto = TryOnPhoto(
-                          id: 'user_uploaded_${DateTime.now().millisecondsSinceEpoch}',
-                          label: 'My Custom Pose',
-                          imageUrl:
-                              'https://images.unsplash.com/photo-1544005313-94ddf0286df2',
-                          isPreset: false,
-                          createdAt: DateTime.now(),
-                        );
-                        onSelectPhoto(customPhoto);
+                        onUseOwnPhoto();
                       },
                       child: Container(
                         decoration: BoxDecoration(
@@ -144,7 +147,7 @@ class ModelPhotoPickerSheet extends ConsumerWidget {
                             ),
                             const SizedBox(height: 10),
                             Text(
-                              'Upload Mine',
+                              'Use my photo',
                               style: AppTypography.bodyMedium(
                                 weight: FontWeight.w600,
                                 color: colors.primary,
@@ -152,7 +155,7 @@ class ModelPhotoPickerSheet extends ConsumerWidget {
                             ),
                             const SizedBox(height: 2),
                             Text(
-                              'Camera or Gallery',
+                              'Camera or gallery',
                               style: AppTypography.caption(
                                 color: colors.textSecondary,
                               ).copyWith(fontSize: 10),

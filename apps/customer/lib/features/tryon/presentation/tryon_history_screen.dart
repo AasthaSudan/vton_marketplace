@@ -11,10 +11,82 @@ import 'package:clothsy_core/shared/widgets/buttons/clothsy_icon_button.dart';
 import 'package:clothsy_core/shared/widgets/buttons/pressable_scale.dart';
 import 'package:clothsy_core/shared/widgets/feedback/clothsy_snackbar.dart';
 import 'package:clothsy_core/shared/widgets/feedback/empty_state_view.dart';
+import 'package:clothsy_core/core/constants/clothsy_copy.dart';
+import 'package:clothsy_core/features/tryon/domain/entities/tryon_session.dart';
+import 'package:clothsy_core/shared/widgets/buttons/primary_button.dart';
 import 'providers/tryon_provider.dart';
+import 'widgets/before_after_slider.dart';
+import 'widgets/tryon_photo_image.dart';
 
 class TryOnHistoryScreen extends ConsumerWidget {
   const TryOnHistoryScreen({super.key});
+
+  /// Opens a saved look full size, with the before/after compare.
+  static void _openLook(BuildContext context, TryOnResult item) {
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (sheetContext) {
+        final colors = sheetContext.colors;
+        return Container(
+          decoration: BoxDecoration(
+            color: colors.surface,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+          ),
+          padding: EdgeInsets.fromLTRB(
+            20,
+            20,
+            20,
+            MediaQuery.of(sheetContext).padding.bottom + 20,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                item.product.title,
+                style: AppTypography.h3(color: colors.textPrimary),
+              ),
+              Text(
+                '${item.product.brand} • ${item.variant.colorName}',
+                style: AppTypography.caption(color: colors.textSecondary),
+              ),
+              const SizedBox(height: 12),
+              ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxHeight: MediaQuery.of(sheetContext).size.height * 0.55,
+                ),
+                child: AspectRatio(
+                  aspectRatio: 3 / 4,
+                  child: BeforeAfterSlider(
+                    beforeImageUrl: item.photo.imageUrl,
+                    beforeImage: TryOnPhotoImage(photo: item.photo),
+                    afterImageUrl: item.resultImageUrl,
+                    beforeLabel: item.photo.isPreset ? 'Model' : 'Your photo',
+                    afterLabel: ClothsyCopy.tryOnResultLabel,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                ClothsyCopy.tryOnDisclaimer,
+                style: AppTypography.caption(color: colors.textSecondary),
+              ),
+              const SizedBox(height: 16),
+              PrimaryButton(
+                text: 'View product',
+                onPressed: () {
+                  Navigator.pop(sheetContext);
+                  context.push('/product/${item.product.id}');
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -92,9 +164,12 @@ class TryOnHistoryScreen extends ConsumerWidget {
                         child: Stack(
                           fit: StackFit.expand,
                           children: [
-                            CachedNetworkImage(
-                              imageUrl: item.resultImageUrl,
-                              fit: BoxFit.cover,
+                            GestureDetector(
+                              onTap: () => _openLook(context, item),
+                              child: CachedNetworkImage(
+                                imageUrl: item.resultImageUrl,
+                                fit: BoxFit.cover,
+                              ),
                             ),
                             // Delete button
                             Positioned(
@@ -143,10 +218,7 @@ class TryOnHistoryScreen extends ConsumerWidget {
                                   ),
                                 ),
                                 clipBehavior: Clip.antiAlias,
-                                child: CachedNetworkImage(
-                                  imageUrl: item.photo.imageUrl,
-                                  fit: BoxFit.cover,
-                                ),
+                                child: TryOnPhotoImage(photo: item.photo),
                               ),
                             ),
                           ],
