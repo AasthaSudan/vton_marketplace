@@ -211,6 +211,18 @@ class _OrdersListScreenState extends ConsumerState<OrdersListScreen> {
                   color: colors.textSecondary,
                 ).copyWith(fontSize: 11),
               ),
+              if (order.sellerOrders.length > 1) ...[
+                const SizedBox(height: 4),
+                Text(
+                  '${order.sellerOrders.length} shipments · '
+                  '${order.sellerOrders.map((so) => so.sellerName).join(', ')}',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTypography.caption(
+                    color: colors.textSecondary,
+                  ).copyWith(fontSize: 11),
+                ),
+              ],
               const SizedBox(height: 12),
               Divider(color: colors.border.withOpacity(0.5)),
               const SizedBox(height: 12),

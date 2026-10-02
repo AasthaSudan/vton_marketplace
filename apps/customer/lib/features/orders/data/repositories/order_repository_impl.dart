@@ -1,161 +1,226 @@
 import 'dart:math';
+import 'package:clothsy_core/core/constants/clothsy_copy.dart';
+import 'package:clothsy_core/core/utils/currency_formatter.dart';
 import 'package:clothsy_core/features/address/domain/entities/address.dart';
 import 'package:clothsy_core/features/cart/domain/entities/cart_item.dart';
 import 'package:clothsy_core/features/catalog/domain/entities/product.dart';
 import 'package:clothsy_core/features/orders/domain/entities/order.dart';
+import 'package:clothsy_core/features/orders/domain/order_splitter.dart';
 import 'package:clothsy_core/features/orders/domain/repositories/order_repository.dart';
+import 'package:clothsy_core/features/payments/domain/payment_gateway.dart';
 
+/// In-memory orders for the mock flavor and tests. Mirrors what the backend
+/// does: split into seller orders, hold payment until confirmed, and refund
+/// cancelled parts.
 class OrderRepositoryImpl implements OrderRepository {
-  final List<Order> _orders = [
-    Order(
-      id: 'ord_101',
-      orderNumber: 'CLY-84920',
-      orderDate: DateTime.now().subtract(const Duration(days: 2)),
-      shippingAddress: const Address(
-        id: 'addr_sample',
-        name: 'Aastha Sudan',
-        phone: '+91 98765 43210',
-        street: 'Gulmohar Avenue, Vasant Vihar',
-        apartment: 'Villa 14',
-        city: 'New Delhi',
-        state: 'Delhi',
-        pinCode: '110057',
-        isDefault: true,
+  static const _sampleAddress = Address(
+    id: 'addr_sample',
+    name: 'Aastha Sudan',
+    phone: '+91 98765 43210',
+    street: 'Gulmohar Avenue, Vasant Vihar',
+    apartment: 'Villa 14',
+    city: 'New Delhi',
+    state: 'Delhi',
+    pinCode: '110057',
+    isDefault: true,
+  );
+
+  late final List<Order> _orders = _seedOrders();
+
+  static CartLineItem _item({
+    required String id,
+    required String productId,
+    required String title,
+    required String sellerId,
+    required String brand,
+    required int price,
+    required String image,
+    required String variantId,
+    required String variantTitle,
+    required String size,
+    required String colorName,
+    int quantity = 1,
+  }) {
+    return CartLineItem(
+      id: id,
+      product: Product(
+        id: productId,
+        handle: productId,
+        title: title,
+        sellerId: sellerId,
+        brand: brand,
+        description: title,
+        price: price,
+        images: [image],
+        availableSizes: [size],
+        variants: const [],
+        category: 'Women',
       ),
-      deliveryMethod: 'Complimentary Express (2-4 Days)',
-      paymentMethod: 'UPI (Google Pay)',
-      paymentStatus: 'Paid',
-      subtotal: 649900,
-      discount: 65000,
-      shippingFee: 0,
-      total: 584900,
-      status: OrderStatus.shipped,
-      items: const [
-        CartLineItem(
-          id: 'item_ord_1',
-          product: Product(
-            id: 'p2',
-            handle: 'linen-tailored-blazer',
+      variant: ProductVariant(
+        id: variantId,
+        title: variantTitle,
+        size: size,
+        colorName: colorName,
+        colorHex: '0xFFD9CCA8',
+        price: price,
+      ),
+      quantity: quantity,
+    );
+  }
+
+  /// Splits [items] into seller orders, then overrides each seller order's
+  /// status so the sample data shows different shipments at different stages.
+  static Order _seed({
+    required String id,
+    required String orderNumber,
+    required Duration age,
+    required PaymentMethod method,
+    required String paymentLabel,
+    required List<CartLineItem> items,
+    required int discount,
+    required List<OrderStatus> statuses,
+  }) {
+    final placedAt = DateTime.now().subtract(age);
+    final split = OrderSplitter.split(
+      orderId: id,
+      orderNumber: orderNumber,
+      items: items,
+      discount: discount,
+      initialStatus: OrderStatus.placed,
+      placedAt: placedAt,
+    );
+    return Order(
+      id: id,
+      orderNumber: orderNumber,
+      orderDate: placedAt,
+      shippingAddress: _sampleAddress,
+      method: method,
+      paymentMethod: paymentLabel,
+      paymentStatus: PaymentStatus.paid,
+      sellerOrders: [
+        for (var i = 0; i < split.length; i++)
+          split[i].copyWith(
+            status: statuses[i],
+            trackingSteps: TrackingStep.timeline(
+              status: statuses[i],
+              sellerName: split[i].sellerName,
+              placedAt: placedAt,
+            ),
+          ),
+      ],
+    );
+  }
+
+  static List<Order> _seedOrders() {
+    const blazer =
+        'https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=900&auto=format&fit=crop&q=80';
+    const linen =
+        'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=900&auto=format&fit=crop&q=80';
+    const dress =
+        'https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?w=900&auto=format&fit=crop&q=80';
+    const shirt =
+        'https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=900&auto=format&fit=crop&q=80';
+
+    return [
+      // One checkout, two sellers shipping separately.
+      _seed(
+        id: 'ord_103',
+        orderNumber: 'CLY-91377',
+        age: const Duration(days: 1),
+        method: PaymentMethod.upi,
+        paymentLabel: 'UPI (Google Pay)',
+        discount: 50000,
+        statuses: const [OrderStatus.packed, OrderStatus.placed],
+        items: [
+          _item(
+            id: 'item_ord_3a',
+            productId: 'p_lavender_blazer',
+            title: 'Lavender Blazer',
+            sellerId: 'sel_noor',
+            brand: 'Noor Atelier',
+            price: 799900,
+            image: blazer,
+            variantId: 'v_blazer_lavender',
+            variantTitle: 'Soft Lavender / M',
+            size: 'M',
+            colorName: 'Soft Lavender',
+          ),
+          _item(
+            id: 'item_ord_3b',
+            productId: 'p_minimal_overshirt',
+            title: 'Minimal Overshirt',
+            sellerId: 'sel_rao',
+            brand: 'Studio Rao',
+            price: 499900,
+            image: shirt,
+            variantId: 'v_overshirt_sand',
+            variantTitle: 'Khaki Sand / M',
+            size: 'M',
+            colorName: 'Khaki Sand',
+          ),
+        ],
+      ),
+      _seed(
+        id: 'ord_101',
+        orderNumber: 'CLY-84920',
+        age: const Duration(days: 2),
+        method: PaymentMethod.upi,
+        paymentLabel: 'UPI (Google Pay)',
+        discount: 65000,
+        statuses: const [OrderStatus.shipped],
+        items: [
+          _item(
+            id: 'item_ord_1',
+            productId: 'p2',
             title: 'Linen Tailored Blazer',
             sellerId: 'sel_rao',
             brand: 'Studio Rao',
-            description: 'Structured Normandy flax linen blazer.',
             price: 649900,
-            images: [
-              'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=900&auto=format&fit=crop&q=80',
-            ],
-            availableSizes: ['S', 'M'],
-            variants: [],
-            category: 'Outerwear',
-          ),
-          variant: ProductVariant(
-            id: 'v2_sand',
-            title: 'Warm Sand / M',
+            image: linen,
+            variantId: 'v2_sand',
+            variantTitle: 'Warm Sand / M',
             size: 'M',
             colorName: 'Warm Sand',
-            colorHex: '0xFFD9CCA8',
-            price: 649900,
           ),
-          quantity: 1,
-        ),
-      ],
-      trackingSteps: [
-        TrackingStep(
-          title: 'Order Placed',
-          description: 'Payment confirmed & order received by Clothsy Atelier.',
-          date: DateTime.now().subtract(const Duration(days: 2)),
-          isCompleted: true,
-        ),
-        TrackingStep(
-          title: 'Packed at Atelier',
-          description:
-              'Hand-inspected, steam-pressed, and packaged in signature luxury box.',
-          date: DateTime.now().subtract(const Duration(days: 1, hours: 8)),
-          isCompleted: true,
-        ),
-        TrackingStep(
-          title: 'Shipped with BlueDart Apex',
-          description:
-              'Package handed over to express transit (AWB #84920412).',
-          date: DateTime.now().subtract(const Duration(hours: 12)),
-          isCompleted: true,
-          isCurrent: true,
-        ),
-        const TrackingStep(
-          title: 'Out for Delivery',
-          description: 'Courier agent will arrive at your doorstep.',
-          isCompleted: false,
-        ),
-        const TrackingStep(
-          title: 'Delivered',
-          description: 'Package delivered.',
-          isCompleted: false,
-        ),
-      ],
-    ),
-    Order(
-      id: 'ord_102',
-      orderNumber: 'CLY-72149',
-      orderDate: DateTime.now().subtract(const Duration(days: 14)),
-      shippingAddress: const Address(
-        id: 'addr_sample',
-        name: 'Aastha Sudan',
-        phone: '+91 98765 43210',
-        street: 'Gulmohar Avenue, Vasant Vihar',
-        apartment: 'Villa 14',
-        city: 'New Delhi',
-        state: 'Delhi',
-        pinCode: '110057',
-        isDefault: true,
+        ],
       ),
-      deliveryMethod: 'Complimentary Express',
-      paymentMethod: 'Credit Card (HDFC Visa)',
-      paymentStatus: 'Paid',
-      subtotal: 499900,
-      discount: 0,
-      shippingFee: 0,
-      total: 499900,
-      status: OrderStatus.delivered,
-      items: const [
-        CartLineItem(
-          id: 'item_ord_2',
-          product: Product(
-            id: 'p1',
-            handle: 'silk-satin-maxi-dress',
+      _seed(
+        id: 'ord_102',
+        orderNumber: 'CLY-72149',
+        age: const Duration(days: 14),
+        method: PaymentMethod.card,
+        paymentLabel: 'Credit Card (HDFC Visa)',
+        discount: 0,
+        statuses: const [OrderStatus.delivered],
+        items: [
+          _item(
+            id: 'item_ord_2',
+            productId: 'p1',
             title: 'Silk Satin Maxi Dress',
             sellerId: 'sel_noor',
             brand: 'Noor Atelier',
-            description: '22-momme Mulberry silk satin cowl neck maxi dress.',
             price: 499900,
-            images: [
-              'https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?w=900&auto=format&fit=crop&q=80',
-            ],
-            availableSizes: ['M'],
-            variants: [],
-            category: 'Dresses',
-          ),
-          variant: ProductVariant(
-            id: 'v1_plum',
-            title: 'Plum Noir / M',
+            image: dress,
+            variantId: 'v1_plum',
+            variantTitle: 'Plum Noir / M',
             size: 'M',
             colorName: 'Plum Noir',
-            colorHex: '0xFF2B1E3F',
-            price: 499900,
           ),
-          quantity: 1,
-        ),
-      ],
-      trackingSteps: [
-        TrackingStep(
-          title: 'Delivered',
-          description: 'Delivered to recipient at Vasant Vihar.',
-          date: DateTime.now().subtract(const Duration(days: 11)),
-          isCompleted: true,
-          isCurrent: true,
-        ),
-      ],
-    ),
-  ];
+        ],
+      ),
+    ];
+  }
+
+  int _indexOf(String id) =>
+      _orders.indexWhere((o) => o.id == id || o.orderNumber == id);
+
+  Order _require(String id) {
+    final index = _indexOf(id);
+    if (index < 0) throw const OrderException('Order not found');
+    return _orders[index];
+  }
+
+  void _store(Order order) => _orders[_indexOf(order.id)] = order;
 
   @override
   Future<List<Order>> getOrders() async {
@@ -166,100 +231,204 @@ class OrderRepositoryImpl implements OrderRepository {
   @override
   Future<Order?> getOrderById(String id) async {
     await Future.delayed(const Duration(milliseconds: 150));
-    try {
-      return _orders.firstWhere((o) => o.id == id || o.orderNumber == id);
-    } catch (_) {
-      return null;
-    }
+    final index = _indexOf(id);
+    return index < 0 ? null : _orders[index];
   }
 
   @override
   Future<Order> createOrder({
     required List<CartLineItem> items,
     required Address address,
-    required String paymentMethod,
-    required int subtotal,
+    required PaymentMethod method,
+    required String paymentLabel,
     required int discount,
-    required int shippingFee,
-    required int total,
   }) async {
     await Future.delayed(const Duration(milliseconds: 400));
-    final randomDigits = 10000 + Random().nextInt(90000);
-    final order = Order(
-      id: 'ord_${DateTime.now().millisecondsSinceEpoch}',
-      orderNumber: 'CLY-$randomDigits',
-      orderDate: DateTime.now(),
-      items: List.from(items),
-      shippingAddress: address,
-      deliveryMethod: 'Complimentary Express (2-4 Business Days)',
-      paymentMethod: paymentMethod,
-      paymentStatus: paymentMethod.contains('Cash') ? 'Pending (COD)' : 'Paid',
-      subtotal: subtotal,
-      discount: discount,
-      shippingFee: shippingFee,
-      total: total,
-      status: OrderStatus.placed,
-      trackingSteps: [
-        TrackingStep(
-          title: 'Order Placed',
-          description:
-              'Payment authorized & order logged with Clothsy Atelier.',
-          date: DateTime.now(),
-          isCompleted: true,
-          isCurrent: true,
-        ),
-        const TrackingStep(
-          title: 'Packed at Atelier',
-          description: 'Hand-pressed, inspected and gift packaged.',
-          isCompleted: false,
-        ),
-        const TrackingStep(
-          title: 'Shipped with Express Courier',
-          description: 'Handed over to logistics carrier.',
-          isCompleted: false,
-        ),
-        const TrackingStep(
-          title: 'Out for Delivery',
-          description: 'On its way to your destination address.',
-          isCompleted: false,
-        ),
-        const TrackingStep(
-          title: 'Delivered',
-          description: 'Package delivered to recipient.',
-          isCompleted: false,
-        ),
-      ],
-    );
+    if (items.isEmpty) {
+      throw const OrderException('Your bag is empty.');
+    }
 
+    final id = 'ord_${DateTime.now().microsecondsSinceEpoch}';
+    final orderNumber = 'CLY-${10000 + Random().nextInt(90000)}';
+    final prepaid = method.isPrepaid;
+    final now = DateTime.now();
+
+    final order = Order(
+      id: id,
+      orderNumber: orderNumber,
+      orderDate: now,
+      shippingAddress: address,
+      method: method,
+      paymentMethod: paymentLabel,
+      paymentStatus: prepaid
+          ? PaymentStatus.pending
+          : PaymentStatus.cashOnDelivery,
+      sellerOrders: OrderSplitter.split(
+        orderId: id,
+        orderNumber: orderNumber,
+        items: items,
+        discount: discount,
+        initialStatus: prepaid
+            ? OrderStatus.pendingPayment
+            : OrderStatus.placed,
+        placedAt: now,
+      ),
+    );
     _orders.insert(0, order);
     return order;
   }
 
   @override
+  Future<Order> confirmPayment(
+    String orderId, {
+    required String paymentRef,
+  }) async {
+    await Future.delayed(const Duration(milliseconds: 200));
+    final order = _require(orderId);
+
+    // Idempotent: a repeated confirmation (retry, duplicate webhook) is a
+    // no-op instead of a second state change.
+    if (order.paymentStatus == PaymentStatus.paid) return order;
+    if (order.paymentStatus != PaymentStatus.pending) {
+      throw const OrderException(
+        'This order is no longer waiting for payment.',
+      );
+    }
+
+    final confirmed = order.copyWith(
+      paymentStatus: PaymentStatus.paid,
+      sellerOrders: [
+        for (final so in order.sellerOrders)
+          so.copyWith(
+            status: OrderStatus.placed,
+            trackingSteps: TrackingStep.timeline(
+              status: OrderStatus.placed,
+              sellerName: so.sellerName,
+              placedAt: DateTime.now(),
+            ),
+          ),
+      ],
+    );
+    _store(confirmed);
+    return confirmed;
+  }
+
+  @override
+  Future<Order> failPayment(String orderId, String reason) async {
+    await Future.delayed(const Duration(milliseconds: 150));
+    final order = _require(orderId);
+
+    // A late "failed" report must never undo a payment that already succeeded.
+    if (order.paymentStatus == PaymentStatus.paid ||
+        order.paymentStatus == PaymentStatus.failed) {
+      return order;
+    }
+
+    final failed = order.copyWith(
+      paymentStatus: PaymentStatus.failed,
+      sellerOrders: [
+        for (final so in order.sellerOrders)
+          so.copyWith(
+            status: OrderStatus.cancelled,
+            trackingSteps: [
+              TrackingStep(
+                title: 'Payment failed',
+                description: reason,
+                date: DateTime.now(),
+                isCompleted: true,
+                isCurrent: true,
+              ),
+            ],
+          ),
+      ],
+    );
+    _store(failed);
+    return failed;
+  }
+
+  SellerOrder _cancelled(Order order, SellerOrder so, String reason) {
+    final String note;
+    if (order.paymentStatus == PaymentStatus.paid) {
+      note =
+          'Reason: $reason. '
+          '${ClothsyCopy.refundStarted(amount: CurrencyFormatter.format(so.total), destination: order.method.refundDestination)}';
+    } else {
+      note = 'Reason: $reason. ${ClothsyCopy.noPaymentTaken}';
+    }
+    return so.copyWith(
+      status: OrderStatus.cancelled,
+      trackingSteps: [
+        ...so.trackingSteps.map(
+          (s) => TrackingStep(
+            title: s.title,
+            description: s.description,
+            date: s.date,
+            isCompleted: s.isCompleted,
+          ),
+        ),
+        TrackingStep(
+          title: 'Cancelled',
+          description: note,
+          date: DateTime.now(),
+          isCompleted: true,
+          isCurrent: true,
+        ),
+      ],
+    );
+  }
+
+  Order _afterCancelling(Order order, List<SellerOrder> updated) {
+    final allCancelled = updated.every(
+      (so) => so.status == OrderStatus.cancelled,
+    );
+    return order.copyWith(
+      sellerOrders: updated,
+      paymentStatus: allCancelled && order.paymentStatus == PaymentStatus.paid
+          ? PaymentStatus.refunded
+          : order.paymentStatus,
+    );
+  }
+
+  @override
   Future<Order> cancelOrder(String orderId, String reason) async {
     await Future.delayed(const Duration(milliseconds: 250));
-    final index = _orders.indexWhere(
-      (o) => o.id == orderId || o.orderNumber == orderId,
-    );
-    if (index >= 0) {
-      final current = _orders[index];
-      final cancelled = current.copyWith(
-        status: OrderStatus.cancelled,
-        trackingSteps: [
-          ...current.trackingSteps,
-          TrackingStep(
-            title: 'Order Cancelled',
-            description:
-                'Reason: $reason. Any prepaid amount will be refunded within 24-48 hours.',
-            date: DateTime.now(),
-            isCompleted: true,
-            isCurrent: true,
-          ),
-        ],
+    final order = _require(orderId);
+    if (!order.canBeCancelled) {
+      throw const OrderException(
+        'This order has already shipped, so it can no longer be cancelled.',
       );
-      _orders[index] = cancelled;
-      return cancelled;
     }
-    throw Exception('Order not found');
+    final updated = [
+      for (final so in order.sellerOrders)
+        so.canBeCancelled ? _cancelled(order, so, reason) : so,
+    ];
+    final result = _afterCancelling(order, updated);
+    _store(result);
+    return result;
+  }
+
+  @override
+  Future<Order> cancelSellerOrder(
+    String orderId,
+    String sellerOrderId,
+    String reason,
+  ) async {
+    await Future.delayed(const Duration(milliseconds: 250));
+    final order = _require(orderId);
+    final target = order.sellerOrderById(sellerOrderId);
+    if (target == null) throw const OrderException('Order not found');
+    if (!target.canBeCancelled) {
+      throw OrderException(
+        '${target.sellerName} has already shipped this part of your order, '
+        'so it can no longer be cancelled.',
+      );
+    }
+    final updated = [
+      for (final so in order.sellerOrders)
+        so.id == sellerOrderId ? _cancelled(order, so, reason) : so,
+    ];
+    final result = _afterCancelling(order, updated);
+    _store(result);
+    return result;
   }
 }

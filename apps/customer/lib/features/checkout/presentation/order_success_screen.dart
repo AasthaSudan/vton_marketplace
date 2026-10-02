@@ -5,6 +5,7 @@ import 'package:clothsy_core/core/constants/clothsy_copy.dart';
 import 'package:clothsy_core/core/theme/app_colors.dart';
 import 'package:clothsy_core/core/theme/app_radius.dart';
 import 'package:clothsy_core/core/theme/app_typography.dart';
+import 'package:clothsy_core/core/utils/currency_formatter.dart';
 import 'package:clothsy_core/shared/widgets/buttons/primary_button.dart';
 import 'package:clothsy_core/shared/widgets/buttons/secondary_button.dart';
 import '../../orders/presentation/providers/order_providers.dart';
@@ -108,15 +109,17 @@ class OrderSuccessScreen extends ConsumerWidget {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              'Estimated Delivery',
+                              'Order total',
                               style: AppTypography.caption(
                                 color: colors.textSecondary,
                               ),
                             ),
                             Text(
-                              'In 2–4 Business Days',
+                              order == null
+                                  ? '—'
+                                  : CurrencyFormatter.format(order.total),
                               style: AppTypography.bodyMedium(
-                                weight: FontWeight.w600,
+                                weight: FontWeight.w700,
                               ),
                             ),
                           ],
@@ -126,15 +129,45 @@ class OrderSuccessScreen extends ConsumerWidget {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              'Delivery Carrier',
+                              'Shipments',
                               style: AppTypography.caption(
                                 color: colors.textSecondary,
                               ),
                             ),
+                            Flexible(
+                              child: Text(
+                                order == null
+                                    ? '—'
+                                    : order.sellerOrders.length == 1
+                                    ? '1 from ${order.sellerOrders.first.sellerName}'
+                                    : '${order.sellerOrders.length}, one from each brand',
+                                textAlign: TextAlign.end,
+                                style: AppTypography.bodyMedium(
+                                  weight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
                             Text(
-                              'BlueDart Apex Express',
-                              style: AppTypography.bodyMedium(
-                                weight: FontWeight.w600,
+                              'Payment',
+                              style: AppTypography.caption(
+                                color: colors.textSecondary,
+                              ),
+                            ),
+                            Flexible(
+                              child: Text(
+                                order == null
+                                    ? '—'
+                                    : '${order.paymentMethod} · ${order.paymentStatus.label}',
+                                textAlign: TextAlign.end,
+                                style: AppTypography.bodyMedium(
+                                  weight: FontWeight.w600,
+                                ),
                               ),
                             ),
                           ],

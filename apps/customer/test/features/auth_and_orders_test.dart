@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:clothsy_core/features/payments/domain/payment_gateway.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:clothsy_shop/features/auth/presentation/providers/auth_provider.dart';
@@ -181,15 +182,14 @@ void main() {
           state: 'Delhi',
           pinCode: '110024',
         ),
-        paymentMethod: 'UPI (Paytm)',
-        subtotal: 499900,
+        method: PaymentMethod.cashOnDelivery,
+        paymentLabel: 'Cash on delivery',
         discount: 50000,
-        shippingFee: 0,
-        total: 449900,
       );
 
       expect(newOrder.orderNumber, startsWith('CLY-'));
       expect(newOrder.status, equals(OrderStatus.placed));
+      // Totals are computed from the items, not passed in by the caller.
       expect(newOrder.total, equals(449900));
 
       final cancelled = await repo.cancelOrder(

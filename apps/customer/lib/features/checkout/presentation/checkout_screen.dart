@@ -6,6 +6,7 @@ import 'package:clothsy_core/core/theme/app_colors.dart';
 import 'package:clothsy_core/core/theme/app_radius.dart';
 import 'package:clothsy_core/core/theme/app_typography.dart';
 import 'package:clothsy_core/core/utils/currency_formatter.dart';
+import 'package:clothsy_core/features/payments/domain/payment_gateway.dart';
 import 'package:clothsy_core/shared/widgets/buttons/clothsy_icon_button.dart';
 import 'package:clothsy_core/shared/widgets/buttons/pressable_scale.dart';
 import 'package:clothsy_core/shared/widgets/buttons/primary_button.dart';
@@ -84,30 +85,53 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
 
     setState(() => _isPlacingOrder = true);
 
-    String paymentLabel = _selectedPaymentMethod;
-    if (_selectedPaymentMethod == 'UPI') {
-      paymentLabel = 'UPI ($_selectedUpiApp)';
+    final PlaceOrderResult result;
+    try {
+      result = await ref
+          .read(ordersProvider.notifier)
+          .placeOrder(
+            cart: cart,
+            address: address,
+            method: _paymentMethodFor(_selectedPaymentMethod),
+            upiApp: _selectedUpiApp,
+            customerName: address.name,
+            customerPhone: address.phone,
+          );
+    } finally {
+      if (mounted) setState(() => _isPlacingOrder = false);
     }
+    if (!mounted) return;
 
-    final order = await ref
-        .read(ordersProvider.notifier)
-        .createOrder(
-          items: cart.items,
-          address: address,
-          paymentMethod: paymentLabel,
-          subtotal: cart.subtotal,
-          discount: cart.discountAmount,
-          shippingFee: cart.shippingFee,
-          total: cart.total,
+    switch (result) {
+      case OrderPlaced(:final order):
+        // Clear the bag only once the order is confirmed.
+        ref.read(cartProvider.notifier).clearCart();
+        context.go('/order-success/${order.id}');
+      case PaymentNotCompleted(:final message, :final cancelledByCustomer):
+        ClothsySnackbar.show(
+          context,
+          message: message,
+          type: cancelledByCustomer ? SnackbarType.info : SnackbarType.error,
         );
+      case OrderRejected(:final message):
+        ClothsySnackbar.show(
+          context,
+          message: message,
+          type: SnackbarType.error,
+        );
+    }
+  }
 
-    // Clear cart upon successful order placement
-    ref.read(cartProvider.notifier).clearCart();
-
-    setState(() => _isPlacingOrder = false);
-
-    if (mounted) {
-      context.go('/order-success/${order.id}');
+  PaymentMethod _paymentMethodFor(String id) {
+    switch (id) {
+      case 'Card':
+        return PaymentMethod.card;
+      case 'NetBanking':
+        return PaymentMethod.netBanking;
+      case 'COD':
+        return PaymentMethod.cashOnDelivery;
+      default:
+        return PaymentMethod.upi;
     }
   }
 
@@ -284,14 +308,17 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Complimentary Express Delivery',
+                                cart.shipmentCount > 1
+                                    ? 'Delivered in ${cart.shipmentCount} shipments'
+                                    : 'Delivered by your brand',
                                 style: AppTypography.bodyMedium(
                                   weight: FontWeight.w600,
                                 ).copyWith(fontSize: 14),
                               ),
                               const SizedBox(height: 2),
                               Text(
-                                'Guaranteed delivery in 2–4 business days via BlueDart Apex',
+                                'Each brand packs and ships its own items. '
+                                "You'll get tracking for every shipment.",
                                 style: AppTypography.caption(
                                   color: colors.textSecondary,
                                 ),
@@ -300,9 +327,13 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                           ),
                         ),
                         Text(
-                          'FREE',
+                          cart.shippingFee == 0
+                              ? 'FREE'
+                              : CurrencyFormatter.format(cart.shippingFee),
                           style: AppTypography.label(
-                            color: colors.success,
+                            color: cart.shippingFee == 0
+                                ? colors.success
+                                : colors.textPrimary,
                             weight: FontWeight.w700,
                           ).copyWith(fontSize: 12),
                         ),
@@ -451,12 +482,29 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                           ),
                         ],
                         const SizedBox(height: 8),
-                        _buildPriceRow(
-                          'Express Delivery',
-                          cart.shippingFee == 0
-                              ? 'FREE'
-                              : CurrencyFormatter.format(cart.shippingFee),
-                        ),
+                        if (cart.shipmentCount > 1)
+                          ...cart.sellerGroups.map(
+                            (group) => Padding(
+                              padding: const EdgeInsets.only(top: 8),
+                              child: _buildPriceRow(
+                                'Shipment from ${group.sellerName}',
+                                group.shippingFee == 0
+                                    ? 'FREE'
+                                    : CurrencyFormatter.format(
+                                        group.shippingFee,
+                                      ),
+                              ),
+                            ),
+                          )
+                        else ...[
+                          const SizedBox(height: 8),
+                          _buildPriceRow(
+                            'Delivery',
+                            cart.shippingFee == 0
+                                ? 'FREE'
+                                : CurrencyFormatter.format(cart.shippingFee),
+                          ),
+                        ],
                         const Padding(
                           padding: EdgeInsets.symmetric(vertical: 12),
                           child: Divider(),
