@@ -1,3 +1,4 @@
+import 'dart:ui' show ImageFilter;
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -40,6 +41,7 @@ class TryonScreen extends ConsumerStatefulWidget {
 
 class _TryonScreenState extends ConsumerState<TryonScreen> {
   bool _initializedProduct = false;
+  String _selectedGarmentCategory = 'All';
 
   @override
   void initState() {
@@ -165,6 +167,7 @@ class _TryonScreenState extends ConsumerState<TryonScreen> {
     final session = ref.watch(tryOnNotifierProvider);
     final history = ref.watch(tryOnHistoryProvider);
     final catalogAsync = ref.watch(allProductsProvider);
+    final presetsAsync = ref.watch(tryOnPresetsProvider);
 
     return Scaffold(
       backgroundColor: colors.background,
@@ -236,52 +239,259 @@ class _TryonScreenState extends ConsumerState<TryonScreen> {
       ),
       body: Column(
         children: [
-          // Credits and photo switcher
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            color: colors.surfaceMuted,
-            child: Row(
-              children: [
-                Icon(Icons.auto_awesome, size: 16, color: colors.tryOn),
-                const SizedBox(width: 6),
-                Expanded(
-                  child: Text(
-                    '${session.remainingCredits} AI previews left',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: AppTypography.caption(
-                      color: colors.textPrimary,
-                      weight: FontWeight.w600,
+          // AI credits & quick status banner
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 6, 16, 4),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    colors.tryOnSoft.withOpacity(0.7),
+                    colors.surfaceMuted,
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: colors.tryOn.withOpacity(0.18),
+                  width: 1,
+                ),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(5),
+                    decoration: BoxDecoration(
+                      color: colors.tryOn.withOpacity(0.15),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.auto_awesome,
+                      size: 14,
+                      color: colors.tryOn,
                     ),
                   ),
-                ),
-                const SizedBox(width: 8),
-                GestureDetector(
-                  onTap: _openModelPicker,
-                  child: Row(
-                    children: [
-                      Text(
-                        'Change photo',
-                        style: AppTypography.caption(
-                          color: colors.primary,
-                          weight: FontWeight.w600,
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: RichText(
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      text: TextSpan(
+                        children: [
+                          TextSpan(
+                            text: '${session.remainingCredits} ',
+                            style: AppTypography.caption(
+                              color: colors.tryOn,
+                              weight: FontWeight.w800,
+                            ).copyWith(fontSize: 13),
+                          ),
+                          TextSpan(
+                            text: 'AI previews left',
+                            style: AppTypography.caption(
+                              color: colors.textPrimary,
+                              weight: FontWeight.w600,
+                            ).copyWith(fontSize: 12),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  PressableScale(
+                    onTap: _openModelPicker,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 5,
+                      ),
+                      decoration: BoxDecoration(
+                        color: colors.surface,
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: colors.primary.withOpacity(0.2),
+                          width: 1,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.04),
+                            blurRadius: 4,
+                            offset: const Offset(0, 1),
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.photo_library_outlined,
+                            size: 13,
+                            color: colors.primary,
+                          ),
+                          const SizedBox(width: 5),
+                          Text(
+                            'All models',
+                            style: AppTypography.caption(
+                              color: colors.primary,
+                              weight: FontWeight.w700,
+                            ).copyWith(fontSize: 11),
+                          ),
+                          const SizedBox(width: 2),
+                          Icon(
+                            Icons.chevron_right,
+                            size: 14,
+                            color: colors.primary,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          // Quick Model Avatars Strip
+          presetsAsync.maybeWhen(
+            data: (presets) {
+              if (presets.isEmpty) return const SizedBox.shrink();
+              return SizedBox(
+                height: 48,
+                child: ListView.separated(
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 3,
+                  ),
+                  itemCount: presets.length + 1,
+                  separatorBuilder: (_, _) => const SizedBox(width: 8),
+                  itemBuilder: (context, index) {
+                    if (index == presets.length) {
+                      return PressableScale(
+                        onTap: _openPhotoGuidance,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 3,
+                          ),
+                          decoration: BoxDecoration(
+                            color: colors.surfaceMuted,
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(color: colors.border, width: 1),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.add_a_photo_outlined,
+                                size: 14,
+                                color: colors.primary,
+                              ),
+                              const SizedBox(width: 5),
+                              Text(
+                                '+ You',
+                                style: AppTypography.caption(
+                                  color: colors.textPrimary,
+                                  weight: FontWeight.w600,
+                                ).copyWith(fontSize: 11),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    }
+
+                    final model = presets[index];
+                    final isSelected = session.selectedPhoto?.id == model.id;
+                    final shortName = model.label.split(' ').first;
+
+                    return PressableScale(
+                      onTap: () {
+                        HapticFeedback.selectionClick();
+                        ref
+                            .read(tryOnNotifierProvider.notifier)
+                            .selectPhoto(model);
+                      },
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 200),
+                        padding: const EdgeInsets.fromLTRB(4, 3, 9, 3),
+                        decoration: BoxDecoration(
+                          color: isSelected
+                              ? colors.primary.withOpacity(0.1)
+                              : colors.surface,
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                            color: isSelected
+                                ? colors.primary
+                                : colors.border.withOpacity(0.6),
+                            width: isSelected ? 1.8 : 1.0,
+                          ),
+                          boxShadow: isSelected
+                              ? [
+                                  BoxShadow(
+                                    color: colors.primary.withOpacity(0.18),
+                                    blurRadius: 6,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ]
+                              : null,
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Container(
+                              width: 26,
+                              height: 26,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: isSelected
+                                      ? colors.primary
+                                      : Colors.transparent,
+                                  width: 1.5,
+                                ),
+                              ),
+                              clipBehavior: Clip.antiAlias,
+                              child: CachedNetworkImage(
+                                imageUrl: model.imageUrl,
+                                fit: BoxFit.cover,
+                                errorWidget: (_, _, _) =>
+                                    const Icon(Icons.person, size: 14),
+                              ),
+                            ),
+                            const SizedBox(width: 5),
+                            Text(
+                              shortName,
+                              style: AppTypography.caption(
+                                color: isSelected
+                                    ? colors.primary
+                                    : colors.textSecondary,
+                                weight: isSelected
+                                    ? FontWeight.w700
+                                    : FontWeight.w500,
+                              ).copyWith(fontSize: 11),
+                            ),
+                            if (isSelected) ...[
+                              const SizedBox(width: 3),
+                              Icon(
+                                Icons.check_circle_rounded,
+                                size: 12,
+                                color: colors.primary,
+                              ),
+                            ],
+                          ],
                         ),
                       ),
-                      Icon(
-                        Icons.chevron_right,
-                        size: 14,
-                        color: colors.primary,
-                      ),
-                    ],
-                  ),
+                    );
+                  },
                 ),
-              ],
-            ),
+              );
+            },
+            orElse: () => const SizedBox.shrink(),
           ),
 
           Expanded(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
               child: _buildMainStage(context, session),
             ),
           ),
@@ -383,65 +593,172 @@ class _TryonScreenState extends ConsumerState<TryonScreen> {
     }
 
     if (photo != null) {
-      return ClipRRect(
-        borderRadius: BorderRadius.circular(20),
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            TryOnPhotoImage(photo: photo),
-            CustomPaint(
-              painter: _FramingOverlayPainter(
-                borderColor: Colors.white.withOpacity(0.5),
-              ),
-            ),
-            Positioned(
-              top: 16,
-              left: 16,
-              child: _Pill(
-                icon: Icons.person,
-                label: photo.isPreset ? photo.label : 'Your photo',
-              ),
-            ),
-            Positioned(
-              top: 16,
-              right: 16,
-              child: PressableScale(
-                onTap: _openModelPicker,
-                child: _Pill(
-                  icon: Icons.cameraswitch_outlined,
-                  label: 'Switch',
-                  light: true,
-                ),
-              ),
-            ),
-            Positioned(
-              bottom: 16,
-              left: 20,
-              right: 20,
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 14,
-                  vertical: 10,
-                ),
-                decoration: BoxDecoration(
-                  color: AppColors.deepInk.withOpacity(0.75),
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                child: Row(
-                  children: [
-                    Icon(Icons.auto_awesome, color: colors.tryOn, size: 18),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        'Pick a piece and colour below, then tap "Try it on".',
-                        style: AppTypography.caption(color: Colors.white),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+      return Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(24),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.12),
+              blurRadius: 24,
+              offset: const Offset(0, 8),
             ),
           ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(24),
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              TryOnPhotoImage(photo: photo),
+              CustomPaint(
+                painter: _FramingOverlayPainter(
+                  borderColor: Colors.white.withOpacity(0.55),
+                ),
+              ),
+              Positioned(
+                top: 14,
+                left: 14,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(20),
+                  child: BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 11,
+                        vertical: 5,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppColors.deepInk.withOpacity(0.55),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: Colors.white.withOpacity(0.2),
+                          width: 1,
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(
+                            Icons.person,
+                            color: Colors.white,
+                            size: 13,
+                          ),
+                          const SizedBox(width: 5),
+                          Text(
+                            photo.isPreset ? photo.label : 'Your photo',
+                            style: AppTypography.caption(
+                              color: Colors.white,
+                              weight: FontWeight.w600,
+                            ).copyWith(fontSize: 11),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              Positioned(
+                top: 14,
+                right: 14,
+                child: PressableScale(
+                  onTap: _openModelPicker,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(20),
+                    child: BackdropFilter(
+                      filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 11,
+                          vertical: 5,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.85),
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                            color: Colors.white.withOpacity(0.4),
+                            width: 1,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.08),
+                              blurRadius: 6,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.cameraswitch_outlined,
+                              color: colors.textPrimary,
+                              size: 13,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              'Switch',
+                              style: AppTypography.caption(
+                                color: colors.textPrimary,
+                                weight: FontWeight.w700,
+                              ).copyWith(fontSize: 11),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              Positioned(
+                bottom: 14,
+                left: 16,
+                right: 16,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(16),
+                  child: BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 9,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppColors.deepInk.withOpacity(0.65),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: Colors.white.withOpacity(0.18),
+                          width: 1,
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.auto_awesome,
+                            color: colors.tryOn,
+                            size: 16,
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              product != null
+                                  ? 'Selected: ${product.title} • Tap "Try it on" below'
+                                  : 'Pick a piece and colour below, then tap "Try it on".',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: AppTypography.caption(
+                                color: Colors.white,
+                                weight: FontWeight.w500,
+                              ).copyWith(fontSize: 11),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       );
     }
@@ -468,116 +785,317 @@ class _TryonScreenState extends ConsumerState<TryonScreen> {
       padding: const EdgeInsets.symmetric(vertical: 8),
       decoration: BoxDecoration(
         color: colors.surface,
-        border: Border(top: BorderSide(color: colors.border)),
+        border: Border(top: BorderSide(color: colors.border.withOpacity(0.6))),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-            child: Row(
-              children: [
-                Text(
-                  'Pick a piece',
-                  style: AppTypography.bodyMedium(
-                    weight: FontWeight.w700,
-                    color: colors.textPrimary,
+          catalogAsync.maybeWhen(
+            data: (products) {
+              final eligible = products
+                  .where((p) => p.isTryonEligible && p.variants.isNotEmpty)
+                  .toList();
+              final categories = [
+                'All',
+                ...{for (final p in eligible) p.category},
+              ];
+
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Header with product details
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 4,
+                    ),
+                    child: Row(
+                      children: [
+                        Text(
+                          'Pick a piece',
+                          style: AppTypography.bodyMedium(
+                            weight: FontWeight.w700,
+                            color: colors.textPrimary,
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 6,
+                            vertical: 1.5,
+                          ),
+                          decoration: BoxDecoration(
+                            color: colors.surfaceMuted,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            '${eligible.length}',
+                            style: AppTypography.caption(
+                              color: colors.textSecondary,
+                              weight: FontWeight.w700,
+                            ).copyWith(fontSize: 10),
+                          ),
+                        ),
+                        const Spacer(),
+                        if (product != null)
+                          Flexible(
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 3,
+                              ),
+                              decoration: BoxDecoration(
+                                color: colors.primary.withOpacity(0.08),
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(
+                                  color: colors.primary.withOpacity(0.2),
+                                  width: 1,
+                                ),
+                              ),
+                              child: Text(
+                                '${product.brand.isNotEmpty ? "${product.brand} • " : ""}${product.title}',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: AppTypography.caption(
+                                  color: colors.primary,
+                                  weight: FontWeight.w700,
+                                ).copyWith(fontSize: 11),
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
                   ),
-                ),
-                if (product != null)
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.only(left: 8),
-                      child: Text(
-                        product.title,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        textAlign: TextAlign.end,
-                        style: AppTypography.caption(
-                          color: colors.textSecondary,
+
+                  // Category Filter Chips
+                  if (categories.length > 2)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 6),
+                      child: SizedBox(
+                        height: 28,
+                        child: ListView.separated(
+                          scrollDirection: Axis.horizontal,
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          itemCount: categories.length,
+                          separatorBuilder: (_, _) => const SizedBox(width: 6),
+                          itemBuilder: (context, index) {
+                            final cat = categories[index];
+                            final isCatSelected =
+                                _selectedGarmentCategory == cat;
+                            return PressableScale(
+                              onTap: () {
+                                HapticFeedback.selectionClick();
+                                setState(() => _selectedGarmentCategory = cat);
+                              },
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                  vertical: 4,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: isCatSelected
+                                      ? colors.primary
+                                      : colors.surfaceMuted,
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Text(
+                                  cat,
+                                  style: AppTypography.caption(
+                                    color: isCatSelected
+                                        ? Colors.white
+                                        : colors.textSecondary,
+                                    weight: isCatSelected
+                                        ? FontWeight.w700
+                                        : FontWeight.w500,
+                                  ).copyWith(fontSize: 11),
+                                ),
+                              ),
+                            );
+                          },
                         ),
                       ),
                     ),
-                  ),
-              ],
-            ),
-          ),
-          SizedBox(
-            height: 76,
-            child: catalogAsync.when(
-              loading: () => const Center(
-                child: CircularProgressIndicator(strokeWidth: 2),
-              ),
-              error: (_, _) => Center(
-                child: Text(
-                  "Couldn't load pieces. Pull down to retry.",
-                  style: AppTypography.caption(color: colors.textSecondary),
-                ),
-              ),
-              data: (products) {
-                final eligible = products
-                    .where((p) => p.isTryonEligible && p.variants.isNotEmpty)
-                    .toList();
-                return ListView.builder(
-                  scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  itemCount: eligible.length,
-                  itemBuilder: (context, index) {
-                    final item = eligible[index];
-                    final isSelected = product?.id == item.id;
-                    return PressableScale(
-                      onTap: () {
-                        HapticFeedback.selectionClick();
-                        ref
-                            .read(tryOnNotifierProvider.notifier)
-                            .selectGarment(item);
+
+                  // Garment Portrait Cards List
+                  SizedBox(
+                    height: 88,
+                    child: Builder(
+                      builder: (context) {
+                        final filtered = _selectedGarmentCategory == 'All'
+                            ? eligible
+                            : eligible
+                                  .where(
+                                    (p) =>
+                                        p.category == _selectedGarmentCategory,
+                                  )
+                                  .toList();
+
+                        return ListView.builder(
+                          scrollDirection: Axis.horizontal,
+                          padding: const EdgeInsets.symmetric(horizontal: 12),
+                          itemCount: filtered.length,
+                          itemBuilder: (context, index) {
+                            final item = filtered[index];
+                            final isSelected = product?.id == item.id;
+                            return PressableScale(
+                              onTap: () {
+                                HapticFeedback.selectionClick();
+                                ref
+                                    .read(tryOnNotifierProvider.notifier)
+                                    .selectGarment(item);
+                              },
+                              child: AnimatedContainer(
+                                duration: const Duration(milliseconds: 200),
+                                width: 66,
+                                margin: const EdgeInsets.symmetric(
+                                  horizontal: 4,
+                                  vertical: 2,
+                                ),
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(
+                                    color: isSelected
+                                        ? colors.primary
+                                        : colors.border.withOpacity(0.7),
+                                    width: isSelected ? 2.5 : 1.0,
+                                  ),
+                                  boxShadow: isSelected
+                                      ? [
+                                          BoxShadow(
+                                            color: colors.primary.withOpacity(
+                                              0.24,
+                                            ),
+                                            blurRadius: 8,
+                                            offset: const Offset(0, 3),
+                                          ),
+                                        ]
+                                      : null,
+                                ),
+                                clipBehavior: Clip.antiAlias,
+                                child: Stack(
+                                  fit: StackFit.expand,
+                                  children: [
+                                    CachedNetworkImage(
+                                      imageUrl: item.primaryImage,
+                                      fit: BoxFit.cover,
+                                      errorWidget: (context, _, _) =>
+                                          ColoredBox(
+                                            color: colors.surfaceMuted,
+                                          ),
+                                    ),
+                                    if (isSelected)
+                                      Positioned(
+                                        top: 3,
+                                        right: 3,
+                                        child: Container(
+                                          padding: const EdgeInsets.all(2),
+                                          decoration: BoxDecoration(
+                                            color: colors.primary,
+                                            shape: BoxShape.circle,
+                                          ),
+                                          child: const Icon(
+                                            Icons.check,
+                                            size: 10,
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                      ),
+                                    Positioned(
+                                      bottom: 0,
+                                      left: 0,
+                                      right: 0,
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          vertical: 2,
+                                          horizontal: 2,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          gradient: LinearGradient(
+                                            colors: [
+                                              Colors.transparent,
+                                              Colors.black.withOpacity(0.75),
+                                            ],
+                                            begin: Alignment.topCenter,
+                                            end: Alignment.bottomCenter,
+                                          ),
+                                        ),
+                                        child: Text(
+                                          CurrencyFormatter.format(item.price),
+                                          textAlign: TextAlign.center,
+                                          style: AppTypography.caption(
+                                            color: Colors.white,
+                                            weight: FontWeight.w700,
+                                          ).copyWith(fontSize: 9),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
+                        );
                       },
-                      child: Container(
-                        width: 60,
-                        margin: const EdgeInsets.symmetric(
-                          horizontal: 4,
-                          vertical: 2,
-                        ),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: isSelected ? colors.primary : colors.border,
-                            width: isSelected ? 2.5 : 1.0,
-                          ),
-                        ),
-                        clipBehavior: Clip.antiAlias,
-                        child: CachedNetworkImage(
-                          imageUrl: item.primaryImage,
-                          fit: BoxFit.cover,
-                          errorWidget: (context, _, _) =>
-                              ColoredBox(color: colors.surfaceMuted),
-                        ),
-                      ),
-                    );
-                  },
-                );
-              },
+                    ),
+                  ),
+                ],
+              );
+            },
+            orElse: () => SizedBox(
+              height: 80,
+              child: catalogAsync.when(
+                loading: () => const Center(
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                ),
+                error: (_, _) => Center(
+                  child: Text(
+                    "Couldn't load pieces. Pull down to retry.",
+                    style: AppTypography.caption(color: colors.textSecondary),
+                  ),
+                ),
+                data: (_) => const SizedBox.shrink(),
+              ),
             ),
           ),
+
           // Confirm the colour being visualised (Blueprint fig. 27, step 4).
           if (product != null && variant != null && product.isTryonEligible)
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
               child: Row(
                 children: [
-                  Text(
-                    'Colour: ',
-                    style: AppTypography.caption(color: colors.textSecondary),
-                  ),
-                  Flexible(
-                    child: Text(
-                      variant.colorName,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: AppTypography.caption(
-                        color: colors.textPrimary,
-                        weight: FontWeight.w700,
-                      ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: colors.surfaceMuted,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          'Colour: ',
+                          style: AppTypography.caption(
+                            color: colors.textSecondary,
+                            weight: FontWeight.w500,
+                          ).copyWith(fontSize: 11),
+                        ),
+                        ConstrainedBox(
+                          constraints: const BoxConstraints(maxWidth: 110),
+                          child: Text(
+                            variant.colorName,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: AppTypography.caption(
+                              color: colors.textPrimary,
+                              weight: FontWeight.w700,
+                            ).copyWith(fontSize: 11),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -634,7 +1152,14 @@ class _TryonScreenState extends ConsumerState<TryonScreen> {
       ),
       decoration: BoxDecoration(
         color: colors.surface,
-        border: Border(top: BorderSide(color: colors.border)),
+        border: Border(top: BorderSide(color: colors.border.withOpacity(0.6))),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 10,
+            offset: const Offset(0, -3),
+          ),
+        ],
       ),
       child: result != null
           ? Row(
@@ -678,18 +1203,35 @@ class _TryonScreenState extends ConsumerState<TryonScreen> {
                 ),
               ],
             )
-          : PrimaryButton(
-              text: ClothsyCopy.tryOnButton,
-              backgroundColor: colors.tryOn,
-              icon: const Icon(
-                Icons.auto_awesome,
-                color: Colors.white,
-                size: 18,
+          : Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(100),
+                boxShadow:
+                    (session.canGenerate &&
+                        !unsupported &&
+                        !session.isProcessing)
+                    ? [
+                        BoxShadow(
+                          color: colors.tryOn.withOpacity(0.38),
+                          blurRadius: 16,
+                          offset: const Offset(0, 5),
+                        ),
+                      ]
+                    : null,
               ),
-              isLoading: session.isProcessing,
-              onPressed: session.canGenerate && !unsupported
-                  ? () => _generate()
-                  : null,
+              child: PrimaryButton(
+                text: ClothsyCopy.tryOnButton,
+                backgroundColor: colors.tryOn,
+                icon: const Icon(
+                  Icons.auto_awesome,
+                  color: Colors.white,
+                  size: 18,
+                ),
+                isLoading: session.isProcessing,
+                onPressed: session.canGenerate && !unsupported
+                    ? () => _generate()
+                    : null,
+              ),
             ),
     );
   }
@@ -766,40 +1308,6 @@ class _StageMessage extends StatelessWidget {
             ],
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _Pill extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final bool light;
-
-  const _Pill({required this.icon, required this.label, this.light = false});
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    final fg = light ? colors.textPrimary : Colors.white;
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-      decoration: BoxDecoration(
-        color: light
-            ? colors.surface.withOpacity(0.9)
-            : AppColors.deepInk.withOpacity(0.6),
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, color: fg, size: 14),
-          const SizedBox(width: 4),
-          Text(
-            label,
-            style: AppTypography.caption(color: fg, weight: FontWeight.w600),
-          ),
-        ],
       ),
     );
   }
@@ -910,6 +1418,7 @@ class _FramingOverlayPainter extends CustomPainter {
     final paint = Paint()
       ..color = borderColor
       ..strokeWidth = 2.0
+      ..strokeCap = StrokeCap.round
       ..style = PaintingStyle.stroke;
 
     const corner = 24.0;
