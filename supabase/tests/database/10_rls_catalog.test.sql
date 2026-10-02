@@ -47,20 +47,26 @@ select lives_ok(
   'sellers edit their own products');
 select throws_ok(
   $$update public.products set status = 'live' where handle = 'test-draft'$$,
-  'P0001', 'NOT_ALLOWED', 'sellers cannot publish without moderation');
+  '42501', null, 'sellers cannot publish without moderation');
+select throws_ok(
+  $$update public.products set is_featured = true, rating = 5 where handle = 'test-draft'$$,
+  '42501', null, 'sellers cannot feature or rate their own products');
 select is_empty(
   $$update public.products set title = 'Hijacked'
     where handle = 'lavender-blazer' returning id$$,
   'sellers cannot change another brand''s products');
-select lives_ok(
+select throws_ok(
   $$update public.product_variants set stock = 7 where sku = 'tst_cheap'$$,
+  '42501', null, 'stock is never overwritten directly');
+select is(
+  adjust_stock(tests.variant('tst_cheap'), 4, 'New delivery'), 7,
   'sellers adjust their own stock');
 select tests.as_owner();
 select is(
-  (select reason::text from public.inventory_movements m
+  (select reason::text || ' ' || note from public.inventory_movements m
    join public.product_variants v on v.id = m.variant_id
    where v.sku = 'tst_cheap' order by m.id desc limit 1),
-  'adjustment', 'stock changes are logged');
+  'restock New delivery', 'stock changes are logged with the reason and note');
 
 -- Another shopper
 select tests.as_user(:'other_user');
