@@ -23,6 +23,7 @@ import '../../features/orders/presentation/order_detail_screen.dart';
 import '../../features/orders/presentation/orders_list_screen.dart';
 import '../../features/profile/presentation/profile_screen.dart';
 import '../../features/search/presentation/search_screen.dart';
+import '../../features/settings/presentation/settings_screen.dart';
 import '../../features/splash/presentation/splash_screen.dart';
 import '../../features/tryon/presentation/tryon_history_screen.dart';
 import '../../features/tryon/presentation/tryon_screen.dart';
@@ -173,6 +174,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             redirectPath: redirect,
           );
         },
+      ),
+      GoRoute(
+        path: '/settings',
+        parentNavigatorKey: rootNavigatorKey,
+        builder: (context, state) => const SettingsScreen(),
       ),
       GoRoute(
         path: '/style-preferences',

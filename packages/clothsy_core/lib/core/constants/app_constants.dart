@@ -15,6 +15,10 @@ class AppConstants {
   /// manage refused deliveries. The server applies its own limit too.
   static const int codMaxOrderValue = 1000000;
 
+  /// Shopper try-on photos are deleted automatically after this long
+  /// (Blueprint section 35: a visible retention period).
+  static const Duration tryOnPhotoRetention = Duration(days: 30);
+
   /// Most units of one piece in a single order (the server enforces it too).
   static const int maxQuantityPerLine = 10;
 

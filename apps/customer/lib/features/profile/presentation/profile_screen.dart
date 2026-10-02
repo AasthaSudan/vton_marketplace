@@ -306,16 +306,10 @@ class ProfileScreen extends ConsumerWidget {
           ),
           _buildMenuItem(
             context,
-            icon: Icons.policy_outlined,
-            title: 'Privacy Policy & Terms',
-            subtitle: 'Shopper data privacy & returns policy',
-            onTap: () {
-              ClothsySnackbar.show(
-                context,
-                message: 'Viewing Clothsy shopper privacy policy',
-                type: SnackbarType.info,
-              );
-            },
+            icon: Icons.tune_rounded,
+            title: 'Settings & privacy',
+            subtitle: 'Appearance, try-on photos and policies',
+            onTap: () => context.push('/settings'),
           ),
           const SizedBox(height: 16),
 

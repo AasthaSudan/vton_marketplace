@@ -10,6 +10,7 @@ import 'package:clothsy_shop/features/catalog/data/repositories/mock_catalog_rep
 import 'package:clothsy_shop/features/catalog/presentation/catalog_screen.dart';
 import 'package:clothsy_shop/features/catalog/presentation/product_detail_screen.dart';
 import 'package:clothsy_shop/features/search/presentation/search_screen.dart';
+import 'package:clothsy_shop/features/settings/presentation/settings_screen.dart';
 import 'package:clothsy_shop/features/home/presentation/home_screen.dart';
 import 'package:clothsy_shop/features/address/presentation/providers/address_providers.dart';
 import 'package:clothsy_shop/features/checkout/presentation/checkout_screen.dart';
@@ -120,6 +121,19 @@ void main() {
 
           expect(tester.takeException(), isNull);
           expect(find.text('Trending searches'), findsOneWidget);
+        },
+      );
+
+      testWidgets(
+        'SettingsScreen renders on ${size.width}x${size.height} with zero overflow',
+        (tester) async {
+          await tester.binding.setSurfaceSize(size);
+          await tester.pumpWidget(wrapWithScope(const SettingsScreen(), size));
+          await tester.pump();
+          await tester.pump(const Duration(milliseconds: 100));
+
+          expect(tester.takeException(), isNull);
+          expect(find.text('Delete my try-on photos'), findsOneWidget);
         },
       );
 

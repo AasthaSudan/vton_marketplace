@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:typed_data';
+import 'package:clothsy_core/core/constants/app_constants.dart';
 import 'package:clothsy_core/core/constants/clothsy_copy.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:clothsy_core/features/catalog/domain/entities/product.dart';
@@ -15,7 +16,7 @@ class MockTryOnRepository implements TryOnRepository {
   static const int startingCredits = 15;
 
   /// Shopper photos are deleted automatically after this long.
-  static const Duration retention = Duration(days: 30);
+  static const Duration retention = AppConstants.tryOnPhotoRetention;
 
   final List<TryOnPhoto> _presets = [
     TryOnPhoto(
