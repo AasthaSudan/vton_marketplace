@@ -130,69 +130,68 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ),
             const SizedBox(height: 22),
 
-            // Circular Categories Row (All, Men, Women, Shoes, Bags) - Equal Sized & Equal Spacing
+            // Circular Categories Strip - Generous, even spacing and smooth scroll
             categoriesAsync.when(
-              loading: () => LayoutBuilder(
-                builder: (context, constraints) {
-                  final itemWidth = (constraints.maxWidth - 32) / 5;
-                  final circleSize = (itemWidth - 12).clamp(44.0, 56.0);
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: List.generate(
-                        5,
-                        (index) => Expanded(
-                          child: Center(
-                            child: SkeletonBox(
-                              width: circleSize,
-                              height: circleSize,
-                              borderRadius: BorderRadius.circular(100),
-                            ),
-                          ),
+              loading: () => SizedBox(
+                height: 94,
+                child: ListView.separated(
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  itemCount: 6,
+                  separatorBuilder: (_, _) => const SizedBox(width: 14),
+                  itemBuilder: (_, _) => const SizedBox(
+                    width: 68,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        SkeletonBox(
+                          width: 52,
+                          height: 52,
+                          borderRadius: BorderRadius.all(Radius.circular(100)),
                         ),
-                      ),
+                        SizedBox(height: 7),
+                        SkeletonBox(
+                          width: 44,
+                          height: 12,
+                          borderRadius: BorderRadius.all(Radius.circular(4)),
+                        ),
+                      ],
                     ),
-                  );
-                },
+                  ),
+                ),
               ),
               error: (context, index) => const SizedBox.shrink(),
               data: (categories) {
-                return LayoutBuilder(
-                  builder: (context, constraints) {
-                    final availableWidth = constraints.maxWidth;
-                    final itemWidth = (availableWidth - 32) / categories.length;
-                    final circleSize = (itemWidth - 12).clamp(44.0, 56.0);
-
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: categories.map((cat) {
-                          final isSelected =
-                              selectedCategory.toLowerCase() ==
-                              cat.title.toLowerCase();
-                          return Expanded(
-                            child: Center(
-                              child: CategoryChip(
-                                circleSize: circleSize,
-                                label: cat.title,
-                                icon: cat.icon,
-                                isSelected: isSelected,
-                                onTap: () {
-                                  ref
-                                      .read(selectedCategoryProvider.notifier)
-                                      .select(cat.title);
-                                  context.go('/explore');
-                                },
-                              ),
-                            ),
-                          );
-                        }).toList(),
-                      ),
-                    );
-                  },
+                return SizedBox(
+                  height: 94,
+                  child: ListView.separated(
+                    scrollDirection: Axis.horizontal,
+                    physics: const BouncingScrollPhysics(),
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    itemCount: categories.length,
+                    separatorBuilder: (_, _) => const SizedBox(width: 14),
+                    itemBuilder: (context, index) {
+                      final cat = categories[index];
+                      final isSelected =
+                          selectedCategory.toLowerCase() ==
+                          cat.title.toLowerCase();
+                      return SizedBox(
+                        width: 68,
+                        child: CategoryChip(
+                          circleSize: 52,
+                          label: cat.title,
+                          icon: cat.icon,
+                          isSelected: isSelected,
+                          onTap: () {
+                            ref
+                                .read(selectedCategoryProvider.notifier)
+                                .select(cat.title);
+                            context.go('/explore');
+                          },
+                        ),
+                      );
+                    },
+                  ),
                 );
               },
             ),
