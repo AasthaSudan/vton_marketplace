@@ -103,7 +103,7 @@ void main() {
         // Instant cache hit
         expect(second.cacheKey, equals(first.cacheKey));
         expect(steps.length, equals(1));
-        expect(steps.first.title, contains('Cache'));
+        expect(steps.first.title, contains('saved preview'));
       },
     );
 

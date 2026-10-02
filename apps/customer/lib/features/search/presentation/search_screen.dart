@@ -24,10 +24,10 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   final List<String> _trendingSearches = const [
     'Silk Maxi Dress',
     'Linen Blazer',
-    'Slip Skirt',
+    'Lavender Hoodie',
     'Cashmere Knit',
     'Leather Tote',
-    'Ankle Strap Heels',
+    'Noor Atelier',
   ];
 
   @override

@@ -30,6 +30,20 @@ void main() {
       expect(results.first.title.contains('Silk'), isTrue);
     });
 
+    test('searchProducts matches every word, in any order', () async {
+      final dress = await repository.searchProducts('silk dress');
+      expect(dress.map((p) => p.title), contains('Silk Satin Maxi Dress'));
+
+      final knit = await repository.searchProducts('cashmere knit');
+      expect(knit.map((p) => p.title), contains('Cashmere Blend Knit Top'));
+
+      final byBrand = await repository.searchProducts('noor');
+      expect(byBrand.every((p) => p.brand == 'Noor Atelier'), isTrue);
+      expect(byBrand, isNotEmpty);
+
+      expect(await repository.searchProducts('silk hoodie'), isEmpty);
+    });
+
     test('getProductById returns product when exists', () async {
       final product = await repository.getProductById('p1');
       expect(product, isNotNull);
@@ -67,10 +81,10 @@ void main() {
       variants: const [
         ProductVariant(
           id: 'v1',
-          title: 'S / Plum',
+          title: 'S / Violet',
           size: 'S',
-          colorName: 'Plum',
-          colorHex: '0xFF2B1E3F',
+          colorName: 'Violet',
+          colorHex: '0xFF5C25FC',
           price: 300000,
         ),
       ],
@@ -112,6 +126,31 @@ void main() {
       expect(cart.couponCode, 'CLOTHSY10');
       expect(cart.discountAmount, 30000); // 10% of ₹3,000, in paise
       expect(cart.total, 270000);
+    });
+
+    test('coupons use integer paise maths and follow the bag', () {
+      final notifier = container.read(cartProvider.notifier);
+      notifier.addToCart(testProduct, testProduct.variants.first); // ₹3,000
+
+      expect(notifier.applyCoupon(' first15 '), isTrue);
+      expect(container.read(cartProvider).couponCode, 'FIRST15');
+      expect(container.read(cartProvider).discountAmount, 45000);
+
+      // The discount is recomputed when the bag changes.
+      final itemId = container.read(cartProvider).items.first.id;
+      notifier.updateQuantity(itemId, 3); // ₹9,000
+      expect(container.read(cartProvider).discountAmount, 135000);
+
+      notifier.removeCoupon();
+      expect(container.read(cartProvider).discountAmount, 0);
+    });
+
+    test('unknown coupons are rejected and change nothing', () {
+      final notifier = container.read(cartProvider.notifier);
+      notifier.addToCart(testProduct, testProduct.variants.first);
+      expect(notifier.applyCoupon('FREEMONEY'), isFalse);
+      expect(container.read(cartProvider).couponCode, isNull);
+      expect(container.read(cartProvider).discountAmount, 0);
     });
 
     test('removeFromCart deletes item', () {

@@ -27,6 +27,7 @@ class OtpVerificationScreen extends ConsumerStatefulWidget {
 }
 
 class _OtpVerificationScreenState extends ConsumerState<OtpVerificationScreen> {
+  static const int _otpLength = 6;
   String _enteredOtp = '';
   int _secondsRemaining = 30;
   Timer? _timer;
@@ -56,11 +57,27 @@ class _OtpVerificationScreenState extends ConsumerState<OtpVerificationScreen> {
     });
   }
 
+  Future<void> _resendCode() async {
+    final ok = await ref
+        .read(authProvider.notifier)
+        .sendPhoneOtp(widget.phoneNumber);
+    if (!mounted) return;
+    if (ok) _startTimer();
+    ClothsySnackbar.show(
+      context,
+      message: ok
+          ? 'New code sent to ${widget.phoneNumber}'
+          : ref.read(authProvider).errorMessage ??
+                "We couldn't send a new code. Please try again.",
+      type: ok ? SnackbarType.info : SnackbarType.error,
+    );
+  }
+
   Future<void> _verifyOtp() async {
-    if (_enteredOtp.length < 4) {
+    if (_enteredOtp.length < _otpLength) {
       ClothsySnackbar.show(
         context,
-        message: 'Please enter the 4-digit code',
+        message: 'Please enter the $_otpLength-digit code',
         type: SnackbarType.error,
       );
       return;
@@ -70,20 +87,27 @@ class _OtpVerificationScreenState extends ConsumerState<OtpVerificationScreen> {
     final ok = await ref
         .read(authProvider.notifier)
         .verifyOtp(widget.phoneNumber, _enteredOtp);
+    if (!mounted) return;
     setState(() => _isLoading = false);
 
-    if (ok && mounted) {
+    if (!ok) {
       ClothsySnackbar.show(
         context,
-        message: 'Welcome to Clothsy!',
-        type: SnackbarType.success,
+        message:
+            ref.read(authProvider).errorMessage ??
+            "That code didn't work. Please try again.",
+        type: SnackbarType.error,
       );
-      if (widget.redirectPath != null && widget.redirectPath!.isNotEmpty) {
-        context.go(widget.redirectPath!);
-      } else {
-        context.go('/');
-      }
+      return;
     }
+
+    ClothsySnackbar.show(
+      context,
+      message: 'Welcome to Clothsy!',
+      type: SnackbarType.success,
+    );
+    final redirect = widget.redirectPath;
+    context.go(redirect != null && redirect.isNotEmpty ? redirect : '/');
   }
 
   @override
@@ -161,7 +185,7 @@ class _OtpVerificationScreenState extends ConsumerState<OtpVerificationScreen> {
 
               // OTP Boxes
               ClothsyOtpField(
-                length: 4,
+                length: _otpLength,
                 onChanged: (val) => _enteredOtp = val,
                 onCompleted: (val) {
                   _enteredOtp = val;
@@ -186,15 +210,7 @@ class _OtpVerificationScreenState extends ConsumerState<OtpVerificationScreen> {
                 )
               else
                 PressableScale(
-                  onTap: () {
-                    _startTimer();
-                    ClothsySnackbar.show(
-                      context,
-                      message:
-                          'New verification code sent to ${widget.phoneNumber}',
-                      type: SnackbarType.info,
-                    );
-                  },
+                  onTap: _resendCode,
                   child: Text(
                     'Resend Code',
                     style: AppTypography.bodyMedium(

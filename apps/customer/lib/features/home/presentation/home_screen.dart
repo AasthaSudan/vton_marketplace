@@ -281,13 +281,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 title: 'Exclusive Offer',
                 subtitle: 'Extra 15% off on first order',
                 onTap: () {
-                  ref.read(cartProvider.notifier).applyCoupon('FIRST15');
+                  final applied = ref
+                      .read(cartProvider.notifier)
+                      .applyCoupon('FIRST15');
                   ClothsySnackbar.show(
                     context,
-                    message: 'Coupon FIRST15 (15% OFF) applied to your bag!',
-                    type: SnackbarType.success,
+                    message: applied
+                        ? 'FIRST15 added: 15% off your bag.'
+                        : "That offer isn't available right now.",
+                    type: applied ? SnackbarType.success : SnackbarType.error,
                   );
-                  context.go('/bag');
+                  if (applied) context.go('/bag');
                 },
               ),
             ),
@@ -329,7 +333,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    'Haute Couture & AI Virtual Try-On',
+                    'Discover it. See it on you.',
                     style: AppTypography.caption(color: colors.textSecondary),
                   ),
                 ],
@@ -425,7 +429,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             Padding(
               padding: const EdgeInsets.all(20),
               child: Text(
-                'Clothsy v1.0.0 • FabricVTON AI',
+                'Clothsy v1.0.0 • Powered by Clothsy AI',
                 style: AppTypography.caption(
                   color: colors.textSecondary.withOpacity(0.7),
                 ).copyWith(fontSize: 11),

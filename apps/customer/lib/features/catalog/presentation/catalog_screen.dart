@@ -179,7 +179,7 @@ class CatalogScreen extends ConsumerWidget {
                     icon: Icons.checkroom_outlined,
                     title: 'No Items in $selectedCategory',
                     message:
-                        'We are continually updating our atelier. Explore another category.',
+                        'New pieces land here often. Try another category for now.',
                     actionText: 'View All',
                     onActionPressed: () {
                       ref.read(selectedCategoryProvider.notifier).select('All');
@@ -246,7 +246,7 @@ class CatalogScreen extends ConsumerWidget {
     ClothsyBottomSheet.show(
       context: context,
       title: 'Sort & Filters',
-      subtitle: 'Refine your atelier curation',
+      subtitle: 'Find exactly what you\'re after',
       child: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(

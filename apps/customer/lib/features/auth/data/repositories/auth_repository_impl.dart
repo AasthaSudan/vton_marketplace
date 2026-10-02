@@ -24,7 +24,7 @@ class AuthRepositoryImpl implements AuthRepository {
       name: prefs.getString(_keyUserName) ?? 'Aastha Sudan',
       email: prefs.getString(_keyUserEmail) ?? 'aastha@example.com',
       phone: prefs.getString(_keyUserPhone) ?? '+91 98765 43210',
-      memberTier: prefs.getString(_keyUserTier) ?? 'Clothsy Gold Member',
+      memberTier: prefs.getString(_keyUserTier) ?? 'Clothsy Member',
     );
     return _cachedUser;
   }
@@ -43,7 +43,7 @@ class AuthRepositoryImpl implements AuthRepository {
       name: 'Aastha Sudan',
       email: 'aastha.clothsy@gmail.com',
       phone: phoneNumber.startsWith('+91') ? phoneNumber : '+91 $phoneNumber',
-      memberTier: 'Clothsy Gold Member',
+      memberTier: 'Clothsy Member',
     );
     await _persistUser(user);
     return user;
@@ -57,7 +57,7 @@ class AuthRepositoryImpl implements AuthRepository {
       name: email.split('@').first.capitalize(),
       email: email,
       phone: '+91 98765 43210',
-      memberTier: 'Clothsy Atelier Member',
+      memberTier: 'Clothsy Member',
     );
     await _persistUser(user);
     return user;
@@ -71,7 +71,7 @@ class AuthRepositoryImpl implements AuthRepository {
       name: 'Aastha Sudan',
       email: 'aastha.sudan@gmail.com',
       phone: '+91 98765 43210',
-      memberTier: 'Clothsy Gold Member',
+      memberTier: 'Clothsy Member',
     );
     await _persistUser(user);
     return user;
@@ -85,7 +85,7 @@ class AuthRepositoryImpl implements AuthRepository {
       name: 'Aastha Sudan',
       email: 'aastha@privaterelay.appleid.com',
       phone: '+91 98765 43210',
-      memberTier: 'Clothsy Atelier Member',
+      memberTier: 'Clothsy Member',
     );
     await _persistUser(user);
     return user;

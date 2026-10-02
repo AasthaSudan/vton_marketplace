@@ -50,29 +50,32 @@ class TryOnRepositoryImpl implements TryOnRepository {
   }
 
   void _seedInitialHistory() {
+    // A real catalogue piece, so "Tried on" badges point at the right product.
+    const blazerImage =
+        'https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=900&auto=format&fit=crop&q=80';
     const demoVariant = ProductVariant(
-      id: 'var_sample_1',
-      title: 'Midnight Plum - S',
-      size: 'S',
-      colorName: 'Midnight Plum',
-      colorHex: '#2B1E3F',
-      price: 1899900,
+      id: 'v_blazer_lavender',
+      title: 'Soft Lavender / M',
+      size: 'M',
+      colorName: 'Soft Lavender',
+      colorHex: '0xFFB9A6E0',
+      price: 799900,
+      originalPrice: 999900,
+      imageUrl: blazerImage,
     );
 
     const demoProduct = Product(
-      id: 'p1',
-      handle: 'cashmere-wrap-coat',
-      title: 'Cashmere Wrap Coat',
+      id: 'p_lavender_blazer',
+      handle: 'lavender-blazer',
+      title: 'Lavender Blazer',
       sellerId: 'sel_noor',
       brand: 'Noor Atelier',
-      category: 'Outerwear',
-      description: 'Hand-tailored double-faced Mongolian cashmere wrap coat.',
-      price: 1899900,
-      images: [
-        'https://images.unsplash.com/photo-1539533018447-63fcce2678e3',
-        'https://images.unsplash.com/photo-1591047139829-d91aecb6caea',
-      ],
-      availableSizes: ['XS', 'S', 'M', 'L'],
+      category: 'Women',
+      description: 'Tailored stretch-twill blazer with notch lapels.',
+      price: 799900,
+      originalPrice: 999900,
+      images: [blazerImage],
+      availableSizes: ['S', 'M', 'L', 'XL'],
       variants: [demoVariant],
     );
 
@@ -82,8 +85,7 @@ class TryOnRepositoryImpl implements TryOnRepository {
       photo: preset,
       product: demoProduct,
       variant: demoVariant,
-      resultImageUrl:
-          'https://images.unsplash.com/photo-1539533018447-63fcce2678e3',
+      resultImageUrl: blazerImage,
       createdAt: DateTime.now().subtract(const Duration(hours: 3)),
       rating: 5,
     );
@@ -135,7 +137,7 @@ class TryOnRepositoryImpl implements TryOnRepository {
       final cached = _cache[cacheKey]!;
       onProgress?.call(
         const ProcessingStep(
-          title: 'Loaded from Atelier Cache',
+          title: 'Loaded your saved preview',
           description: 'Instant preview ready',
           progress: 1.0,
         ),

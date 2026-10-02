@@ -43,6 +43,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     }
   }
 
+  void _showAuthError() {
+    final message = ref.read(authProvider).errorMessage;
+    if (message == null) return;
+    ClothsySnackbar.show(context, message: message, type: SnackbarType.error);
+  }
+
   Future<void> _handlePhoneSubmit() async {
     final phone = _phoneController.text.trim();
     if (phone.isEmpty || phone.length < 10) {
@@ -56,10 +62,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
     setState(() => _isLoading = true);
     final ok = await ref.read(authProvider.notifier).sendPhoneOtp(phone);
+    if (!mounted) return;
     setState(() => _isLoading = false);
 
-    if (ok && mounted) {
-      context.push('/otp?phone=$phone&redirect=${widget.redirectPath ?? "/"}');
+    if (ok) {
+      final redirect = Uri.encodeQueryComponent(widget.redirectPath ?? '/');
+      context.push(
+        '/otp?phone=${Uri.encodeQueryComponent(phone)}&redirect=$redirect',
+      );
+    } else {
+      _showAuthError();
     }
   }
 
@@ -88,25 +100,25 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     final ok = await ref
         .read(authProvider.notifier)
         .signInWithEmail(email, password);
+    if (!mounted) return;
     setState(() => _isLoading = false);
-
-    if (ok && mounted) {
-      _onSuccessRedirect();
-    }
+    ok ? _onSuccessRedirect() : _showAuthError();
   }
 
   Future<void> _handleGoogleSignIn() async {
     setState(() => _isLoading = true);
     final ok = await ref.read(authProvider.notifier).signInWithGoogle();
+    if (!mounted) return;
     setState(() => _isLoading = false);
-    if (ok && mounted) _onSuccessRedirect();
+    ok ? _onSuccessRedirect() : _showAuthError();
   }
 
   Future<void> _handleAppleSignIn() async {
     setState(() => _isLoading = true);
     final ok = await ref.read(authProvider.notifier).signInWithApple();
+    if (!mounted) return;
     setState(() => _isLoading = false);
-    if (ok && mounted) _onSuccessRedirect();
+    ok ? _onSuccessRedirect() : _showAuthError();
   }
 
   @override
@@ -154,7 +166,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             ),
             const SizedBox(height: 6),
             Text(
-              'Sign in to access your atelier orders, save wishlist pieces, and personalize your virtual try-on.',
+              'Sign in to track your orders, save your wishlist and see styles on you with Clothsy AI Try-On.',
               textAlign: TextAlign.center,
               style: AppTypography.body(color: colors.textSecondary),
             ),

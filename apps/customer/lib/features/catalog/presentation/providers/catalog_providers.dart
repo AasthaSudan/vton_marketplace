@@ -81,11 +81,15 @@ class SearchQueryNotifier extends Notifier<String> {
   void clear() => state = '';
 }
 
-final searchQueryProvider = NotifierProvider<SearchQueryNotifier, String>(
-  SearchQueryNotifier.new,
-);
+/// Auto-disposed so every visit to Search starts fresh.
+final searchQueryProvider =
+    NotifierProvider.autoDispose<SearchQueryNotifier, String>(
+      SearchQueryNotifier.new,
+    );
 
-final searchResultsProvider = FutureProvider<List<Product>>((ref) async {
+final searchResultsProvider = FutureProvider.autoDispose<List<Product>>((
+  ref,
+) async {
   final query = ref.watch(searchQueryProvider);
   if (query.trim().isEmpty) return [];
   final repo = ref.watch(catalogRepositoryProvider);

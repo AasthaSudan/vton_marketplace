@@ -77,7 +77,7 @@ class CatalogRepositoryImpl implements CatalogRepository {
     ),
   ];
 
-  // Rich catalog dataset reflecting the Clothsy luxury fashion collection
+  // Demo catalogue: a few pieces from each launch brand
   final List<Product> _products = [
     Product(
       id: 'p_lavender_blazer',
@@ -591,12 +591,18 @@ class CatalogRepositoryImpl implements CatalogRepository {
   Future<List<Product>> searchProducts(String query) async {
     await Future.delayed(const Duration(milliseconds: 250));
     if (query.trim().isEmpty) return [];
-    final q = query.toLowerCase().trim();
+    // Every word must appear somewhere in the product, in any order, so
+    // "silk dress" finds the "Silk Satin Maxi Dress".
+    final words = query.toLowerCase().split(RegExp(r'\s+'))
+      ..removeWhere((w) => w.isEmpty);
     return _products.where((p) {
-      return p.title.toLowerCase().contains(q) ||
-          p.brand.toLowerCase().contains(q) ||
-          p.category.toLowerCase().contains(q) ||
-          p.tags.any((t) => t.toLowerCase().contains(q));
+      final haystack = [
+        p.title,
+        p.brand,
+        p.category,
+        ...p.tags,
+      ].join(' ').toLowerCase();
+      return words.every(haystack.contains);
     }).toList();
   }
 

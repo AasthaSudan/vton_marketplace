@@ -18,6 +18,7 @@ class _SplashScreenState extends State<SplashScreen>
   late final Animation<double> _fadeAnimation;
   late final Animation<double> _scaleAnimation;
   Timer? _timer;
+  bool _navigated = false;
 
   @override
   void initState() {
@@ -43,7 +44,10 @@ class _SplashScreenState extends State<SplashScreen>
   }
 
   Future<void> _proceed() async {
-    if (!mounted) return;
+    // A tap and the timer can both fire: only navigate once.
+    if (!mounted || _navigated) return;
+    _navigated = true;
+    _timer?.cancel();
     try {
       final prefs = await SharedPreferences.getInstance();
       final hasCompleted = prefs.getBool('has_completed_onboarding') ?? false;
@@ -73,7 +77,7 @@ class _SplashScreenState extends State<SplashScreen>
     return GestureDetector(
       onTap: _proceed,
       child: Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: colors.background,
         body: Center(
           child: AnimatedBuilder(
             animation: _controller,

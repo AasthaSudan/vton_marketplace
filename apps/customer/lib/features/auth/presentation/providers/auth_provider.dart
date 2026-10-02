@@ -27,6 +27,10 @@ class AuthState {
   }
 }
 
+String _friendly(Object error) => error is AuthFailure
+    ? error.message
+    : 'Something went wrong signing you in. Please try again.';
+
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
   return AuthRepositoryImpl();
 });
@@ -62,7 +66,7 @@ class AuthNotifier extends Notifier<AuthState> {
     } catch (e) {
       state = state.copyWith(
         status: AuthStatus.unauthenticated,
-        errorMessage: e.toString(),
+        errorMessage: _friendly(e),
       );
       return false;
     }
@@ -81,7 +85,7 @@ class AuthNotifier extends Notifier<AuthState> {
     } catch (e) {
       state = state.copyWith(
         status: AuthStatus.unauthenticated,
-        errorMessage: e.toString(),
+        errorMessage: _friendly(e),
       );
       return false;
     }
@@ -100,7 +104,7 @@ class AuthNotifier extends Notifier<AuthState> {
     } catch (e) {
       state = state.copyWith(
         status: AuthStatus.unauthenticated,
-        errorMessage: e.toString(),
+        errorMessage: _friendly(e),
       );
       return false;
     }
@@ -119,7 +123,7 @@ class AuthNotifier extends Notifier<AuthState> {
     } catch (e) {
       state = state.copyWith(
         status: AuthStatus.unauthenticated,
-        errorMessage: e.toString(),
+        errorMessage: _friendly(e),
       );
       return false;
     }
@@ -138,7 +142,7 @@ class AuthNotifier extends Notifier<AuthState> {
     } catch (e) {
       state = state.copyWith(
         status: AuthStatus.unauthenticated,
-        errorMessage: e.toString(),
+        errorMessage: _friendly(e),
       );
       return false;
     }

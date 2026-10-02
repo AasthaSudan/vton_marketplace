@@ -7,6 +7,7 @@ import 'package:clothsy_core/shared/widgets/badges/cart_badge_icon.dart';
 import 'package:clothsy_core/shared/widgets/cards/product_card.dart';
 import 'package:clothsy_core/shared/widgets/feedback/empty_state_view.dart';
 import '../../cart/presentation/providers/cart_provider.dart';
+import '../../tryon/presentation/providers/tryon_provider.dart';
 import 'providers/wishlist_provider.dart';
 
 class WishlistScreen extends ConsumerWidget {
@@ -17,6 +18,7 @@ class WishlistScreen extends ConsumerWidget {
     final colors = context.colors;
     final wishlist = ref.watch(wishlistProvider);
     final cartCount = ref.watch(cartCountProvider);
+    final triedOn = ref.watch(triedOnProductIdsProvider);
 
     return Scaffold(
       backgroundColor: colors.background,
@@ -58,7 +60,7 @@ class WishlistScreen extends ConsumerWidget {
                   originalPrice: product.originalPrice,
                   imageUrl: product.primaryImage,
                   isWishlisted: true,
-                  isTriedOn: product.isTryonEligible,
+                  isTriedOn: triedOn.contains(product.id),
                   onTap: () => context.push('/product/${product.id}'),
                   onWishlistToggle: () {
                     ref.read(wishlistProvider.notifier).toggleWishlist(product);

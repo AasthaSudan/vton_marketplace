@@ -1,6 +1,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Release builds need this to reach the catalogue, payments and try-on. -->
+    <uses-permission android:name="android.permission.INTERNET" />
     <application
-        android:label="clothsy_shop"
+        android:label="Clothsy"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

@@ -45,7 +45,7 @@ class _CartScreenState extends ConsumerState<CartScreen> {
     } else {
       ClothsySnackbar.show(
         context,
-        message: 'Invalid code. Try "CLOTHSY10" or "LUXURY20".',
+        message: "That code isn't valid. Check it and try again.",
         type: SnackbarType.error,
       );
     }

@@ -56,28 +56,31 @@ class CartNotifier extends Notifier<CartSummary> {
     _updateState(items: currentItems);
   }
 
+  /// Coupon rates in basis points (1000 = 10%). Mock-only: the server owns
+  /// coupons once the Supabase backend is in use.
+  static const Map<String, int> _couponBps = {
+    'CLOTHSY10': 1000,
+    'WELCOME10': 1000,
+    'FIRST15': 1500,
+    'LUXURY20': 2000,
+  };
+
+  /// Integer paise maths, rounded half up — never floating point.
+  static int _discountFor(String code, int subtotal) {
+    final bps = _couponBps[code];
+    if (bps == null) return 0;
+    return (subtotal * bps + 5000) ~/ 10000;
+  }
+
   bool applyCoupon(String code) {
     final trimmed = code.trim().toUpperCase();
-    if (trimmed == 'CLOTHSY10' || trimmed == 'WELCOME10') {
-      // 10% discount
-      final discount = (state.subtotal * 0.10).round();
-      state = CartSummary(
-        items: state.items,
-        couponCode: trimmed,
-        discountAmount: discount,
-      );
-      return true;
-    } else if (trimmed == 'LUXURY20') {
-      // 20% discount
-      final discount = (state.subtotal * 0.20).round();
-      state = CartSummary(
-        items: state.items,
-        couponCode: trimmed,
-        discountAmount: discount,
-      );
-      return true;
-    }
-    return false;
+    if (!_couponBps.containsKey(trimmed)) return false;
+    state = CartSummary(
+      items: state.items,
+      couponCode: trimmed,
+      discountAmount: _discountFor(trimmed, state.subtotal),
+    );
+    return true;
   }
 
   void removeCoupon() {
@@ -93,20 +96,12 @@ class CartNotifier extends Notifier<CartSummary> {
   }
 
   void _updateState({required List<CartLineItem> items}) {
-    int discount = 0;
-    if (state.couponCode != null) {
-      final sub = items.fold<int>(0, (sum, item) => sum + item.lineTotal);
-      if (state.couponCode == 'CLOTHSY10' || state.couponCode == 'WELCOME10') {
-        discount = (sub * 0.10).round();
-      } else if (state.couponCode == 'LUXURY20') {
-        discount = (sub * 0.20).round();
-      }
-    }
-
+    final code = state.couponCode;
+    final subtotal = items.fold<int>(0, (sum, item) => sum + item.lineTotal);
     state = CartSummary(
       items: items,
-      couponCode: state.couponCode,
-      discountAmount: discount,
+      couponCode: code,
+      discountAmount: code == null ? 0 : _discountFor(code, subtotal),
     );
   }
 }

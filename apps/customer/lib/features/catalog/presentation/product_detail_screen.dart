@@ -83,7 +83,9 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
           );
 
           final swatches = product.variants.map((v) {
-            final hex = int.tryParse(v.colorHex) ?? 0xFF2B1E3F;
+            final hex =
+                int.tryParse(v.colorHex) ??
+                context.colors.textPrimary.toARGB32();
             return ColorSwatchItem(
               id: v.id,
               name: v.colorName,
@@ -150,7 +152,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                           aspectRatio: 0.78,
                           child: Container(
                             decoration: BoxDecoration(
-                              color: AppColors.softLilac,
+                              color: context.colors.surfaceMuted,
                               borderRadius: const BorderRadius.vertical(
                                 top: Radius.circular(500),
                                 bottom: Radius.circular(32),
@@ -197,11 +199,13 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                                         fit: BoxFit.cover,
                                         placeholder: (context, url) =>
                                             Container(
-                                              color: AppColors.softLilac,
+                                              color:
+                                                  context.colors.surfaceMuted,
                                             ),
                                         errorWidget: (context, url, err) =>
                                             Container(
-                                              color: AppColors.softLilac,
+                                              color:
+                                                  context.colors.surfaceMuted,
                                               child: Icon(
                                                 Icons.checkroom_rounded,
                                                 size: 60,
@@ -290,9 +294,9 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                                 Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    const Icon(
+                                    Icon(
                                       Icons.star_rounded,
-                                      color: AppColors.rating,
+                                      color: context.colors.rating,
                                       size: 18,
                                     ),
                                     const SizedBox(width: 4),
@@ -417,8 +421,14 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                               swatches: swatches,
                               selectedSwatchId: activeVariant.id,
                               onSwatchSelected: (item) {
+                                // A colour is a specific variant, so the size
+                                // highlight follows it.
+                                final variant = product.variants.firstWhere(
+                                  (v) => v.id == item.id,
+                                );
                                 setState(() {
-                                  _selectedVariantId = item.id;
+                                  _selectedVariantId = variant.id;
+                                  _selectedSize = variant.size;
                                 });
                               },
                             ),
@@ -964,7 +974,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
           ),
           const SizedBox(height: 20),
           Text(
-            'Need bespoke sizing advice? Contact our atelier stylists for personalized guidance.',
+            'Between sizes? Check the seller\'s fit notes and reviews, or pick the size you usually wear.',
             style: AppTypography.caption(color: colors.textSecondary),
           ),
         ],
