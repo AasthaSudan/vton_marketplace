@@ -230,6 +230,9 @@ class Order {
   final String paymentMethod;
   final PaymentStatus paymentStatus;
 
+  /// The gateway order to pay with, while a prepaid order awaits payment.
+  final PaymentIntent? paymentIntent;
+
   const Order({
     required this.id,
     required this.orderNumber,
@@ -240,6 +243,7 @@ class Order {
     required this.method,
     required this.paymentMethod,
     this.paymentStatus = PaymentStatus.paid,
+    this.paymentIntent,
   });
 
   /// Every line item across all sellers.
@@ -312,6 +316,7 @@ class Order {
       method: method,
       paymentMethod: paymentMethod ?? this.paymentMethod,
       paymentStatus: paymentStatus ?? this.paymentStatus,
+      paymentIntent: paymentIntent,
     );
   }
 }

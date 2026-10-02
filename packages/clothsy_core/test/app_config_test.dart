@@ -1,5 +1,6 @@
 import 'package:clothsy_core/core/constants/app_config.dart';
 import 'package:clothsy_core/core/constants/app_constants.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -24,6 +25,38 @@ void main() {
         'SUPABASE_ANON_KEY',
         'RAZORPAY_KEY_ID',
       ]);
+    });
+
+    test('dev against a local backend may skip the Razorpay key', () {
+      const config = AppConfig(
+        flavor: AppFlavor.dev,
+        supabaseUrl: 'http://127.0.0.1:54321',
+        supabaseAnonKey: 'anon',
+      );
+      expect(config.useMockBackend, isFalse);
+      expect(config.missingKeys, isEmpty);
+      expect(config.usesRazorpay, isFalse);
+    });
+
+    test('staging still requires the Razorpay key', () {
+      const config = AppConfig(
+        flavor: AppFlavor.staging,
+        supabaseUrl: 'https://x.supabase.co',
+        supabaseAnonKey: 'anon',
+      );
+      expect(config.missingKeys, ['RAZORPAY_KEY_ID']);
+    });
+
+    test('Razorpay checkout runs only on Android and iOS', () {
+      const config = AppConfig(
+        flavor: AppFlavor.prod,
+        razorpayKeyId: 'rzp_live_1',
+      );
+      debugDefaultTargetPlatformOverride = TargetPlatform.android;
+      expect(config.usesRazorpay, isTrue);
+      debugDefaultTargetPlatformOverride = TargetPlatform.macOS;
+      expect(config.usesRazorpay, isFalse);
+      debugDefaultTargetPlatformOverride = null;
     });
 
     test('fully configured staging uses the real backend', () {

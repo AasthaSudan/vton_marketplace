@@ -36,6 +36,25 @@ enum PaymentMethod {
   }
 }
 
+/// What the order service set up with the gateway for a prepaid order
+/// (e.g. a Razorpay order the checkout sheet must be opened with).
+class PaymentIntent {
+  /// `razorpay` or `mock`.
+  final String provider;
+
+  /// Public key id the checkout sheet is opened with.
+  final String keyId;
+
+  /// The gateway's order id (Razorpay `order_...`).
+  final String gatewayOrderId;
+
+  const PaymentIntent({
+    required this.provider,
+    required this.keyId,
+    required this.gatewayOrderId,
+  });
+}
+
 /// Everything a gateway needs to collect one payment.
 ///
 /// [amount] is integer paise and must come from the server-created order — the
@@ -51,6 +70,9 @@ class PaymentRequest {
   /// Preferred UPI app, when [method] is UPI (e.g. `Google Pay`).
   final String? upiApp;
 
+  /// The gateway order to pay, when the order service created one.
+  final PaymentIntent? intent;
+
   const PaymentRequest({
     required this.orderId,
     required this.orderNumber,
@@ -59,6 +81,7 @@ class PaymentRequest {
     required this.customerName,
     required this.customerPhone,
     this.upiApp,
+    this.intent,
   });
 }
 
@@ -76,7 +99,14 @@ class PaymentSuccess extends PaymentResult {
   /// Gateway signature the server verifies, when the gateway provides one.
   final String? signature;
 
-  const PaymentSuccess({required this.paymentRef, this.signature});
+  /// The gateway order the payment belongs to (Razorpay `order_...`).
+  final String? gatewayOrderId;
+
+  const PaymentSuccess({
+    required this.paymentRef,
+    this.signature,
+    this.gatewayOrderId,
+  });
 }
 
 /// The payment did not go through (declined, timed out, bank error).

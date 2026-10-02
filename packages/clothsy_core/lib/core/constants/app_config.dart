@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'app_constants.dart';
 
 /// Runtime configuration injected at build time — never hard-code keys.
@@ -38,13 +39,24 @@ class AppConfig {
   bool get useMockBackend =>
       flavor == AppFlavor.mock || (flavor == AppFlavor.dev && !hasBackend);
 
-  /// Names of required values that are missing for this flavor.
+  /// Opens the real Razorpay checkout sheet. Needs a key id, and the
+  /// Razorpay SDK only exists on Android and iOS; everywhere else payments go
+  /// through the mock gateway against the server's mock provider.
+  bool get usesRazorpay =>
+      razorpayKeyId.isNotEmpty &&
+      !kIsWeb &&
+      (defaultTargetPlatform == TargetPlatform.android ||
+          defaultTargetPlatform == TargetPlatform.iOS);
+
+  /// Names of required values that are missing for this flavor. Dev builds
+  /// may run without a Razorpay key (local backend with mock payments);
+  /// staging and prod may not.
   List<String> get missingKeys {
     if (useMockBackend) return const [];
     return [
       if (supabaseUrl.isEmpty) 'SUPABASE_URL',
       if (supabaseAnonKey.isEmpty) 'SUPABASE_ANON_KEY',
-      if (razorpayKeyId.isEmpty) 'RAZORPAY_KEY_ID',
+      if (razorpayKeyId.isEmpty && flavor != AppFlavor.dev) 'RAZORPAY_KEY_ID',
     ];
   }
 }
