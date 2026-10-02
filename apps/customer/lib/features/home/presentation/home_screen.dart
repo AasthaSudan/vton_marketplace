@@ -280,18 +280,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 icon: Icons.local_offer_outlined,
                 title: 'Exclusive Offer',
                 subtitle: 'Extra 15% off on first order',
-                onTap: () {
-                  final applied = ref
+                onTap: () async {
+                  final error = await ref
                       .read(cartProvider.notifier)
                       .applyCoupon('FIRST15');
+                  if (!context.mounted) return;
                   ClothsySnackbar.show(
                     context,
-                    message: applied
-                        ? 'FIRST15 added: 15% off your bag.'
-                        : "That offer isn't available right now.",
-                    type: applied ? SnackbarType.success : SnackbarType.error,
+                    message: error ?? 'FIRST15 added: 15% off your bag.',
+                    type: error == null
+                        ? SnackbarType.success
+                        : SnackbarType.error,
                   );
-                  if (applied) context.go('/bag');
+                  if (error == null) context.go('/bag');
                 },
               ),
             ),

@@ -111,7 +111,7 @@ void main() {
       expect(cart.total, 600000);
     });
 
-    test('applyCoupon applies 10% discount for CLOTHSY10', () {
+    test('applyCoupon applies 10% discount for CLOTHSY10', () async {
       final notifier = container.read(cartProvider.notifier);
       notifier.addToCart(
         testProduct,
@@ -119,8 +119,7 @@ void main() {
         quantity: 1,
       ); // 3000
 
-      final applied = notifier.applyCoupon('CLOTHSY10');
-      expect(applied, isTrue);
+      expect(await notifier.applyCoupon('CLOTHSY10'), isNull);
 
       final cart = container.read(cartProvider);
       expect(cart.couponCode, 'CLOTHSY10');
@@ -128,11 +127,11 @@ void main() {
       expect(cart.total, 270000);
     });
 
-    test('coupons use integer paise maths and follow the bag', () {
+    test('coupons use integer paise maths and follow the bag', () async {
       final notifier = container.read(cartProvider.notifier);
       notifier.addToCart(testProduct, testProduct.variants.first); // ₹3,000
 
-      expect(notifier.applyCoupon(' first15 '), isTrue);
+      expect(await notifier.applyCoupon(' first15 '), isNull);
       expect(container.read(cartProvider).couponCode, 'FIRST15');
       expect(container.read(cartProvider).discountAmount, 45000);
 
@@ -145,10 +144,10 @@ void main() {
       expect(container.read(cartProvider).discountAmount, 0);
     });
 
-    test('unknown coupons are rejected and change nothing', () {
+    test('unknown coupons are rejected and change nothing', () async {
       final notifier = container.read(cartProvider.notifier);
       notifier.addToCart(testProduct, testProduct.variants.first);
-      expect(notifier.applyCoupon('FREEMONEY'), isFalse);
+      expect(await notifier.applyCoupon('FREEMONEY'), contains("isn't valid"));
       expect(container.read(cartProvider).couponCode, isNull);
       expect(container.read(cartProvider).discountAmount, 0);
     });

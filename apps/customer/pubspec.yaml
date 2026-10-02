@@ -21,6 +21,7 @@ dependencies:
   dio: ^5.11.1
   shared_preferences: ^2.5.5
   intl: ^0.20.3
+  uuid: ^4.6.0
 
 dev_dependencies:
   flutter_test:

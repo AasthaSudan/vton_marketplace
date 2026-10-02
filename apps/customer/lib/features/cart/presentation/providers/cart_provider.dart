@@ -1,6 +1,12 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:clothsy_core/features/catalog/domain/entities/product.dart';
 import 'package:clothsy_core/features/cart/domain/entities/cart_item.dart';
+import 'package:clothsy_core/features/cart/domain/repositories/coupon_repository.dart';
+import '../../data/mock_coupon_repository.dart';
+
+final couponRepositoryProvider = Provider<CouponRepository>((ref) {
+  return MockCouponRepository();
+});
 
 class CartNotifier extends Notifier<CartSummary> {
   @override
@@ -56,39 +62,32 @@ class CartNotifier extends Notifier<CartSummary> {
     _updateState(items: currentItems);
   }
 
-  /// Coupon rates in basis points (1000 = 10%). Mock-only: the server owns
-  /// coupons once the Supabase backend is in use.
-  static const Map<String, int> _couponBps = {
-    'CLOTHSY10': 1000,
-    'WELCOME10': 1000,
-    'FIRST15': 1500,
-    'LUXURY20': 2000,
-  };
-
-  /// Integer paise maths, rounded half up — never floating point.
-  static int _discountFor(String code, int subtotal) {
-    final bps = _couponBps[code];
-    if (bps == null) return 0;
-    return (subtotal * bps + 5000) ~/ 10000;
-  }
-
-  bool applyCoupon(String code) {
+  /// Validates [code] with the coupon service and applies it to the bag.
+  /// Returns null on success, or a message to show the shopper.
+  Future<String?> applyCoupon(String code) async {
     final trimmed = code.trim().toUpperCase();
-    if (!_couponBps.containsKey(trimmed)) return false;
-    state = CartSummary(
-      items: state.items,
-      couponCode: trimmed,
-      discountAmount: _discountFor(trimmed, state.subtotal),
-    );
-    return true;
+    if (trimmed.isEmpty) return 'Enter a coupon code first.';
+    try {
+      final rule = await ref
+          .read(couponRepositoryProvider)
+          .validate(trimmed, goodsSubtotal: state.subtotal);
+      if (!ref.mounted) return null;
+      state = CartSummary(
+        items: state.items,
+        couponCode: rule.code,
+        coupon: rule,
+        discountAmount: rule.discountFor(state.subtotal),
+      );
+      return null;
+    } on CouponException catch (e) {
+      return e.message;
+    } catch (_) {
+      return "We couldn't check that code right now. Please try again.";
+    }
   }
 
   void removeCoupon() {
-    state = CartSummary(
-      items: state.items,
-      couponCode: null,
-      discountAmount: 0,
-    );
+    state = CartSummary(items: state.items);
   }
 
   void clearCart() {
@@ -96,12 +95,13 @@ class CartNotifier extends Notifier<CartSummary> {
   }
 
   void _updateState({required List<CartLineItem> items}) {
-    final code = state.couponCode;
+    final coupon = state.coupon;
     final subtotal = items.fold<int>(0, (sum, item) => sum + item.lineTotal);
     state = CartSummary(
       items: items,
-      couponCode: code,
-      discountAmount: code == null ? 0 : _discountFor(code, subtotal),
+      couponCode: coupon?.code,
+      coupon: coupon,
+      discountAmount: coupon?.discountFor(subtotal) ?? 0,
     );
   }
 }

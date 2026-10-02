@@ -31,24 +31,17 @@ class _CartScreenState extends ConsumerState<CartScreen> {
     super.dispose();
   }
 
-  void _applyCoupon() {
-    final code = _couponController.text;
-    if (code.trim().isEmpty) return;
+  Future<void> _applyCoupon() async {
+    final code = _couponController.text.trim();
+    if (code.isEmpty) return;
 
-    final success = ref.read(cartProvider.notifier).applyCoupon(code);
-    if (success) {
-      ClothsySnackbar.show(
-        context,
-        message: 'Promo coupon "$code" applied successfully!',
-        type: SnackbarType.success,
-      );
-    } else {
-      ClothsySnackbar.show(
-        context,
-        message: "That code isn't valid. Check it and try again.",
-        type: SnackbarType.error,
-      );
-    }
+    final error = await ref.read(cartProvider.notifier).applyCoupon(code);
+    if (!mounted) return;
+    ClothsySnackbar.show(
+      context,
+      message: error ?? '${code.toUpperCase()} applied to your bag.',
+      type: error == null ? SnackbarType.success : SnackbarType.error,
+    );
   }
 
   @override
