@@ -4,6 +4,7 @@
 #   scripts/backend.sh down     stop (data kept)
 #   scripts/backend.sh reset    stop, wipe data, start fresh
 #   scripts/backend.sh test     pgTAP database tests + Deno function tests
+#   scripts/backend.sh e2e      Phase 1 exit check through the gateway (fresh stack)
 #   scripts/backend.sh logs [service]
 #   scripts/backend.sh psql     SQL shell on the local database
 #   scripts/backend.sh config   write apps/customer/config/dev.json
@@ -84,11 +85,12 @@ case "${1:-}" in
     compose --profile test run --rm db-test
     compose --profile test run --rm deno
     ;;
+  e2e) python3 scripts/e2e_backend.py ;;
   logs) shift; compose logs -f "$@" ;;
   psql) compose exec db psql -U postgres ;;
   config) write_config ;;
   *)
-    sed -n '2,10p' "$0"
+    sed -n '2,11p' "$0"
     exit 1
     ;;
 esac

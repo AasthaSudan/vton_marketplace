@@ -1,0 +1,60 @@
+name: Clothsy backend
+
+# The database (migrations, row level security, order and payment functions),
+# the Edge Functions and the Phase 1 end-to-end flow, tested in the same
+# Docker Compose stack used locally (scripts/backend.sh).
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'supabase/**'
+      - 'docker-compose.yml'
+      - 'scripts/backend.sh'
+      - 'scripts/e2e_backend.py'
+      - '.github/workflows/backend.yml'
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - 'supabase/**'
+      - 'docker-compose.yml'
+      - 'scripts/backend.sh'
+      - 'scripts/e2e_backend.py'
+      - '.github/workflows/backend.yml'
+
+jobs:
+  backend:
+    name: Database & Edge Functions
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Local environment
+        run: cp supabase/.env.example supabase/.env
+
+      - name: Start the database, auth, REST and storage
+        run: docker compose --env-file supabase/.env up -d --wait db auth rest storage
+
+      - name: Apply migrations and seed
+        run: docker compose --env-file supabase/.env run --rm migrate
+
+      - name: Database tests (pgTAP)
+        run: docker compose --env-file supabase/.env --profile test run --rm db-test
+
+      - name: Edge Function checks and tests (Deno)
+        run: docker compose --env-file supabase/.env --profile test run --rm deno
+
+      - name: Start Edge Functions and the gateway
+        run: docker compose --env-file supabase/.env up -d --wait functions gateway
+
+      - name: End-to-end exit check (sign-in to refund, through the gateway)
+        run: python3 scripts/e2e_backend.py
+
+      - name: Service logs on failure
+        if: failure()
+        run: docker compose --env-file supabase/.env logs --tail 200 db auth rest storage functions gateway
+
+      - name: Stop
+        if: always()
+        run: docker compose --env-file supabase/.env down -v
