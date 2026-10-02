@@ -4,6 +4,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:clothsy_core/core/constants/app_constants.dart';
 import 'package:clothsy_shop/features/brands/presentation/brand_directory_screen.dart';
 import 'package:clothsy_shop/features/brands/presentation/brand_storefront_screen.dart';
+import 'package:clothsy_shop/features/cart/presentation/cart_screen.dart';
+import 'package:clothsy_shop/features/cart/presentation/providers/cart_provider.dart';
+import 'package:clothsy_shop/features/catalog/data/repositories/catalog_repository_impl.dart';
 import 'package:clothsy_shop/features/catalog/presentation/product_detail_screen.dart';
 import 'package:clothsy_shop/features/home/presentation/home_screen.dart';
 import 'package:clothsy_shop/features/onboarding/presentation/onboarding_screen.dart';
@@ -123,6 +126,64 @@ void main() {
             find.text('Hand-finished occasion & workwear'),
             findsOneWidget,
           );
+        },
+      );
+
+      testWidgets(
+        'CartScreen groups a two-brand bag by seller on ${size.width}x${size.height}',
+        (tester) async {
+          await tester.binding.setSurfaceSize(size);
+          final container = ProviderContainer();
+          addTearDown(container.dispose);
+
+          final catalog = CatalogRepositoryImpl();
+          // The mock repository uses real timers, so resolve it outside the
+          // widget tester's fake clock.
+          final blazer = (await tester.runAsync(
+            () => catalog.getProductById('p_lavender_blazer'),
+          ))!;
+          final shirt = (await tester.runAsync(
+            () => catalog.getProductById('p_minimal_overshirt'),
+          ))!;
+          container
+              .read(cartProvider.notifier)
+              .addToCart(blazer, blazer.variants.first);
+          container
+              .read(cartProvider.notifier)
+              .addToCart(shirt, shirt.variants.first);
+
+          await tester.pumpWidget(
+            UncontrolledProviderScope(
+              container: container,
+              child: MaterialApp(
+                debugShowCheckedModeBanner: false,
+                home: MediaQuery(
+                  data: MediaQueryData(
+                    size: size,
+                    padding: const EdgeInsets.only(top: 44, bottom: 34),
+                  ),
+                  child: SizedBox(
+                    width: size.width,
+                    height: size.height,
+                    child: const CartScreen(),
+                  ),
+                ),
+              ),
+            ),
+          );
+          await tester.pump();
+          await tester.pump(const Duration(milliseconds: 300));
+
+          expect(tester.takeException(), isNull);
+          expect(find.text('Noor Atelier'), findsOneWidget);
+          expect(find.text('Studio Rao'), findsOneWidget);
+
+          await tester.scrollUntilVisible(
+            find.text('Delivery (2 shipments)'),
+            200,
+            scrollable: find.byType(Scrollable).first,
+          );
+          expect(tester.takeException(), isNull);
         },
       );
 

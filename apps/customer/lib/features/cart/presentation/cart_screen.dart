@@ -81,11 +81,11 @@ class _CartScreenState extends ConsumerState<CartScreen> {
                       vertical: 12,
                     ),
                     children: [
-                      // Cart Line Items List
-                      ...cart.items.map(
-                        (item) => _buildCartItemCard(context, item),
+                      // One bag, grouped by seller — each ships separately.
+                      ...cart.sellerGroups.map(
+                        (group) => _buildSellerGroup(context, group),
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 4),
 
                       // Promo Coupon Code Input
                       Container(
@@ -202,7 +202,9 @@ class _CartScreenState extends ConsumerState<CartScreen> {
                             ],
                             const SizedBox(height: 8),
                             _buildSummaryRow(
-                              'Express Delivery',
+                              cart.shipmentCount > 1
+                                  ? 'Delivery (${cart.shipmentCount} shipments)'
+                                  : 'Delivery',
                               cart.shippingFee == 0
                                   ? 'FREE'
                                   : CurrencyFormatter.format(cart.shippingFee),
@@ -214,12 +216,15 @@ class _CartScreenState extends ConsumerState<CartScreen> {
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Text(
-                                  'Total Amount',
-                                  style: AppTypography.h3(
-                                    color: colors.textPrimary,
+                                Expanded(
+                                  child: Text(
+                                    'Total Amount',
+                                    style: AppTypography.h3(
+                                      color: colors.textPrimary,
+                                    ),
                                   ),
                                 ),
+                                const SizedBox(width: 8),
                                 Text(
                                   CurrencyFormatter.format(cart.total),
                                   style: AppTypography.h2(
@@ -259,6 +264,63 @@ class _CartScreenState extends ConsumerState<CartScreen> {
                 ),
               ],
             ),
+    );
+  }
+
+  /// One seller's items with its own shipment summary underneath.
+  Widget _buildSellerGroup(BuildContext context, SellerBagGroup group) {
+    final colors = context.colors;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8, left: 2),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.storefront_outlined,
+                  size: 16,
+                  color: colors.primary,
+                ),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Text(
+                    group.sellerName,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTypography.bodyMedium(
+                      color: colors.textPrimary,
+                      weight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+                Text(
+                  group.shippingFee == 0
+                      ? 'Free delivery'
+                      : 'Delivery ${CurrencyFormatter.format(group.shippingFee)}',
+                  style: AppTypography.caption(
+                    color: group.shippingFee == 0
+                        ? colors.success
+                        : colors.textSecondary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          ...group.items.map((item) => _buildCartItemCard(context, item)),
+          if (group.amountToFreeShipping > 0)
+            Padding(
+              padding: const EdgeInsets.only(left: 2, top: 2),
+              child: Text(
+                'Add ${CurrencyFormatter.format(group.amountToFreeShipping)} more '
+                'from ${group.sellerName} for free delivery.',
+                style: AppTypography.caption(color: colors.textSecondary),
+              ),
+            ),
+        ],
+      ),
     );
   }
 
@@ -354,16 +416,18 @@ class _CartScreenState extends ConsumerState<CartScreen> {
                     style: AppTypography.caption(color: colors.textSecondary),
                   ),
                   const SizedBox(height: 10),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
+                  // Price and stepper share a row when there is room; on the
+                  // narrowest phones the stepper drops below the price.
+                  LayoutBuilder(
+                    builder: (context, constraints) {
+                      final price = Text(
                         CurrencyFormatter.format(item.variant.price),
+                        maxLines: 1,
                         style: AppTypography.price(
                           color: colors.textPrimary,
                         ).copyWith(fontSize: 16),
-                      ),
-                      QuantityStepper(
+                      );
+                      final stepper = QuantityStepper(
                         height: 32,
                         value: item.quantity,
                         onChanged: (newQty) {
@@ -371,8 +435,22 @@ class _CartScreenState extends ConsumerState<CartScreen> {
                               .read(cartProvider.notifier)
                               .updateQuantity(item.id, newQty);
                         },
-                      ),
-                    ],
+                      );
+                      if (constraints.maxWidth < 180) {
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [price, const SizedBox(height: 8), stepper],
+                        );
+                      }
+                      return Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Flexible(child: price),
+                          const SizedBox(width: 8),
+                          stepper,
+                        ],
+                      );
+                    },
                   ),
                 ],
               ),
@@ -392,13 +470,16 @@ class _CartScreenState extends ConsumerState<CartScreen> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(
-          label,
-          style: AppTypography.caption(
-            color: isHighlight ? colors.success : colors.textSecondary,
-            weight: isHighlight ? FontWeight.w600 : FontWeight.w400,
+        Expanded(
+          child: Text(
+            label,
+            style: AppTypography.caption(
+              color: isHighlight ? colors.success : colors.textSecondary,
+              weight: isHighlight ? FontWeight.w600 : FontWeight.w400,
+            ),
           ),
         ),
+        const SizedBox(width: 8),
         Text(
           value,
           style: AppTypography.bodyMedium(
