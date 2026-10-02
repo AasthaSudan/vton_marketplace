@@ -23,17 +23,30 @@ class PanelSection {
 
 /// Responsive shell for the Clothsy web panels: a sidebar on wide screens and
 /// a drawer on narrow ones, with the brand header and the selected section.
+///
+/// It keeps its own selection unless [selectedIndex] and [onSelect] are given
+/// (e.g. by a router), and shows [body] instead of [sectionBuilder] when set.
 class PanelShell extends StatefulWidget {
   final String panelName;
   final List<PanelSection> sections;
   final Widget Function(BuildContext context, PanelSection section)?
   sectionBuilder;
+  final int? selectedIndex;
+  final ValueChanged<int>? onSelect;
+  final Widget? body;
+
+  /// Shown under the sections, e.g. the signed-in store and sign out.
+  final Widget? sidebarFooter;
 
   const PanelShell({
     super.key,
     required this.panelName,
     required this.sections,
     this.sectionBuilder,
+    this.selectedIndex,
+    this.onSelect,
+    this.body,
+    this.sidebarFooter,
   });
 
   static const double wideBreakpoint = 900;
@@ -45,28 +58,39 @@ class PanelShell extends StatefulWidget {
 class _PanelShellState extends State<PanelShell> {
   int _selected = 0;
 
-  void _select(int index) => setState(() => _selected = index);
+  int get _current => widget.selectedIndex ?? _selected;
+
+  void _select(int index) {
+    if (widget.onSelect != null) {
+      widget.onSelect!(index);
+    } else {
+      setState(() => _selected = index);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final section = widget.sections[_selected];
+    final section = widget.sections[_current];
     final isWide =
         MediaQuery.sizeOf(context).width >= PanelShell.wideBreakpoint;
 
     final sidebar = _Sidebar(
       panelName: widget.panelName,
       sections: widget.sections,
-      selected: _selected,
+      selected: _current,
+      footer: widget.sidebarFooter,
       onSelect: (i) {
-        _select(i);
         if (!isWide) Navigator.of(context).maybePop();
+        _select(i);
       },
     );
 
-    final content = widget.sectionBuilder != null
-        ? widget.sectionBuilder!(context, section)
-        : PanelSectionPlaceholder(section: section);
+    final content =
+        widget.body ??
+        (widget.sectionBuilder != null
+            ? widget.sectionBuilder!(context, section)
+            : PanelSectionPlaceholder(section: section));
 
     return Scaffold(
       backgroundColor: colors.surfaceMuted,
@@ -97,12 +121,14 @@ class _Sidebar extends StatelessWidget {
   final List<PanelSection> sections;
   final int selected;
   final ValueChanged<int> onSelect;
+  final Widget? footer;
 
   const _Sidebar({
     required this.panelName,
     required this.sections,
     required this.selected,
     required this.onSelect,
+    this.footer,
   });
 
   @override
@@ -136,6 +162,7 @@ class _Sidebar extends StatelessWidget {
                 isSelected: i == selected,
                 onTap: () => onSelect(i),
               ),
+            if (footer != null) ...[const SizedBox(height: 16), footer!],
           ],
         ),
       ),
