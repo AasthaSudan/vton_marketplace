@@ -28,6 +28,11 @@ class Product {
   final String id;
   final String handle;
   final String title;
+
+  /// The seller (brand storefront) this product belongs to.
+  final String sellerId;
+
+  /// Display name of the seller / brand.
   final String brand;
   final String description;
   final int price;
@@ -47,6 +52,7 @@ class Product {
     required this.id,
     required this.handle,
     required this.title,
+    required this.sellerId,
     required this.brand,
     required this.description,
     required this.price,
