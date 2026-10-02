@@ -12,7 +12,7 @@ Legend: ✅ done · 🟡 partly done / mock only · ⏳ written, not yet verifie
 | Phase | Scope | Status |
 |---|---|---|
 | **P0** Restructure & rebrand | Workspace, brand, ₹/paise, nav, flavors, panel shells, CI | ✅ |
-| **P1** Customer core + Try-On + payments | Auth, catalogue, search, PDP, bag, checkout, orders, Try-On, Supabase backend | 🟡 app ✅ on mocks · backend ⏳ |
+| **P1** Customer core + Try-On + payments | Auth, catalogue, search, PDP, bag, checkout, orders, Try-On, Supabase backend | ✅ on the local Docker backend · real providers 🔑 |
 | **P2** Seller Panel | Onboarding/KYC, storefront, products & stock, fulfilment, payouts | ⬜ (shell only) |
 | **P3** Admin + returns | Roles, moderation, orders & money, returns/refunds/disputes, CMS | ⬜ (shell only) |
 | **P4** Growth | Clothsy Coins, referrals, follows & drops, notifications, personalised feeds | ⬜ |
@@ -43,20 +43,20 @@ Legend: ✅ done · 🟡 partly done / mock only · ⏳ written, not yet verifie
 
 | Piece | Status | Notes |
 |---|---|---|
-| Docker Compose stack (Postgres, Auth, REST, Storage, Functions, gateway) | ⏳ | Waiting for ≥10 GB free disk + Docker Desktop to run |
-| Schema + row level security (11 migrations) | ⏳ | Sellers, catalogue, stock ledger, addresses, coupons, orders, payments, refunds, try-on, storage, cron |
-| Order functions (`place_order`, confirm / fail / cancel, refunds, expiry) | ⏳ | Server pricing, stock holds, idempotency, late/duplicate payment refunds |
-| Edge Functions (create-order, verify-payment, razorpay-webhook, refund, tryon-run, tryon-cleanup) | ⏳ | Mock providers locally; Razorpay / FabricVTON adapters ready |
-| pgTAP tests (7 files + generated parity) and Deno tests (8 files) | ⏳ | Run with `scripts/backend.sh test` |
-| App ↔ backend wiring (Supabase repositories, Razorpay gateway) | ✅ | Unit-tested; end-to-end run pending the stack |
+| Docker Compose stack (Postgres, Auth, REST, Storage, Functions, gateway) | ✅ | `scripts/backend.sh up`; about 6.5 GB of images |
+| Schema + row level security (11 migrations) | ✅ | Sellers, catalogue, stock ledger, addresses, coupons, orders, payments, refunds, try-on, storage, cron |
+| Order functions (`place_order`, confirm / fail / cancel, refunds, expiry) | ✅ | Server pricing, stock holds, idempotency, late/duplicate payment refunds |
+| Edge Functions (create-order, verify-payment, razorpay-webhook, refund, tryon-run, tryon-cleanup) | ✅ | Mock providers locally; Razorpay / FabricVTON adapters ready |
+| Tests | ✅ | pgTAP (8 files, 173 assertions), Deno (31), end-to-end exit check (49 checks); `scripts/backend.sh test` / `e2e`, and in CI |
+| App ↔ backend wiring (Supabase repositories, Razorpay gateway) | ✅ | Also run in the browser against the stack: guest browsing, test-OTP sign-in, onboarding saved, prepaid checkout with FIRST15 → paid |
 | Real Razorpay payments + webhooks | 🔑 | Test keys + a public URL |
 | Real FabricVTON try-on | 🔑 | API key + docs; adapter has `TODO(fabricvton)` markers |
 | Real SMS OTP | 🔑 | DLT-registered SMS provider |
 | Hosted Supabase projects (dev / staging / prod) | 🔑 | |
 
-### Exit check for Phase 1
+### Exit check for Phase 1 ✅
 
-On the local stack: test-OTP sign-in → style onboarding saved → search
+Passes on the local stack (`scripts/backend.sh reset && scripts/backend.sh e2e`): test-OTP sign-in → style onboarding saved → search
 "blazr" finds the blazer → PIN check → try on with your own photo → a
 two-brand bag with LUXURY20 → COD order → prepaid order goes pending →
 paid → cancel one brand's part → refund queued for exactly that part and

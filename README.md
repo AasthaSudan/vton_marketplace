@@ -12,8 +12,12 @@ apps/
 └── admin_web/     # Admin & Operations Panel (Flutter web)
 packages/
 └── clothsy_core/  # Shared domain entities, money, theme tokens & widgets
-supabase/          # Backend: migrations, Edge Functions, seed (Phase 1+)
+supabase/          # Backend: migrations, Edge Functions, seed, tests
+docker-compose.yml # Local backend (Postgres, Auth, REST, Storage, Functions)
+docs/              # ROADMAP.md (status) and backend.md (local backend)
 ```
+
+Where things stand and what is next: **[docs/ROADMAP.md](docs/ROADMAP.md)**.
 
 ---
 
@@ -43,6 +47,18 @@ flutter run -t lib/main_dev.dart --dart-define-from-file=config/dev.json
 Copy `apps/customer/config/example.json` to `config/<flavor>.json` and fill in
 the public client values. Real config files are git-ignored; secrets live only
 in Supabase Edge Functions.
+
+### Local backend (Docker)
+
+```bash
+scripts/backend.sh up       # Postgres, Auth, REST, Storage, Functions on :54321
+cd apps/customer
+flutter run -d chrome -t lib/main_dev.dart --dart-define-from-file=config/dev.json
+```
+
+Sign in with **99999 00001**, code **123456** (test numbers, no SMS sent).
+Payments and Try-On use local mock providers until real keys are added.
+Details: [docs/backend.md](docs/backend.md).
 
 ### Seller & Admin panels
 
@@ -79,8 +95,15 @@ flutter analyze apps packages
 (cd apps/admin_web && flutter test)
 ```
 
-CI (`.github/workflows/ci.yml`) runs formatting, analysis and all tests, then
-builds the customer APK and both web panels.
+```bash
+scripts/backend.sh test                 # database (pgTAP) + Edge Functions (Deno), in Docker
+scripts/backend.sh reset && scripts/backend.sh e2e   # Phase 1 flow end to end against the stack
+```
+
+CI (`.github/workflows/ci.yml`) runs formatting, analysis and all Flutter
+tests, then builds the customer APK and both web panels;
+`.github/workflows/backend.yml` runs the backend tests and the end-to-end
+check in the same Docker stack.
 
 ---
 
