@@ -34,9 +34,11 @@ select is(
     'cancel_seller_order', 'check_pin_serviceability', 'delete_my_tryon_data',
     'delete_tryon_photo', 'fail_payment', 'get_seller_bank_account', 'get_tryon_status',
     'moderate_product', 'my_sellers', 'place_order', 'register_seller',
-    'review_seller_application', 'search_products', 'set_default_address',
-    'set_product_listed', 'set_seller_bank_account', 'set_tryon_consent', 'submit_product',
-    'submit_seller_application', 'validate_coupon', 'verify_seller_bank_account'],
+    'review_seller_application', 'search_products', 'seller_accept_order',
+    'seller_cancel_order', 'seller_order_invoice', 'seller_pack_order', 'seller_ship_order',
+    'set_default_address', 'set_product_listed', 'set_seller_bank_account',
+    'set_tryon_consent', 'submit_product', 'submit_seller_application', 'validate_coupon',
+    'verify_seller_bank_account'],
   'signed-in users can only call the shopper, brand and staff functions (each checks the caller)'
 );
 
