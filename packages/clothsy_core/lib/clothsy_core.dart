@@ -2,8 +2,8 @@
 library;
 
 export 'core/constants/app_config.dart';
-export 'core/constants/clothsy_copy.dart';
 export 'core/constants/app_constants.dart';
+export 'core/constants/clothsy_copy.dart';
 export 'core/errors/app_exception.dart';
 export 'core/network/api_client.dart';
 export 'core/theme/app_colors.dart';
@@ -45,6 +45,7 @@ export 'shared/widgets/inputs/clothsy_otp_field.dart';
 export 'shared/widgets/inputs/clothsy_search_bar.dart';
 export 'shared/widgets/inputs/clothsy_text_field.dart';
 export 'shared/widgets/navigation/clothsy_bottom_nav.dart';
+export 'shared/widgets/navigation/panel_shell.dart';
 export 'shared/widgets/selectors/category_chip.dart';
 export 'shared/widgets/selectors/color_swatch_selector.dart';
 export 'shared/widgets/selectors/quantity_stepper.dart';
