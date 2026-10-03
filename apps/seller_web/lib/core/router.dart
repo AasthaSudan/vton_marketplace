@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import '../features/auth/sign_in_screen.dart';
 import '../features/dashboard/dashboard_screen.dart';
+import '../features/inventory/inventory_screen.dart';
 import '../features/onboarding/application_screen.dart';
 import '../features/onboarding/register_brand_screen.dart';
 import '../features/orders/order_detail_screen.dart';
@@ -197,12 +198,13 @@ final routerProvider = Provider<GoRouter>((ref) {
               ),
             ],
           ),
-          for (final path in const [
-            '/inventory',
-            '/store',
-            '/money',
-            '/insights',
-          ])
+          GoRoute(
+            path: '/inventory',
+            builder: (_, state) => InventoryScreen(
+              lowStockOnly: state.uri.queryParameters['low'] == '1',
+            ),
+          ),
+          for (final path in const ['/store', '/money', '/insights'])
             GoRoute(
               path: path,
               builder: (_, _) => PanelSectionPlaceholder(
