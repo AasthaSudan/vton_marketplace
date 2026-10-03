@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../features/auth/sign_in_screen.dart';
 import '../features/dashboard/dashboard_screen.dart';
 import '../features/inventory/inventory_screen.dart';
+import '../features/money/money_screen.dart';
 import '../features/onboarding/application_screen.dart';
 import '../features/onboarding/register_brand_screen.dart';
 import '../features/orders/order_detail_screen.dart';
@@ -206,7 +207,8 @@ final routerProvider = Provider<GoRouter>((ref) {
             ),
           ),
           GoRoute(path: '/store', builder: (_, _) => const StoreScreen()),
-          for (final path in const ['/money', '/insights'])
+          GoRoute(path: '/money', builder: (_, _) => const MoneyScreen()),
+          for (final path in const ['/insights'])
             GoRoute(
               path: path,
               builder: (_, _) => PanelSectionPlaceholder(
