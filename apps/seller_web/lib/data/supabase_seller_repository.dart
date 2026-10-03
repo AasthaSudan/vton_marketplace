@@ -41,7 +41,7 @@ class SupabaseSellerRepository implements SellerRepository {
     } on StorageException catch (e) {
       throw SellerFailure('UPLOAD_FAILED', {'message': e.message});
     } catch (e) {
-      throw const SellerFailure('NETWORK_ERROR');
+      throw SellerFailure('NETWORK_ERROR', {'cause': '$e'});
     }
   }
 
@@ -179,7 +179,7 @@ class SupabaseSellerRepository implements SellerRepository {
         .from('seller_documents')
         .select()
         .eq('seller_id', sellerId)
-        .order('created_at');
+        .order('created_at', ascending: true);
     return rows.map(SellerDocument.fromJson).toList();
   });
 
@@ -247,7 +247,7 @@ class SupabaseSellerRepository implements SellerRepository {
             .from('seller_application_events')
             .select()
             .eq('seller_id', sellerId)
-            .order('id');
+            .order('id', ascending: true);
         return rows.map(ApplicationEvent.fromJson).toList();
       });
 
@@ -305,7 +305,7 @@ class SupabaseSellerRepository implements SellerRepository {
             .from('seller_collections')
             .select()
             .eq('seller_id', sellerId)
-            .order('position');
+            .order('position', ascending: true);
         return rows.map(SellerCollection.fromJson).toList();
       });
 
