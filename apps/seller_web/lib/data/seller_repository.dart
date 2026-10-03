@@ -120,7 +120,8 @@ class SellerFailure implements Exception {
   String get message => sellerMessage(code, details);
 
   @override
-  String toString() => 'SellerFailure($code)';
+  String toString() =>
+      'SellerFailure($code${details.isEmpty ? '' : ' $details'})';
 }
 
 /// What to tell the seller for a server error code.
