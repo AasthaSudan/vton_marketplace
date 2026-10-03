@@ -352,6 +352,138 @@ class FakeSellerRepository implements SellerRepository {
       ),
   ];
 
+  // Products
+  final List<SellerProduct> productList = [];
+
+  static SellerProduct sampleProduct({
+    String id = 'p1',
+    String title = 'Linen Shirt',
+    String status = 'draft',
+    String description = '',
+    List<String> images = const [],
+    List<SellerVariant> variants = const [],
+    String? rejectionReason,
+    DateTime? approvedAt,
+  }) => SellerProduct(
+    id: id,
+    handle: 'linen-shirt-abc123',
+    title: title,
+    description: description,
+    category: 'Tops',
+    categoryHandles: const ['women', 'tops'],
+    images: images,
+    status: status,
+    rejectionReason: rejectionReason,
+    approvedAt: approvedAt,
+    updatedAt: DateTime(2026, 10, 4, 10, _productClock++),
+    variants: variants,
+    minPrice: variants.isEmpty ? 0 : variants.first.price,
+  );
+  static int _productClock = 0;
+
+  void _setProduct(
+    String id, {
+    String? status,
+    ProductDraft? draft,
+    List<SellerVariant>? variants,
+  }) {
+    final i = productList.indexWhere((p) => p.id == id);
+    final p = productList[i];
+    productList[i] = sampleProduct(
+      id: p.id,
+      title: draft?.title ?? p.title,
+      description: draft?.description ?? p.description,
+      images: draft?.images ?? p.images,
+      status: status ?? p.status,
+      rejectionReason: p.rejectionReason,
+      approvedAt: status == 'live' ? DateTime(2026, 10, 4) : p.approvedAt,
+      variants: variants ?? p.variants,
+    );
+  }
+
+  @override
+  Future<List<SellerProduct>> products(String sellerId) async =>
+      List.of(productList);
+
+  @override
+  Future<SellerProduct> product(String productId) async =>
+      productList.firstWhere((p) => p.id == productId);
+
+  @override
+  Future<String> createProduct(String sellerId, ProductDraft draft) async {
+    calls.add('create ${draft.title}');
+    final id = 'p${productList.length + 1}';
+    productList.add(sampleProduct(id: id, title: draft.title));
+    _setProduct(id, draft: draft);
+    return id;
+  }
+
+  @override
+  Future<void> updateProduct(String productId, ProductDraft draft) async {
+    calls.add('update ${draft.title}');
+    _setProduct(productId, draft: draft);
+  }
+
+  @override
+  Future<void> deleteProduct(String productId) async {
+    calls.add('delete $productId');
+    productList.removeWhere((p) => p.id == productId);
+  }
+
+  @override
+  Future<void> addVariant(String productId, VariantDraft draft) async {
+    calls.add('add variant ${draft.sku} ${draft.price}');
+    final p = productList.firstWhere((p) => p.id == productId);
+    _setProduct(
+      productId,
+      variants: [
+        ...p.variants,
+        SellerVariant(
+          id: 'v${p.variants.length + 1}',
+          productId: productId,
+          sku: draft.sku,
+          title: draft.title,
+          size: draft.size,
+          price: draft.price,
+          compareAtPrice: draft.compareAtPrice,
+          stock: draft.stock,
+        ),
+      ],
+    );
+  }
+
+  @override
+  Future<void> submitProduct(String productId) async {
+    final p = productList.firstWhere((p) => p.id == productId);
+    final missing = [
+      if (p.description.length < 20) 'description',
+      if (p.images.isEmpty) 'images',
+      if (p.variants.isEmpty) 'variants',
+    ];
+    if (missing.isNotEmpty) {
+      throw SellerFailure('PRODUCT_INCOMPLETE', {'missing': missing});
+    }
+    calls.add('submit $productId');
+    _setProduct(productId, status: 'pending_review');
+  }
+
+  @override
+  Future<void> setListed(String productId, bool listed) async {
+    calls.add('listed $productId $listed');
+    _setProduct(productId, status: listed ? 'live' : 'archived');
+  }
+
+  @override
+  Future<String> uploadImage(
+    String sellerId, {
+    required String fileName,
+    required Uint8List bytes,
+    required String contentType,
+  }) async {
+    calls.add('upload image $fileName');
+    return 'https://example.com/$fileName';
+  }
+
   // Not used by the screens built so far.
   @override
   dynamic noSuchMethod(Invocation invocation) =>

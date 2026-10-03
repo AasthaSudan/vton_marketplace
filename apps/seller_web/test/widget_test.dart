@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:clothsy_seller/app.dart';
+import 'package:clothsy_seller/core/files.dart';
 import 'package:clothsy_seller/core/providers.dart';
 import 'package:clothsy_seller/core/router.dart';
 import 'package:clothsy_seller/data/models.dart';
@@ -27,6 +28,9 @@ Future<void> pumpPanel(
       retry: (_, _) => null,
       overrides: [
         sellerRepositoryProvider.overrideWithValue(repo),
+        pickFileProvider.overrideWithValue(
+          (_) async => PickedFile('shirt.jpg', Uint8List(4)),
+        ),
         printPdfProvider.overrideWithValue((
           Uint8List bytes,
           String name,
@@ -38,6 +42,16 @@ Future<void> pumpPanel(
     ),
   );
   await tester.pumpAndSettle();
+}
+
+/// Scrolls [finder] into view, then taps it.
+Future<void> tapShown(WidgetTester tester, Finder finder) async {
+  // Let any confirmation snackbar finish so it does not cover the button.
+  await tester.pump(const Duration(seconds: 4));
+  await tester.pumpAndSettle();
+  await tester.ensureVisible(finder.first);
+  await tester.pumpAndSettle();
+  await tester.tap(finder.first);
 }
 
 Finder field(String label) => find.widgetWithText(TextFormField, label).first;
@@ -253,6 +267,121 @@ void main() {
       await tester.tap(find.text('Inventory'));
       await tester.pumpAndSettle();
       expect(find.text('Coming in Phase 2'), findsOneWidget);
+    });
+  });
+
+  group('Products', () {
+    FakeSellerRepository store() => FakeSellerRepository(
+      signedIn: true,
+      sellers: [FakeSellerRepository.store()],
+    );
+
+    testWidgets('a new listing: draft, size, photo, then review', (
+      tester,
+    ) async {
+      final repo = store();
+      await pumpPanel(tester, repo);
+      await tester.tap(find.text('Products'));
+      await tester.pumpAndSettle();
+      expect(find.text('No products yet'), findsOneWidget);
+
+      await tester.tap(find.text('Add product').first);
+      await tester.pumpAndSettle();
+      await tapShown(tester, find.text('Save draft'));
+      await tester.pumpAndSettle();
+      expect(find.text('At least 3 characters'), findsOneWidget);
+
+      await tester.enterText(field('Title'), 'Linen Shirt');
+      await tapShown(tester, find.text('Save draft'));
+      await tester.pumpAndSettle();
+      expect(repo.calls, contains('create Linen Shirt'));
+      expect(find.textContaining('Draft — add photos'), findsOneWidget);
+
+      // Submitting too early lists what is missing.
+      await tapShown(tester, find.text('Submit for review'));
+      await tester.pumpAndSettle();
+      expect(find.text('Needed before review'), findsOneWidget);
+      expect(find.text('At least one photo'), findsOneWidget);
+
+      await tapShown(tester, find.text('Add size'));
+      await tester.pumpAndSettle();
+      await tester.enterText(field('SKU'), 'KLS-M');
+      await tester.enterText(field('Size'), 'M');
+      await tester.enterText(field('Selling price (₹)'), '1899');
+      await tester.enterText(field('MRP (₹, optional)'), '1500');
+      await tester.tap(find.widgetWithText(FilledButton, 'Add size'));
+      await tester.pumpAndSettle();
+      expect(find.text('Above the price'), findsOneWidget);
+      await tester.enterText(field('MRP (₹, optional)'), '2499');
+      await tester.tap(find.widgetWithText(FilledButton, 'Add size'));
+      await tester.pumpAndSettle();
+      expect(repo.calls, contains('add variant KLS-M 189900'));
+      expect(find.text('KLS-M'), findsOneWidget);
+
+      await tapShown(tester, find.byIcon(Icons.add_photo_alternate_outlined));
+      await tester.pumpAndSettle();
+      expect(repo.calls, contains('upload image shirt.jpg'));
+      await tester.enterText(
+        field('Description'),
+        'Breathable linen with a relaxed fit and shell buttons.',
+      );
+      await tapShown(tester, find.text('Submit for review'));
+      await tester.pumpAndSettle();
+      expect(repo.calls, contains('submit p1'));
+      expect(
+        find.textContaining('Clothsy is reviewing this listing'),
+        findsOneWidget,
+      );
+      expect(find.text('Save'), findsNothing);
+    });
+
+    testWidgets('a live listing is unpublished and put back on sale', (
+      tester,
+    ) async {
+      final repo = store();
+      repo.productList.add(
+        FakeSellerRepository.sampleProduct(
+          status: 'live',
+          approvedAt: DateTime(2026, 10, 1),
+        ),
+      );
+      await pumpPanel(tester, repo);
+      await tester.tap(find.text('Products'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Linen Shirt'));
+      await tester.pumpAndSettle();
+      await tapShown(tester, find.text('Unpublish'));
+      await tester.pumpAndSettle();
+      expect(repo.calls, contains('listed p1 false'));
+      await tapShown(tester, find.text('Put back on sale'));
+      await tester.pumpAndSettle();
+      expect(repo.calls, contains('listed p1 true'));
+      expect(find.textContaining('On sale.'), findsOneWidget);
+    });
+
+    testWidgets("changes needed: the list shows Clothsy's reason", (
+      tester,
+    ) async {
+      final repo = store();
+      repo.productList.addAll([
+        FakeSellerRepository.sampleProduct(
+          status: 'rejected',
+          rejectionReason: 'Photos show a watermark',
+        ),
+        FakeSellerRepository.sampleProduct(
+          id: 'p2',
+          title: 'Silk Scarf',
+          status: 'live',
+        ),
+      ]);
+      await pumpPanel(tester, repo);
+      await tester.tap(find.text('Products'));
+      await tester.pumpAndSettle();
+      expect(find.text('Clothsy: Photos show a watermark'), findsOneWidget);
+      await tester.tap(find.text('Live (1)'));
+      await tester.pumpAndSettle();
+      expect(find.text('Silk Scarf'), findsOneWidget);
+      expect(find.text('Linen Shirt'), findsNothing);
     });
   });
 
