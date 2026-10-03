@@ -14,6 +14,7 @@ import '../features/products/product_editor_screen.dart';
 import '../features/products/products_screen.dart';
 import '../features/shell/loading_screen.dart';
 import '../features/shell/seller_shell.dart';
+import '../features/store/store_screen.dart';
 import 'providers.dart';
 
 /// Sidebar sections (Blueprint fig. 30) and where they live.
@@ -204,7 +205,8 @@ final routerProvider = Provider<GoRouter>((ref) {
               lowStockOnly: state.uri.queryParameters['low'] == '1',
             ),
           ),
-          for (final path in const ['/store', '/money', '/insights'])
+          GoRoute(path: '/store', builder: (_, _) => const StoreScreen()),
+          for (final path in const ['/money', '/insights'])
             GoRoute(
               path: path,
               builder: (_, _) => PanelSectionPlaceholder(
