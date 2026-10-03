@@ -9,6 +9,8 @@ import '../features/onboarding/application_screen.dart';
 import '../features/onboarding/register_brand_screen.dart';
 import '../features/orders/order_detail_screen.dart';
 import '../features/orders/orders_screen.dart';
+import '../features/products/product_editor_screen.dart';
+import '../features/products/products_screen.dart';
 import '../features/shell/loading_screen.dart';
 import '../features/shell/seller_shell.dart';
 import 'providers.dart';
@@ -180,8 +182,22 @@ final routerProvider = Provider<GoRouter>((ref) {
             ],
           ),
           // Built next; the sidebar already shows where they will live.
+          GoRoute(
+            path: '/products',
+            builder: (_, _) => const ProductsScreen(),
+            routes: [
+              GoRoute(
+                path: 'new',
+                builder: (_, _) => const ProductEditorScreen(),
+              ),
+              GoRoute(
+                path: ':id',
+                builder: (_, state) =>
+                    ProductEditorScreen(productId: state.pathParameters['id']),
+              ),
+            ],
+          ),
           for (final path in const [
-            '/products',
             '/inventory',
             '/store',
             '/money',
