@@ -569,6 +569,56 @@ class FakeSellerRepository implements SellerRepository {
     int limit = 100,
   }) async => List.of(movements);
 
+  // Storefront and collections
+  Storefront storefrontData = const Storefront(
+    name: 'Kiet Threads',
+    tagline: 'Linen from Ghaziabad',
+  );
+  final List<SellerCollection> collectionList = [];
+
+  @override
+  Future<Storefront> storefront(String sellerId) async => storefrontData;
+
+  @override
+  Future<void> saveStorefront(String sellerId, Storefront storefront) async {
+    calls.add(
+      'save storefront ${storefront.tagline} dispatch=${storefront.dispatchDays} '
+      'logo=${storefront.logoUrl}',
+    );
+    storefrontData = storefront;
+  }
+
+  @override
+  Future<List<SellerCollection>> collections(String sellerId) async =>
+      List.of(collectionList);
+
+  @override
+  Future<void> saveCollection(
+    String sellerId, {
+    String? id,
+    required String title,
+    required String description,
+    required List<String> productIds,
+    required bool isVisible,
+  }) async {
+    calls.add('collection $title $productIds $isVisible');
+    final c = SellerCollection(
+      id: id ?? 'c${collectionList.length + 1}',
+      title: title,
+      description: description,
+      productIds: productIds,
+      isVisible: isVisible,
+    );
+    final i = collectionList.indexWhere((x) => x.id == c.id);
+    i < 0 ? collectionList.add(c) : collectionList[i] = c;
+  }
+
+  @override
+  Future<void> deleteCollection(String id) async {
+    calls.add('delete collection $id');
+    collectionList.removeWhere((c) => c.id == id);
+  }
+
   // Not used by the screens built so far.
   @override
   dynamic noSuchMethod(Invocation invocation) =>

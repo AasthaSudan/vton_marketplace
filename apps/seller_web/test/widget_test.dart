@@ -266,7 +266,7 @@ void main() {
 
     testWidgets('sections still to come say so', (tester) async {
       await pumpPanel(tester, approved());
-      await tester.tap(find.text('Store'));
+      await tester.tap(find.text('Insights'));
       await tester.pumpAndSettle();
       expect(find.text('Coming in Phase 2'), findsOneWidget);
     });
@@ -514,6 +514,72 @@ void main() {
       final bad = parseStockCsv('sku,stock\nKLS-M,-1\n,4\nKLS-L,ten\n');
       expect(bad.rows, isEmpty);
       expect(bad.errors, hasLength(3));
+    });
+  });
+
+  group('Store', () {
+    FakeSellerRepository store() {
+      final repo = FakeSellerRepository(
+        signedIn: true,
+        sellers: [FakeSellerRepository.store()],
+      );
+      repo.productList.add(FakeSellerRepository.sampleProduct(status: 'live'));
+      return repo;
+    }
+
+    testWidgets('the storefront is edited and saved with a new logo', (
+      tester,
+    ) async {
+      final repo = store();
+      await pumpPanel(tester, repo);
+      await tester.tap(find.text('Store').first);
+      await tester.pumpAndSettle();
+      expect(find.text('Linen from Ghaziabad'), findsOneWidget);
+
+      await tester.tap(find.byIcon(Icons.add_photo_alternate_outlined).first);
+      await tester.pumpAndSettle();
+      expect(repo.calls, contains('upload image shirt.jpg'));
+
+      await tester.enterText(field('Tagline'), 'Handwoven linen');
+      await tester.enterText(field('Dispatch within (days)'), '0');
+      await tapShown(tester, find.text('Save storefront'));
+      await tester.pumpAndSettle();
+      expect(find.text('1 to 30'), findsOneWidget);
+
+      await tester.enterText(field('Dispatch within (days)'), '3');
+      await tapShown(tester, find.text('Save storefront'));
+      await tester.pumpAndSettle();
+      expect(
+        repo.calls,
+        contains(
+          'save storefront Handwoven linen dispatch=3 '
+          'logo=https://example.com/shirt.jpg',
+        ),
+      );
+    });
+
+    testWidgets('a collection groups products for the storefront', (
+      tester,
+    ) async {
+      final repo = store();
+      await pumpPanel(tester, repo);
+      await tester.tap(find.text('Store').first);
+      await tester.pumpAndSettle();
+      await tapShown(tester, find.text('New collection'));
+      await tester.pumpAndSettle();
+      await tester.enterText(field('Collection name'), 'Summer Linen');
+      await tester.tap(find.widgetWithText(CheckboxListTile, 'Linen Shirt'));
+      await tester.tap(find.text('Save collection'));
+      await tester.pumpAndSettle();
+      expect(repo.calls, contains('collection Summer Linen [p1] true'));
+      expect(find.text('Summer Linen'), findsOneWidget);
+      expect(find.text('1 product'), findsOneWidget);
+
+      await tapShown(tester, find.byTooltip('Delete Summer Linen'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.widgetWithText(FilledButton, 'Delete'));
+      await tester.pumpAndSettle();
+      expect(repo.calls, contains('delete collection c1'));
     });
   });
 
