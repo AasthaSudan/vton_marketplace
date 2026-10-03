@@ -5,6 +5,7 @@ import 'package:clothsy_seller/core/files.dart';
 import 'package:clothsy_seller/core/providers.dart';
 import 'package:clothsy_seller/core/router.dart';
 import 'package:clothsy_seller/features/inventory/inventory_screen.dart';
+import 'package:clothsy_seller/features/money/money_screen.dart';
 import 'package:clothsy_seller/data/models.dart';
 import 'package:clothsy_seller/printing/invoice_pdf.dart';
 import 'package:flutter/material.dart';
@@ -14,6 +15,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'fake_seller_repository.dart';
 
 final printed = <String>[];
+final saved = <String, String>{};
 
 Future<void> pumpPanel(
   WidgetTester tester,
@@ -25,11 +27,16 @@ Future<void> pumpPanel(
   tester.view.devicePixelRatio = 1;
   addTearDown(tester.view.reset);
   printed.clear();
+  saved.clear();
   await tester.pumpWidget(
     ProviderScope(
       retry: (_, _) => null,
       overrides: [
         sellerRepositoryProvider.overrideWithValue(repo),
+        saveTextProvider.overrideWithValue(
+          (String name, String content, {String mimeType = 'text/csv'}) =>
+              saved[name] = content,
+        ),
         pickFileProvider.overrideWithValue(
           (_) async => picked ?? PickedFile('shirt.jpg', Uint8List(4)),
         ),
@@ -580,6 +587,115 @@ void main() {
       await tester.tap(find.widgetWithText(FilledButton, 'Delete'));
       await tester.pumpAndSettle();
       expect(repo.calls, contains('delete collection c1'));
+    });
+  });
+
+  group('Money', () {
+    final delivered = DateTime(2026, 9, 20);
+    Settlement settlement(String ref, String status, {String? payout}) =>
+        Settlement(
+          id: ref,
+          reference: ref,
+          gross: 99900,
+          commission: 14985,
+          shippingFee: 6000,
+          collectionFee: 1998,
+          gstOnFees: 4137,
+          net: 72780,
+          status: status,
+          deliveredAt: delivered,
+          eligibleAt: delivered.add(const Duration(days: 7)),
+          payoutId: payout,
+        );
+
+    FakeSellerRepository paidStore() {
+      final repo = FakeSellerRepository(
+        signedIn: true,
+        sellers: [FakeSellerRepository.store()],
+      );
+      repo.bank = const BankAccount(
+        accountHolder: 'Kiet Threads',
+        last4: '7766',
+        ifsc: 'HDFC0000123',
+        status: 'verified',
+      );
+      repo.settlementList.addAll([
+        settlement('CLY-1-A', 'paid', payout: 'po1'),
+        settlement('CLY-2-A', 'eligible'),
+        settlement('CLY-3-A', 'pending'),
+      ]);
+      repo.payoutList.add(
+        Payout(
+          id: 'po1',
+          amount: 72780,
+          status: 'paid',
+          utr: 'UTR0001',
+          accountLast4: '7766',
+          settlementCount: 1,
+          createdAt: DateTime(2026, 9, 28),
+        ),
+      );
+      repo.adjustmentList.add(
+        Adjustment(
+          amount: -72780,
+          reason: 'Returned after payout: CLY-1-A',
+          createdAt: DateTime(2026, 10, 1),
+        ),
+      );
+      return repo;
+    }
+
+    testWidgets('balances, payouts with UTR and every fee per order', (
+      tester,
+    ) async {
+      await pumpPanel(tester, paidStore());
+      await tester.tap(find.text('Money').first);
+      await tester.pumpAndSettle();
+      expect(find.text('Ready for payout'), findsNWidgets(2));
+      expect(find.text('UTR0001'), findsOneWidget);
+      expect(
+        find.text('Kiet Threads · ••••7766 · HDFC0000123'),
+        findsOneWidget,
+      );
+      expect(find.text('To be deducted'), findsOneWidget);
+      expect(find.textContaining('Payable 27 Sep'), findsOneWidget);
+      expect(find.text('– ₹149.85'), findsNWidgets(3));
+    });
+
+    testWidgets('the statement downloads as CSV', (tester) async {
+      await pumpPanel(tester, paidStore());
+      await tester.tap(find.text('Money').first);
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Download statement'));
+      await tester.pump();
+      expect(saved.keys.single, startsWith('clothsy-statement-'));
+      expect(
+        saved.values.single,
+        contains('Order,CLY-2-A,2026-09-20,999.00,-149.85'),
+      );
+    });
+
+    test('statement CSV: orders, then adjustments, quoted when needed', () {
+      final csv = buildStatementCsv(
+        [settlement('CLY-9-A', 'eligible')],
+        [
+          Adjustment(
+            amount: -500,
+            reason: 'Damaged, returned',
+            createdAt: DateTime(2026, 10, 2),
+          ),
+        ],
+      ).split('\n');
+      expect(csv[0], startsWith('Type,Reference,Delivered,Gross sales'));
+      expect(
+        csv[1],
+        'Order,CLY-9-A,2026-09-20,999.00,-149.85,-60.00,-19.98,-41.37,727.80,'
+        'Ready for payout,',
+      );
+      expect(
+        csv[2],
+        'Adjustment,"Damaged, returned",2026-10-02,,,,,,-5.00,Next payout,',
+      );
     });
   });
 

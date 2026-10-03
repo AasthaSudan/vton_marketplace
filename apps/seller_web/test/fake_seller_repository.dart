@@ -619,6 +619,22 @@ class FakeSellerRepository implements SellerRepository {
     collectionList.removeWhere((c) => c.id == id);
   }
 
+  // Money
+  final List<Settlement> settlementList = [];
+  final List<Payout> payoutList = [];
+  final List<Adjustment> adjustmentList = [];
+
+  @override
+  Future<List<Settlement>> settlements(String sellerId) async =>
+      List.of(settlementList);
+
+  @override
+  Future<List<Payout>> payouts(String sellerId) async => List.of(payoutList);
+
+  @override
+  Future<List<Adjustment>> adjustments(String sellerId) async =>
+      List.of(adjustmentList);
+
   // Not used by the screens built so far.
   @override
   dynamic noSuchMethod(Invocation invocation) =>
