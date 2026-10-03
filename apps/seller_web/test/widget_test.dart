@@ -4,6 +4,7 @@ import 'package:clothsy_seller/app.dart';
 import 'package:clothsy_seller/core/files.dart';
 import 'package:clothsy_seller/core/providers.dart';
 import 'package:clothsy_seller/core/router.dart';
+import 'package:clothsy_seller/features/inventory/inventory_screen.dart';
 import 'package:clothsy_seller/data/models.dart';
 import 'package:clothsy_seller/printing/invoice_pdf.dart';
 import 'package:flutter/material.dart';
@@ -18,6 +19,7 @@ Future<void> pumpPanel(
   WidgetTester tester,
   FakeSellerRepository repo, {
   Size size = const Size(1280, 900),
+  PickedFile? picked,
 }) async {
   tester.view.physicalSize = size;
   tester.view.devicePixelRatio = 1;
@@ -29,7 +31,7 @@ Future<void> pumpPanel(
       overrides: [
         sellerRepositoryProvider.overrideWithValue(repo),
         pickFileProvider.overrideWithValue(
-          (_) async => PickedFile('shirt.jpg', Uint8List(4)),
+          (_) async => picked ?? PickedFile('shirt.jpg', Uint8List(4)),
         ),
         printPdfProvider.overrideWithValue((
           Uint8List bytes,
@@ -264,7 +266,7 @@ void main() {
 
     testWidgets('sections still to come say so', (tester) async {
       await pumpPanel(tester, approved());
-      await tester.tap(find.text('Inventory'));
+      await tester.tap(find.text('Store'));
       await tester.pumpAndSettle();
       expect(find.text('Coming in Phase 2'), findsOneWidget);
     });
@@ -382,6 +384,136 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('Silk Scarf'), findsOneWidget);
       expect(find.text('Linen Shirt'), findsNothing);
+    });
+  });
+
+  group('Inventory', () {
+    FakeSellerRepository stocked() {
+      final repo = FakeSellerRepository(
+        signedIn: true,
+        sellers: [FakeSellerRepository.store()],
+      );
+      repo.productList.add(
+        FakeSellerRepository.sampleProduct(
+          status: 'live',
+          variants: const [
+            SellerVariant(
+              id: 'v1',
+              productId: 'p1',
+              sku: 'KLS-M',
+              title: 'Ivory / M',
+              size: 'M',
+              price: 189900,
+              stock: 2,
+              isLowStock: true,
+            ),
+            SellerVariant(
+              id: 'v2',
+              productId: 'p1',
+              sku: 'KLS-L',
+              title: 'Ivory / L',
+              size: 'L',
+              price: 189900,
+              stock: 10,
+            ),
+          ],
+        ),
+      );
+      return repo;
+    }
+
+    testWidgets('low stock is flagged and topped up with a note', (
+      tester,
+    ) async {
+      final repo = stocked();
+      await pumpPanel(tester, repo);
+      await tester.tap(find.text('Inventory'));
+      await tester.pumpAndSettle();
+      expect(find.text('KLS-L'), findsOneWidget);
+
+      await tester.tap(find.text('Low stock (1)'));
+      await tester.pumpAndSettle();
+      expect(find.text('KLS-L'), findsNothing);
+
+      await tester.tap(find.text('Adjust KLS-M'));
+      await tester.pumpAndSettle();
+      await tester.enterText(field('Units'), '5');
+      await tester.enterText(field('Note (optional)'), 'New delivery');
+      await tester.tap(find.widgetWithText(FilledButton, 'Save'));
+      await tester.pumpAndSettle();
+      expect(repo.calls, contains('adjust v1 5 New delivery'));
+      expect(find.text('Low stock (0)'), findsOneWidget);
+      expect(find.text('+5'), findsOneWidget);
+      expect(find.text('Restock — New delivery'), findsOneWidget);
+    });
+
+    testWidgets('removing more than is available is refused', (tester) async {
+      final repo = stocked();
+      await pumpPanel(tester, repo);
+      await tester.tap(find.text('Inventory'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Adjust KLS-M'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Remove'));
+      await tester.enterText(field('Units'), '3');
+      await tester.tap(find.widgetWithText(FilledButton, 'Save'));
+      await tester.pumpAndSettle();
+      expect(find.text('Only 2 available'), findsOneWidget);
+      expect(repo.calls.where((c) => c.startsWith('adjust')), isEmpty);
+    });
+
+    testWidgets('a bulk import with an unknown SKU changes nothing', (
+      tester,
+    ) async {
+      final repo = stocked();
+      await pumpPanel(
+        tester,
+        repo,
+        picked: PickedFile(
+          'stock.csv',
+          Uint8List.fromList('sku,stock\nKLS-M,8\nNOPE,1\n'.codeUnits),
+        ),
+      );
+      await tester.tap(find.text('Inventory'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Import stock CSV'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.widgetWithText(FilledButton, 'Import'));
+      await tester.pumpAndSettle();
+      expect(
+        find.text('These SKUs are not in your catalogue: NOPE'),
+        findsOneWidget,
+      );
+      expect(repo.calls.where((c) => c.startsWith('bulk')), isEmpty);
+    });
+
+    testWidgets('a good bulk import sets the units available', (tester) async {
+      final repo = stocked();
+      await pumpPanel(
+        tester,
+        repo,
+        picked: PickedFile(
+          'stock.csv',
+          Uint8List.fromList('sku,stock\nKLS-M,8\nKLS-L,10\n'.codeUnits),
+        ),
+      );
+      await tester.tap(find.text('Inventory'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Import stock CSV'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.widgetWithText(FilledButton, 'Import'));
+      await tester.pumpAndSettle();
+      expect(repo.calls, contains('bulk KLS-M=8 KLS-L=10'));
+      expect(find.text('1 updated, 1 unchanged'), findsOneWidget);
+    });
+
+    test('stock CSVs: header optional, bad lines reported', () {
+      final ok = parseStockCsv('KLS-M,8\r\nKLS-L;0\n\n');
+      expect(ok.rows, [(sku: 'KLS-M', stock: 8), (sku: 'KLS-L', stock: 0)]);
+      expect(ok.errors, isEmpty);
+      final bad = parseStockCsv('sku,stock\nKLS-M,-1\n,4\nKLS-L,ten\n');
+      expect(bad.rows, isEmpty);
+      expect(bad.errors, hasLength(3));
     });
   });
 

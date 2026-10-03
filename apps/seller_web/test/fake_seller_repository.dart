@@ -484,6 +484,91 @@ class FakeSellerRepository implements SellerRepository {
     return 'https://example.com/$fileName';
   }
 
+  // Stock
+  final List<StockMovement> movements = [];
+
+  void _setStock(String variantId, int stock, String reason, String? note) {
+    for (final p in List.of(productList)) {
+      final i = p.variants.indexWhere((v) => v.id == variantId);
+      if (i < 0) continue;
+      final v = p.variants[i];
+      final updated = SellerVariant(
+        id: v.id,
+        productId: v.productId,
+        sku: v.sku,
+        title: v.title,
+        size: v.size,
+        price: v.price,
+        stock: stock,
+        lowStockThreshold: v.lowStockThreshold,
+        isLowStock: stock <= v.lowStockThreshold,
+      );
+      _setProduct(p.id, variants: [...p.variants]..[i] = updated);
+      movements.insert(
+        0,
+        StockMovement(
+          id: movements.length + 1,
+          sku: v.sku,
+          variantTitle: v.title,
+          productTitle: p.title,
+          delta: stock - v.stock,
+          reason: reason,
+          note: note,
+          createdAt: DateTime(2026, 10, 4, 12),
+        ),
+      );
+    }
+  }
+
+  SellerVariant _variant(String id) =>
+      productList.expand((p) => p.variants).firstWhere((v) => v.id == id);
+
+  @override
+  Future<int> adjustStock(String variantId, int delta, {String? note}) async {
+    calls.add('adjust $variantId $delta ${note ?? ''}'.trim());
+    final v = _variant(variantId);
+    if (v.stock + delta < 0) throw const SellerFailure('INSUFFICIENT_STOCK');
+    _setStock(
+      variantId,
+      v.stock + delta,
+      delta > 0 ? 'restock' : 'adjustment',
+      note,
+    );
+    return v.stock + delta;
+  }
+
+  @override
+  Future<({int updated, int unchanged})> bulkSetStock(
+    String sellerId,
+    List<({String sku, int stock})> rows,
+  ) async {
+    final all = productList.expand((p) => p.variants).toList();
+    final unknown = [
+      for (final r in rows)
+        if (!all.any((v) => v.sku == r.sku))
+          {'sku': r.sku, 'error': 'UNKNOWN_SKU'},
+    ];
+    if (unknown.isNotEmpty) {
+      throw SellerFailure('INVALID_IMPORT', {'errors': unknown});
+    }
+    calls.add('bulk ${rows.map((r) => '${r.sku}=${r.stock}').join(' ')}');
+    var updated = 0;
+    for (final r in rows) {
+      final v = all.firstWhere((v) => v.sku == r.sku);
+      if (v.stock != r.stock) {
+        _setStock(v.id, r.stock, 'bulk_import', 'Bulk stock import');
+        updated++;
+      }
+    }
+    return (updated: updated, unchanged: rows.length - updated);
+  }
+
+  @override
+  Future<List<StockMovement>> stockHistory(
+    String sellerId, {
+    int limit = 100,
+  }) async => List.of(movements);
+
   // Not used by the screens built so far.
   @override
   dynamic noSuchMethod(Invocation invocation) =>
