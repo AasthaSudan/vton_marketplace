@@ -273,9 +273,9 @@ void main() {
 
     testWidgets('sections still to come say so', (tester) async {
       await pumpPanel(tester, approved());
-      await tester.tap(find.text('Insights'));
+      await tester.tap(find.text('Growth'));
       await tester.pumpAndSettle();
-      expect(find.text('Coming in Phase 2'), findsOneWidget);
+      expect(find.text('Coming in Phase 4'), findsOneWidget);
     });
   });
 
@@ -697,6 +697,27 @@ void main() {
         'Adjustment,"Damaged, returned",2026-10-02,,,,,,-5.00,Next payout,',
       );
     });
+  });
+
+  testWidgets('insights: sales by period, top products, Try-On conversion', (
+    tester,
+  ) async {
+    await pumpPanel(
+      tester,
+      FakeSellerRepository(
+        signedIn: true,
+        sellers: [FakeSellerRepository.store()],
+      ),
+    );
+    await tester.tap(find.text('Insights'));
+    await tester.pumpAndSettle();
+    expect(find.text('Linen Shirt'), findsNWidgets(2));
+    expect(find.text('25%'), findsOneWidget);
+    await tester.tap(find.text('7 days'));
+    await tester.pumpAndSettle();
+    // The fake sells 0, 1, 2 pieces on alternating days: 6 over the week.
+    expect(find.text('6'), findsWidgets);
+    expect(tester.takeException(), isNull);
   });
 
   test('the invoice and label print as one PDF', () async {

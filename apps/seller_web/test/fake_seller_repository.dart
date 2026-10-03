@@ -635,6 +635,29 @@ class FakeSellerRepository implements SellerRepository {
   Future<List<Adjustment>> adjustments(String sellerId) async =>
       List.of(adjustmentList);
 
+  // Insights
+  @override
+  Future<List<TopProduct>> topProducts(
+    String sellerId, {
+    int days = 30,
+  }) async => const [
+    TopProduct(productId: 'p1', title: 'Linen Shirt', units: 12, gmv: 2278800),
+  ];
+
+  @override
+  Future<List<TryOnInsight>> tryOnInsights(
+    String sellerId, {
+    int days = 30,
+  }) async => const [
+    TryOnInsight(
+      productId: 'p1',
+      title: 'Linen Shirt',
+      tryOns: 30,
+      shoppers: 20,
+      buyers: 5,
+    ),
+  ];
+
   // Not used by the screens built so far.
   @override
   dynamic noSuchMethod(Invocation invocation) =>
